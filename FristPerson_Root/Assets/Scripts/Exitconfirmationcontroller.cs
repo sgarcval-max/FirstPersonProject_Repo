@@ -128,6 +128,16 @@ public class ExitConfirmationController : MonoBehaviour
     /// <summary>Llamar desde el botón "CONFIRMAR" dentro de este mismo panel.</summary>
     public void OnConfirmPressed()
     {
+        // Ocultamos el contenido y encogemos el panel exactamente igual que al cancelar,
+        // pero esta vez en PARALELO con el fundido a negro (ambas cosas a la vez).
+        // IMPORTANTE: aquí NO desactivamos panelRect.gameObject al terminar de encoger,
+        // porque este mismo script (y su corrutina del fundido a negro) vive en ese
+        // GameObject — desactivarlo a mitad de camino cortaría el fundido antes de que
+        // llegara a cerrar el juego.
+        if (panelContent != null) panelContent.SetActive(false);
+
+        StartAnimation(startLeft, startTop, startRight, startBottom, onComplete: null);
+
         StartCoroutine(FadeToBlackThenQuit());
     }
 
