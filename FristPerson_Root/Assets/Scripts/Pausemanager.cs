@@ -16,6 +16,8 @@ public class PauseManager : MonoBehaviour
     [SerializeField] private GameObject settingsPanel;
     [Tooltip("El SettingsNavigationController que vive en el SettingsPanel. Se busca solo si se deja vacío.")]
     [SerializeField] private SettingsNavigationController settingsNavigation;
+    [Tooltip("El ExitConfirmationController del panel de salida. Se busca solo si se deja vacío.")]
+    [SerializeField] private ExitConfirmationController exitConfirmation;
 
     [Header("Jugador")]
     [Tooltip("Se busca automáticamente en la escena si se deja vacío.")]
@@ -68,15 +70,27 @@ public class PauseManager : MonoBehaviour
         {
             musicDucking = FindObjectOfType<MusicDucking>();
         }
+
+        if (exitConfirmation == null)
+        {
+            exitConfirmation = FindObjectOfType<ExitConfirmationController>(true); // true = incluir objetos inactivos
+        }
     }
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            // Si el panel de ajustes está abierto, ESC retrocede una página dentro de Ajustes
-            // (o cierra Ajustes del todo si ya estamos en la página principal). Esto lo decide
-            // SettingsNavigationController.GoBack(), que sabe en qué página estamos.
+            // Prioridad 1: si el panel de "¿Seguro que quieres salir?" está abierto,
+            // ESC actúa como si hubiéramos pulsado Cancelar (no queremos salir del juego sin querer).
+            if (exitConfirmation != null && exitConfirmation.IsOpen)
+            {
+                exitConfirmation.OnCancelPressed();
+                return;
+            }
+
+            // Prioridad 2: si el panel de ajustes está abierto, ESC retrocede una página dentro de Ajustes
+            // (o cierra Ajustes del todo si ya estamos en la página principal).
             if (settingsPanel != null && settingsPanel.activeSelf)
             {
                 if (settingsNavigation != null)
