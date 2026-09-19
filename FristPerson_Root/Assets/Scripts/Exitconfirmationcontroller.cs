@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// Controla el panel de "¿Seguro que quieres salir?" que aparece POR ENCIMA del
@@ -32,6 +33,19 @@ public class ExitConfirmationController : MonoBehaviour
     [SerializeField] private float targetRight = 265.3f;
     [SerializeField] private float targetBottom = 154.1f;
 
+    [Header("Fondo oscurecido (detrás del panel)")]
+    [Tooltip("Imagen negra a pantalla completa, hija de un objeto DISTINTO al que se anima (para que no crezca/encoja con el panel). Debe empezar con Alpha 0.")]
+    [SerializeField] private Image dimBackground;
+    [Tooltip("Opacidad máxima del fondo oscurecido, de 0 (invisible) a 1 (negro sólido). Ej: 0.6 = bastante notable pero sin tapar del todo.")]
+    [Range(0f, 1f)]
+    [SerializeField] private float dimTargetAlpha = 0.6f;
+    [SerializeField] private float dimFadeDuration = 0.3f;
+
+    [Header("Fundido a negro al confirmar salida")]
+    [Tooltip("Imagen negra a pantalla completa, inicialmente transparente, colocada la ÚLTIMA en la Hierarchy (para quedar por encima de todo).")]
+    [SerializeField] private Image fadeToBlackImage;
+    [SerializeField] private float fadeToBlackDuration = 1f;
+
     [Header("Animación")]
     [SerializeField] private float animationDuration = 0.3f;
 
@@ -43,6 +57,7 @@ public class ExitConfirmationController : MonoBehaviour
     public bool IsOpen => panelRect != null && panelRect.gameObject.activeSelf;
 
     private Coroutine animationRoutine;
+    private Coroutine dimFadeRoutine;
 
     private void Awake()
     {
@@ -50,6 +65,18 @@ public class ExitConfirmationController : MonoBehaviour
         if (panelContent != null) panelContent.SetActive(false);
         ApplyOffsets(startLeft, startTop, startRight, startBottom);
         if (panelRect != null) panelRect.gameObject.SetActive(false);
+
+        if (dimBackground != null)
+        {
+            SetImageAlpha(dimBackground, 0f);
+            dimBackground.gameObject.SetActive(false);
+        }
+
+        if (fadeToBlackImage != null)
+        {
+            SetImageAlpha(fadeToBlackImage, 0f);
+            fadeToBlackImage.gameObject.SetActive(false);
+        }
     }
 
     /// <summary>Llamar desde el botón "Salir del juego" del menú de pausa.</summary>
@@ -58,6 +85,12 @@ public class ExitConfirmationController : MonoBehaviour
         if (panelContent != null) panelContent.SetActive(false);
         panelRect.gameObject.SetActive(true);
         ApplyOffsets(startLeft, startTop, startRight, startBottom);
+
+        if (dimBackground != null)
+        {
+            dimBackground.gameObject.SetActive(true);
+            StartDimFade(dimTargetAlpha, null);
+        }
 
         if (UIAudioManager.Instance != null) UIAudioManager.Instance.PlayPanelOpen();
 
@@ -71,6 +104,11 @@ public class ExitConfirmationController : MonoBehaviour
     public void OnCancelPressed()
     {
         if (panelContent != null) panelContent.SetActive(false);
+
+        if (dimBackground != null)
+        {
+            StartDimFade(0f, () => { dimBackground.gameObject.SetActive(false); });
+        }
 
         if (UIAudioManager.Instance != null) UIAudioManager.Instance.PlayPanelClose();
 
@@ -90,11 +128,73 @@ public class ExitConfirmationController : MonoBehaviour
     /// <summary>Llamar desde el botón "CONFIRMAR" dentro de este mismo panel.</summary>
     public void OnConfirmPressed()
     {
+        StartCoroutine(FadeToBlackThenQuit());
+    }
+
+    private IEnumerator FadeToBlackThenQuit()
+    {
+        if (fadeToBlackImage != null)
+        {
+            fadeToBlackImage.gameObject.SetActive(true);
+            SetImageAlpha(fadeToBlackImage, 0f);
+
+            float elapsed = 0f;
+            while (elapsed < fadeToBlackDuration)
+            {
+                // Unscaled porque el juego está en pausa (Time.timeScale = 0) en este momento
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / fadeToBlackDuration);
+                SetImageAlpha(fadeToBlackImage, t);
+                yield return null;
+            }
+
+            SetImageAlpha(fadeToBlackImage, 1f);
+        }
+
+        QuitNow();
+    }
+
+    private void SetImageAlpha(Image image, float alpha)
+    {
+        Color c = image.color;
+        c.a = alpha;
+        image.color = c;
+    }
+
+    private void QuitNow()
+    {
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
         Application.Quit();
 #endif
+    }
+
+    private void StartDimFade(float targetAlpha, Action onComplete)
+    {
+        if (dimFadeRoutine != null)
+        {
+            StopCoroutine(dimFadeRoutine);
+        }
+        dimFadeRoutine = StartCoroutine(DimFadeRoutine(targetAlpha, onComplete));
+    }
+
+    private IEnumerator DimFadeRoutine(float targetAlpha, Action onComplete)
+    {
+        float startAlpha = dimBackground.color.a;
+        float elapsed = 0f;
+
+        while (elapsed < dimFadeDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / dimFadeDuration);
+            SetImageAlpha(dimBackground, Mathf.Lerp(startAlpha, targetAlpha, t));
+            yield return null;
+        }
+
+        SetImageAlpha(dimBackground, targetAlpha);
+        onComplete?.Invoke();
+        dimFadeRoutine = null;
     }
 
     private void StartAnimation(float left, float top, float right, float bottom, Action onComplete)
