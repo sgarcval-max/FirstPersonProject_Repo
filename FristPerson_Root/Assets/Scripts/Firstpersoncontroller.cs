@@ -21,8 +21,7 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] private float gravity = -9.81f;
 
     [Header("Cámara / Ratón")]
-    [SerializeField] private float mouseSensitivityX = 50f;
-    [SerializeField] private float mouseSensitivityY = 50f;
+    [SerializeField] private float mouseSensitivity = 50f;
     [SerializeField] private bool invertY = false;
     [SerializeField] private float minPitch = -80f;
     [SerializeField] private float maxPitch = 80f;
@@ -56,16 +55,10 @@ public class FirstPersonController : MonoBehaviour
     // Multiplicador extra para que el Mouse Delta del Input System se sienta similar a antes
     private const float LOOK_SCALE = 0.02f;
 
-    public float MouseSensitivityX
+    public float MouseSensitivity
     {
-        get => mouseSensitivityX;
-        set => mouseSensitivityX = value;
-    }
-
-    public float MouseSensitivityY
-    {
-        get => mouseSensitivityY;
-        set => mouseSensitivityY = value;
+        get => mouseSensitivity;
+        set => mouseSensitivity = value;
     }
 
     public bool InvertY
@@ -110,8 +103,8 @@ public class FirstPersonController : MonoBehaviour
     {
         Vector2 lookInput = controls.Movimiento.Look.ReadValue<Vector2>();
 
-        float mouseX = lookInput.x * mouseSensitivityX * LOOK_SCALE;
-        float mouseY = lookInput.y * mouseSensitivityY * LOOK_SCALE;
+        float mouseX = lookInput.x * mouseSensitivity * LOOK_SCALE;
+        float mouseY = lookInput.y * mouseSensitivity * LOOK_SCALE;
 
         if (invertY)
         {

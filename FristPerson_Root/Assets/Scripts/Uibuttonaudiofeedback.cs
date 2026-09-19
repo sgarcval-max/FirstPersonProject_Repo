@@ -8,7 +8,7 @@ using UnityEngine.UI;
 /// en el OnClick() del Inspector.
 /// </summary>
 [RequireComponent(typeof(Button))]
-public class UIButtonAudioFeedback : MonoBehaviour, IPointerEnterHandler
+public class UIButtonAudioFeedback : MonoBehaviour, IPointerEnterHandler, ISelectHandler
 {
     [Tooltip("Desmarca esto en botones que ya reproducen su propio sonido especial al pulsarlos (ej: el botón de Reasignar tecla), para no duplicar el sonido de click.")]
     [SerializeField] private bool playClickSound = true;
@@ -42,6 +42,17 @@ public class UIButtonAudioFeedback : MonoBehaviour, IPointerEnterHandler
     }
 
     public void OnPointerEnter(PointerEventData eventData)
+    {
+        PlayHover();
+    }
+
+    /// <summary>Se llama cuando el botón queda "seleccionado" navegando con teclado (W/S), no solo con ratón.</summary>
+    public void OnSelect(BaseEventData eventData)
+    {
+        PlayHover();
+    }
+
+    private void PlayHover()
     {
         if (UIAudioManager.Instance != null)
         {
