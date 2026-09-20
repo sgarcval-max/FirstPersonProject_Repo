@@ -31,6 +31,10 @@ public class PauseManager : MonoBehaviour
     [Tooltip("Nombre exacto de la escena del menú principal (debe estar en Build Settings).")]
     [SerializeField] private string mainMenuSceneName = "MainMenu";
 
+    [Header("Activar/Desactivar (para el Menú Principal)")]
+    [Tooltip("Actívalo en la escena de JUEGO. Desactívalo en la instancia del MENÚ PRINCIPAL (sobrescritura de instancia del Prefab) para que ESC no haga nada relacionado con pausa ahí.")]
+    [SerializeField] private bool enablePauseFunctionality = true;
+
     [Header("Eventos")]
     public UnityEvent OnGamePaused;
     public UnityEvent OnGameResumed;
@@ -81,16 +85,14 @@ public class PauseManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            // Prioridad 1: si el panel de "¿Seguro que quieres salir?" está abierto,
-            // ESC actúa como si hubiéramos pulsado Cancelar (no queremos salir del juego sin querer).
+            // Estas dos comprobaciones (salir y ajustes) funcionan SIEMPRE, tanto en el
+            // Juego como en el Menú Principal, independientemente de "Enable Pause Functionality".
             if (exitConfirmation != null && exitConfirmation.IsOpen)
             {
                 exitConfirmation.OnCancelPressed();
                 return;
             }
 
-            // Prioridad 2: si el panel de ajustes está abierto, ESC retrocede una página dentro de Ajustes
-            // (o cierra Ajustes del todo si ya estamos en la página principal).
             if (settingsPanel != null && settingsPanel.activeSelf)
             {
                 if (settingsNavigation != null)
@@ -104,7 +106,11 @@ public class PauseManager : MonoBehaviour
                 return;
             }
 
-            TogglePause();
+            // Esto SÍ depende del interruptor: en el Menú Principal no hay "pausa" que alternar.
+            if (enablePauseFunctionality)
+            {
+                TogglePause();
+            }
         }
     }
 
@@ -155,9 +161,20 @@ public class PauseManager : MonoBehaviour
         if (UIAudioManager.Instance != null) UIAudioManager.Instance.PlayPanelOpen();
     }
 
-    /// <summary>Cierra Ajustes y vuelve al menú de pausa (no reanuda el juego).</summary>
+    /// <summary>Cierra Ajustes. En el Juego vuelve al menú de pausa; en el Menú Principal vuelve a MainMenuPage.</summary>
     public void CloseSettings()
     {
+        if (!enablePauseFunctionality)
+        {
+            // Estamos en el Menú Principal (no en el Juego): delega a MainMenuController
+            MainMenuController mainMenu = FindObjectOfType<MainMenuController>();
+            if (mainMenu != null)
+            {
+                mainMenu.CloseSettings();
+                return;
+            }
+        }
+
         if (settingsPanel != null) settingsPanel.SetActive(false);
         if (pausePanel != null) pausePanel.SetActive(true);
         if (UIAudioManager.Instance != null) UIAudioManager.Instance.PlayPanelClose();
@@ -167,7 +184,15 @@ public class PauseManager : MonoBehaviour
     public void GoToMainMenu()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene(mainMenuSceneName);
+
+        if (SceneTransitionManager.Instance != null)
+        {
+            SceneTransitionManager.Instance.LoadScene(mainMenuSceneName);
+        }
+        else
+        {
+            SceneManager.LoadScene(mainMenuSceneName);
+        }
     }
 
     /// <summary>Sale de la aplicación. En el Editor de Unity esto no cierra nada (comportamiento normal de Unity).</summary>

@@ -40,7 +40,7 @@ public class SettingsNavigationController : MonoBehaviour
         if (UIAudioManager.Instance != null) UIAudioManager.Instance.PlayPanelOpen();
     }
 
-    /// <summary>Vuelve a la página anterior. Si no hay historial (estamos en la página principal), cierra Ajustes y vuelve al menú de pausa.</summary>
+    /// <summary>Vuelve a la página anterior. Si no hay historial (estamos en la página principal), cierra Ajustes: usa PauseManager si existe (escena de juego) o MainMenuController si no (Menú Principal).</summary>
     public void GoBack()
     {
         if (history.Count > 0)
@@ -52,6 +52,14 @@ public class SettingsNavigationController : MonoBehaviour
         else if (PauseManager.Instance != null)
         {
             PauseManager.Instance.CloseSettings();
+        }
+        else
+        {
+            MainMenuController mainMenu = FindObjectOfType<MainMenuController>();
+            if (mainMenu != null)
+            {
+                mainMenu.CloseSettings();
+            }
         }
     }
 
