@@ -38,6 +38,11 @@ public class SceneTransitionManager : MonoBehaviour
             return;
         }
         Instance = this;
+
+        // "false" aquí es importante: le decimos a Unity que NO intente mantener la
+        // posición visual exacta al desvincularse del padre (eso es lo que rompía la UI
+        // la vez anterior). Con "false", simplemente conserva sus valores locales tal cual.
+        transform.SetParent(null, false);
         DontDestroyOnLoad(gameObject);
 
         if (fadeCanvasGroup != null) fadeCanvasGroup.alpha = 0f;
