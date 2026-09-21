@@ -2853,6 +2853,158 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 7434741177666435706, guid: 41b8a798d7cbe8f4a9ee9e4ebd5fca41, type: 3}
   m_PrefabInstance: {fileID: 1343163263}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1486466550
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1486466552}
+  - component: {fileID: 1486466551}
+  m_Layer: 0
+  m_Name: LocalizationManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1486466551
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1486466550}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efb870a036b5e0448a75aa81a8284d30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizationManager
+  entries:
+  - key: menu_resume
+    spanish: REANUDAR
+    english: RESUME
+  - key: menu_settings
+    spanish: AJUSTES
+    english: SETTINGS
+  - key: menu_main_menu
+    spanish: "SALIR AL MEN\xDA PRINCIPAL"
+    english: EXIT TO MAIN MENU
+  - key: menu_quit
+    spanish: SALIR DEL JUEGO
+    english: QUIT GAME
+  - key: settings_mouse_keyboard
+    spanish: "RAT\xD3N Y TECLADO"
+    english: MOUSE AND KEYBOARD
+  - key: settings_subtitles
+    spanish: SUBTITULOS
+    english: SUBTITLES
+  - key: tooltip_master_volume
+    spanish: "\xB7 Ajusta el volumen general del juego"
+    english: "\xB7 Adjusts the game's overall volume"
+  - key: tooltip_music_volume
+    spanish: "\xB7 Ajusta el volumen de la m\xFAsica del juego"
+    english: "\xB7 Adjust the game music volume"
+  - key: tooltip_sfx_volume
+    spanish: "\xB7 Ajusta el volumen de los efectos de sonido del juego."
+    english: "\xB7 Adjusts the game's sound effect volume."
+  - key: SoundButton
+    spanish: SONIDO
+    english: SOUND
+  - key: RyTButton
+    spanish: "RAT\xD3N Y TECLADO"
+    english: MOUSE AND KEYBOARD
+  - key: InfoAjustes
+    spanish: AJUSTES
+    english: SETTINGS
+  - key: Tooltip_soundButton
+    spanish: "\xB7 Este men\xFA contiene opciones para ajustar el volumen, la musica
+      y los efectos"
+    english: "\xB7 This menu contains options to adjust the volume, music, and effects."
+  - key: Tooltip_RyTButton
+    spanish: "\xB7 Este men\xFA contiene opciones para modificar los controles del
+      raton y teclado"
+    english: "\xB7 This menu contains options to modify mouse and keyboard controls."
+  - key: Tooltip_SubButton
+    spanish: "\xB7 Este men\xFA contiene opciones para modificar el idioma del juego"
+    english: "\xB7 This menu contains options to change the game language."
+  - key: Subinfotext
+    spanish: "AJUSTES DE SUBT\xCDTULOS"
+    english: SUBTITLE SETTINGS
+  - key: iDIOMAteXT
+    spanish: IDIOMA DE LOS TEXTOS
+    english: LANGUAGE OF THE TEXTS
+  - key: iNFOajustessound
+    spanish: AJUSTES SONIDO
+    english: SOUND SETTINGS
+  - key: VOLUMENinfo
+    spanish: VOLUMEN
+    english: VOLUME
+  - key: VOLUMEN_GENERAL
+    spanish: VOLUMEN GENERAL
+    english: GENERAL VOLUME
+  - key: MUSICA_
+    spanish: MUSICA
+    english: MUSIC
+  - key: EFECTOS_
+    spanish: EFECTOS
+    english: EFFECTS
+  - key: ASIGNA_TEXT
+    spanish: "ASIGNACI\xD3N DE TECLAS"
+    english: KEY ASSIGNMENT
+  - key: iNVERT_TEXT
+    spanish: INVERTIR EJE Y
+    english: REVERSE Y-AXIS
+  - key: Tooltip_Slider
+    spanish: "\xB7 Ajusta la sensibilidad del rat\xF3n"
+    english: "\xB7 Adjust mouse sensitivity"
+  - key: Tooltip_Teclas
+    spanish: "\xB7 Cambiar la asignaci\xF3n de teclas para rat\xF3n y teclado"
+    english: "\xB7 Change key assignments for mouse and keyboard"
+  - key: sensi
+    spanish: SENSIBILIDAD
+    english: SENSITIVITY
+  - key: iNFOTEXTGRANDE
+    spanish: "AJUSTES DE RAT\xD3N Y TECLADO"
+    english: MOUSE AND KEYBOARD SETTINGS
+  - key: iNFOSUBTEXT
+    spanish: "RAT\xD3N"
+    english: MOUSE
+  - key: Tooltip_Invert
+    spanish: "\xB7 Invierte los ejes del rat\xF3n."
+    english: "\xB7 Inverts the mouse axes."
+  - key: Play_Game
+    spanish: JUGAR
+    english: PLAY
+  - key: Ajustes_mainmenu
+    spanish: AJUSTES
+    english: SETTINGS
+  - key: ExitGame_mainmenu
+    spanish: SALIR DEL JUEGO
+    english: EXIT GAME
+  - key: Info_teclas
+    spanish: "ASIGNACI\xD3N DE TECLAS"
+    english: KEY ASSIGNMENT
+  - key: MiniInfoTExt_teclas
+    spanish: MOVIMIENTO
+    english: MOVEMENT
+--- !u!4 &1486466552
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1486466550}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 250.78404, y: 0.00001, z: 1827.9191}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1525991009
 GameObject:
   m_ObjectHideFlags: 0
@@ -3405,143 +3557,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 10, y: 2.220446e-16, z: 10}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!1 &1604156561
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1604156563}
-  - component: {fileID: 1604156562}
-  m_Layer: 0
-  m_Name: LocalizationManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1604156562
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1604156561}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: efb870a036b5e0448a75aa81a8284d30, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LocalizationManager
-  entries:
-  - key: menu_resume
-    spanish: REANUDAR
-    english: RESUME
-  - key: menu_settings
-    spanish: AJUSTES
-    english: SETTINGS
-  - key: menu_main_menu
-    spanish: "SALIR AL MEN\xDA PRINCIPAL"
-    english: EXIT TO MAIN MENU
-  - key: menu_quit
-    spanish: SALIR DEL JUEGO
-    english: QUIT GAME
-  - key: settings_mouse_keyboard
-    spanish: "RAT\xD3N Y TECLADO"
-    english: MOUSE AND KEYBOARD
-  - key: settings_subtitles
-    spanish: SUBTITULOS
-    english: SUBTITLES
-  - key: tooltip_master_volume
-    spanish: "\xB7 Ajusta el volumen general del juego"
-    english: "\xB7 Adjusts the game's overall volume"
-  - key: tooltip_music_volume
-    spanish: "\xB7 Ajusta el volumen de la m\xFAsica del juego"
-    english: "\xB7 Adjust the game music volume"
-  - key: tooltip_sfx_volume
-    spanish: "\xB7 Ajusta el volumen de los efectos de sonido del juego."
-    english: "\xB7 Adjusts the game's sound effect volume."
-  - key: SoundButton
-    spanish: SONIDO
-    english: SOUND
-  - key: RyTButton
-    spanish: "RAT\xD3N Y TECLADO"
-    english: MOUSE AND KEYBOARD
-  - key: InfoAjustes
-    spanish: AJUSTES
-    english: SETTINGS
-  - key: Tooltip_soundButton
-    spanish: "\xB7 Este men\xFA contiene opciones para ajustar el volumen, la musica
-      y los efectos"
-    english: "\xB7 This menu contains options to adjust the volume, music, and effects."
-  - key: Tooltip_RyTButton
-    spanish: "\xB7 Este men\xFA contiene opciones para modificar los controles del
-      raton y teclado"
-    english: "\xB7 This menu contains options to modify mouse and keyboard controls."
-  - key: Tooltip_SubButton
-    spanish: "\xB7 Este men\xFA contiene opciones para modificar el idioma del juego"
-    english: "\xB7 This menu contains options to change the game language."
-  - key: Subinfotext
-    spanish: "AJUSTES DE SUBT\xCDTULOS"
-    english: SUBTITLE SETTINGS
-  - key: iDIOMAteXT
-    spanish: IDIOMA DE LOS TEXTOS
-    english: LANGUAGE OF THE TEXTS
-  - key: iNFOajustessound
-    spanish: AJUSTES SONIDO
-    english: SOUND SETTINGS
-  - key: VOLUMENinfo
-    spanish: VOLUMEN
-    english: VOLUME
-  - key: VOLUMEN_GENERAL
-    spanish: VOLUMEN GENERAL
-    english: GENERAL VOLUME
-  - key: MUSICA_
-    spanish: MUSICA
-    english: MUSIC
-  - key: EFECTOS_
-    spanish: EFECTOS
-    english: EFFECTS
-  - key: ASIGNA_TEXT
-    spanish: "ASIGNACI\xD3N DE TECLAS"
-    english: KEY ASSIGNMENT
-  - key: iNVERT_TEXT
-    spanish: INVERTIR EJE Y
-    english: REVERSE Y-AXIS
-  - key: Tooltip_Slider
-    spanish: "\xB7 Ajusta la sensibilidad del rat\xF3n"
-    english: "\xB7 Adjust mouse sensitivity"
-  - key: Tooltip_Teclas
-    spanish: "\xB7 Cambiar la asignaci\xF3n de teclas para rat\xF3n y teclado"
-    english: "\xB7 Change key assignments for mouse and keyboard"
-  - key: sensi
-    spanish: SENSIBILIDAD
-    english: SENSITIVITY
-  - key: iNFOTEXTGRANDE
-    spanish: "AJUSTES DE RAT\xD3N Y TECLADO"
-    english: MOUSE AND KEYBOARD SETTINGS
-  - key: iNFOSUBTEXT
-    spanish: "RAT\xD3N"
-    english: MOUSE
-  - key: Tooltip_Invert
-    spanish: "\xB7 Invierte los ejes del rat\xF3n."
-    english: "\xB7 Inverts the mouse axes."
---- !u!4 &1604156563
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1604156561}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 250.78404, y: 0.00001, z: 1827.9191}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1671297787
 GameObject:
   m_ObjectHideFlags: 0
@@ -4554,6 +4569,6 @@ SceneRoots:
   - {fileID: 2014231201}
   - {fileID: 1990170558}
   - {fileID: 371033123}
-  - {fileID: 1604156563}
+  - {fileID: 1486466552}
   - {fileID: 1898569710}
   - {fileID: 2050513010}

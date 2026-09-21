@@ -3955,6 +3955,12 @@ MonoBehaviour:
   - key: ExitGame_mainmenu
     spanish: SALIR DEL JUEGO
     english: EXIT GAME
+  - key: Info_teclas
+    spanish: "ASIGNACI\xD3N DE TECLAS"
+    english: KEY ASSIGNMENT
+  - key: MiniInfoTExt_teclas
+    spanish: MOVIMIENTO
+    english: MOVEMENT
 --- !u!4 &1604156563
 Transform:
   m_ObjectHideFlags: 0
