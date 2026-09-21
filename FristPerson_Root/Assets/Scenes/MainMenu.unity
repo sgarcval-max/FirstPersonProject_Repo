@@ -394,6 +394,7 @@ GameObject:
   - component: {fileID: 250979919}
   - component: {fileID: 250979921}
   - component: {fileID: 250979920}
+  - component: {fileID: 250979922}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -520,6 +521,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 250979918}
   m_CullTransparentMesh: 1
+--- !u!114 &250979922
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 250979918}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16bd0ed8315787441ad46827488cf5ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  key: Ajustes_mainmenu
 --- !u!1 &290125985
 GameObject:
   m_ObjectHideFlags: 0
@@ -2015,6 +2029,7 @@ GameObject:
   - component: {fileID: 864036995}
   - component: {fileID: 864036997}
   - component: {fileID: 864036996}
+  - component: {fileID: 864036998}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -2141,6 +2156,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 864036994}
   m_CullTransparentMesh: 1
+--- !u!114 &864036998
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 864036994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16bd0ed8315787441ad46827488cf5ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  key: ExitGame_mainmenu
 --- !u!1 &883657173
 GameObject:
   m_ObjectHideFlags: 0
@@ -3918,6 +3946,15 @@ MonoBehaviour:
   - key: Tooltip_Invert
     spanish: "\xB7 Invierte los ejes del rat\xF3n."
     english: "\xB7 Inverts the mouse axes."
+  - key: Play_Game
+    spanish: JUGAR
+    english: PLAY
+  - key: Ajustes_mainmenu
+    spanish: AJUSTES
+    english: SETTINGS
+  - key: ExitGame_mainmenu
+    spanish: SALIR DEL JUEGO
+    english: EXIT GAME
 --- !u!4 &1604156563
 Transform:
   m_ObjectHideFlags: 0
@@ -4450,6 +4487,7 @@ GameObject:
   - component: {fileID: 1939120527}
   - component: {fileID: 1939120529}
   - component: {fileID: 1939120528}
+  - component: {fileID: 1939120530}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -4576,6 +4614,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1939120526}
   m_CullTransparentMesh: 1
+--- !u!114 &1939120530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1939120526}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16bd0ed8315787441ad46827488cf5ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  key: Play_Game
 --- !u!1 &1960503325
 GameObject:
   m_ObjectHideFlags: 0
