@@ -375,7 +375,6 @@ RectTransform:
   - {fileID: 606842657}
   - {fileID: 1802162767}
   - {fileID: 135801712}
-  - {fileID: 1343163264}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -394,6 +393,7 @@ GameObject:
   - component: {fileID: 290125986}
   - component: {fileID: 290125988}
   - component: {fileID: 290125987}
+  - component: {fileID: 290125989}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -520,6 +520,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 290125985}
   m_CullTransparentMesh: 1
+--- !u!114 &290125989
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290125985}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16bd0ed8315787441ad46827488cf5ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  key: Exit_Button
 --- !u!1 &299236027
 GameObject:
   m_ObjectHideFlags: 0
@@ -807,6 +820,7 @@ GameObject:
   - component: {fileID: 321160520}
   - component: {fileID: 321160522}
   - component: {fileID: 321160521}
+  - component: {fileID: 321160523}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -933,6 +947,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 321160519}
   m_CullTransparentMesh: 1
+--- !u!114 &321160523
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 321160519}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16bd0ed8315787441ad46827488cf5ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  key: Cancel_Button
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -2751,260 +2778,6 @@ Transform:
   - {fileID: 330585546}
   m_Father: {fileID: 1671297792}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &1343163263
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 142795558}
-    m_Modifications:
-    - target: {fileID: 1395117378650320214, guid: 41b8a798d7cbe8f4a9ee9e4ebd5fca41, type: 3}
-      propertyPath: m_Name
-      value: BlackImage
-      objectReference: {fileID: 0}
-    - target: {fileID: 7434741177666435706, guid: 41b8a798d7cbe8f4a9ee9e4ebd5fca41, type: 3}
-      propertyPath: m_Pivot.x
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 7434741177666435706, guid: 41b8a798d7cbe8f4a9ee9e4ebd5fca41, type: 3}
-      propertyPath: m_Pivot.y
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 7434741177666435706, guid: 41b8a798d7cbe8f4a9ee9e4ebd5fca41, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7434741177666435706, guid: 41b8a798d7cbe8f4a9ee9e4ebd5fca41, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7434741177666435706, guid: 41b8a798d7cbe8f4a9ee9e4ebd5fca41, type: 3}
-      propertyPath: m_AnchorMin.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7434741177666435706, guid: 41b8a798d7cbe8f4a9ee9e4ebd5fca41, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7434741177666435706, guid: 41b8a798d7cbe8f4a9ee9e4ebd5fca41, type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7434741177666435706, guid: 41b8a798d7cbe8f4a9ee9e4ebd5fca41, type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7434741177666435706, guid: 41b8a798d7cbe8f4a9ee9e4ebd5fca41, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7434741177666435706, guid: 41b8a798d7cbe8f4a9ee9e4ebd5fca41, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7434741177666435706, guid: 41b8a798d7cbe8f4a9ee9e4ebd5fca41, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7434741177666435706, guid: 41b8a798d7cbe8f4a9ee9e4ebd5fca41, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7434741177666435706, guid: 41b8a798d7cbe8f4a9ee9e4ebd5fca41, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7434741177666435706, guid: 41b8a798d7cbe8f4a9ee9e4ebd5fca41, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7434741177666435706, guid: 41b8a798d7cbe8f4a9ee9e4ebd5fca41, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7434741177666435706, guid: 41b8a798d7cbe8f4a9ee9e4ebd5fca41, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7434741177666435706, guid: 41b8a798d7cbe8f4a9ee9e4ebd5fca41, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7434741177666435706, guid: 41b8a798d7cbe8f4a9ee9e4ebd5fca41, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7434741177666435706, guid: 41b8a798d7cbe8f4a9ee9e4ebd5fca41, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7434741177666435706, guid: 41b8a798d7cbe8f4a9ee9e4ebd5fca41, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 41b8a798d7cbe8f4a9ee9e4ebd5fca41, type: 3}
---- !u!224 &1343163264 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 7434741177666435706, guid: 41b8a798d7cbe8f4a9ee9e4ebd5fca41, type: 3}
-  m_PrefabInstance: {fileID: 1343163263}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &1486466550
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1486466552}
-  - component: {fileID: 1486466551}
-  m_Layer: 0
-  m_Name: LocalizationManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1486466551
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1486466550}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: efb870a036b5e0448a75aa81a8284d30, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LocalizationManager
-  entries:
-  - key: menu_resume
-    spanish: REANUDAR
-    english: RESUME
-  - key: menu_settings
-    spanish: AJUSTES
-    english: SETTINGS
-  - key: menu_main_menu
-    spanish: "SALIR AL MEN\xDA PRINCIPAL"
-    english: EXIT TO MAIN MENU
-  - key: menu_quit
-    spanish: SALIR DEL JUEGO
-    english: QUIT GAME
-  - key: settings_mouse_keyboard
-    spanish: "RAT\xD3N Y TECLADO"
-    english: MOUSE AND KEYBOARD
-  - key: settings_subtitles
-    spanish: SUBTITULOS
-    english: SUBTITLES
-  - key: tooltip_master_volume
-    spanish: "\xB7 Ajusta el volumen general del juego"
-    english: "\xB7 Adjusts the game's overall volume"
-  - key: tooltip_music_volume
-    spanish: "\xB7 Ajusta el volumen de la m\xFAsica del juego"
-    english: "\xB7 Adjust the game music volume"
-  - key: tooltip_sfx_volume
-    spanish: "\xB7 Ajusta el volumen de los efectos de sonido del juego."
-    english: "\xB7 Adjusts the game's sound effect volume."
-  - key: SoundButton
-    spanish: SONIDO
-    english: SOUND
-  - key: RyTButton
-    spanish: "RAT\xD3N Y TECLADO"
-    english: MOUSE AND KEYBOARD
-  - key: InfoAjustes
-    spanish: AJUSTES
-    english: SETTINGS
-  - key: Tooltip_soundButton
-    spanish: "\xB7 Este men\xFA contiene opciones para ajustar el volumen, la musica
-      y los efectos"
-    english: "\xB7 This menu contains options to adjust the volume, music, and effects."
-  - key: Tooltip_RyTButton
-    spanish: "\xB7 Este men\xFA contiene opciones para modificar los controles del
-      raton y teclado"
-    english: "\xB7 This menu contains options to modify mouse and keyboard controls."
-  - key: Tooltip_SubButton
-    spanish: "\xB7 Este men\xFA contiene opciones para modificar el idioma del juego"
-    english: "\xB7 This menu contains options to change the game language."
-  - key: Subinfotext
-    spanish: "AJUSTES DE SUBT\xCDTULOS"
-    english: SUBTITLE SETTINGS
-  - key: iDIOMAteXT
-    spanish: IDIOMA DE LOS TEXTOS
-    english: LANGUAGE OF THE TEXTS
-  - key: iNFOajustessound
-    spanish: AJUSTES SONIDO
-    english: SOUND SETTINGS
-  - key: VOLUMENinfo
-    spanish: VOLUMEN
-    english: VOLUME
-  - key: VOLUMEN_GENERAL
-    spanish: VOLUMEN GENERAL
-    english: GENERAL VOLUME
-  - key: MUSICA_
-    spanish: MUSICA
-    english: MUSIC
-  - key: EFECTOS_
-    spanish: EFECTOS
-    english: EFFECTS
-  - key: ASIGNA_TEXT
-    spanish: "ASIGNACI\xD3N DE TECLAS"
-    english: KEY ASSIGNMENT
-  - key: iNVERT_TEXT
-    spanish: INVERTIR EJE Y
-    english: REVERSE Y-AXIS
-  - key: Tooltip_Slider
-    spanish: "\xB7 Ajusta la sensibilidad del rat\xF3n"
-    english: "\xB7 Adjust mouse sensitivity"
-  - key: Tooltip_Teclas
-    spanish: "\xB7 Cambiar la asignaci\xF3n de teclas para rat\xF3n y teclado"
-    english: "\xB7 Change key assignments for mouse and keyboard"
-  - key: sensi
-    spanish: SENSIBILIDAD
-    english: SENSITIVITY
-  - key: iNFOTEXTGRANDE
-    spanish: "AJUSTES DE RAT\xD3N Y TECLADO"
-    english: MOUSE AND KEYBOARD SETTINGS
-  - key: iNFOSUBTEXT
-    spanish: "RAT\xD3N"
-    english: MOUSE
-  - key: Tooltip_Invert
-    spanish: "\xB7 Invierte los ejes del rat\xF3n."
-    english: "\xB7 Inverts the mouse axes."
-  - key: Play_Game
-    spanish: JUGAR
-    english: PLAY
-  - key: Ajustes_mainmenu
-    spanish: AJUSTES
-    english: SETTINGS
-  - key: ExitGame_mainmenu
-    spanish: SALIR DEL JUEGO
-    english: EXIT GAME
-  - key: Info_teclas
-    spanish: "ASIGNACI\xD3N DE TECLAS"
-    english: KEY ASSIGNMENT
-  - key: MiniInfoTExt_teclas
-    spanish: MOVIMIENTO
-    english: MOVEMENT
---- !u!4 &1486466552
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1486466550}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 250.78404, y: 0.00001, z: 1827.9191}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1525991009
 GameObject:
   m_ObjectHideFlags: 0
@@ -3167,6 +2940,7 @@ GameObject:
   - component: {fileID: 1532281408}
   - component: {fileID: 1532281410}
   - component: {fileID: 1532281409}
+  - component: {fileID: 1532281411}
   m_Layer: 5
   m_Name: InfoText (TMP)
   m_TagString: Untagged
@@ -3293,6 +3067,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1532281407}
   m_CullTransparentMesh: 1
+--- !u!114 &1532281411
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1532281407}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16bd0ed8315787441ad46827488cf5ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  key: Info_textExit
 --- !u!1 &1574611001
 GameObject:
   m_ObjectHideFlags: 0
@@ -3753,6 +3540,7 @@ GameObject:
   - component: {fileID: 1701510093}
   - component: {fileID: 1701510095}
   - component: {fileID: 1701510094}
+  - component: {fileID: 1701510096}
   m_Layer: 5
   m_Name: ExitText (TMP)
   m_TagString: Untagged
@@ -3881,6 +3669,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1701510092}
   m_CullTransparentMesh: 1
+--- !u!114 &1701510096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1701510092}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16bd0ed8315787441ad46827488cf5ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  key: Exit_Text
 --- !u!1 &1802162766
 GameObject:
   m_ObjectHideFlags: 0
@@ -4499,6 +4300,170 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2056121106
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2056121108}
+  - component: {fileID: 2056121107}
+  m_Layer: 0
+  m_Name: LocalizationManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2056121107
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2056121106}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efb870a036b5e0448a75aa81a8284d30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizationManager
+  entries:
+  - key: menu_resume
+    spanish: REANUDAR
+    english: RESUME
+  - key: menu_settings
+    spanish: AJUSTES
+    english: SETTINGS
+  - key: menu_main_menu
+    spanish: "SALIR AL MEN\xDA PRINCIPAL"
+    english: EXIT TO MAIN MENU
+  - key: menu_quit
+    spanish: SALIR DEL JUEGO
+    english: QUIT GAME
+  - key: settings_mouse_keyboard
+    spanish: "RAT\xD3N Y TECLADO"
+    english: MOUSE AND KEYBOARD
+  - key: settings_subtitles
+    spanish: SUBTITULOS
+    english: SUBTITLES
+  - key: tooltip_master_volume
+    spanish: "\xB7 Ajusta el volumen general del juego"
+    english: "\xB7 Adjusts the game's overall volume"
+  - key: tooltip_music_volume
+    spanish: "\xB7 Ajusta el volumen de la m\xFAsica del juego"
+    english: "\xB7 Adjust the game music volume"
+  - key: tooltip_sfx_volume
+    spanish: "\xB7 Ajusta el volumen de los efectos de sonido del juego."
+    english: "\xB7 Adjusts the game's sound effect volume."
+  - key: SoundButton
+    spanish: SONIDO
+    english: SOUND
+  - key: RyTButton
+    spanish: "RAT\xD3N Y TECLADO"
+    english: MOUSE AND KEYBOARD
+  - key: InfoAjustes
+    spanish: AJUSTES
+    english: SETTINGS
+  - key: Tooltip_soundButton
+    spanish: "\xB7 Este men\xFA contiene opciones para ajustar el volumen, la musica
+      y los efectos"
+    english: "\xB7 This menu contains options to adjust the volume, music, and effects."
+  - key: Tooltip_RyTButton
+    spanish: "\xB7 Este men\xFA contiene opciones para modificar los controles del
+      raton y teclado"
+    english: "\xB7 This menu contains options to modify mouse and keyboard controls."
+  - key: Tooltip_SubButton
+    spanish: "\xB7 Este men\xFA contiene opciones para modificar el idioma del juego"
+    english: "\xB7 This menu contains options to change the game language."
+  - key: Subinfotext
+    spanish: "AJUSTES DE SUBT\xCDTULOS"
+    english: SUBTITLE SETTINGS
+  - key: iDIOMAteXT
+    spanish: IDIOMA DE LOS TEXTOS
+    english: LANGUAGE OF THE TEXTS
+  - key: iNFOajustessound
+    spanish: AJUSTES SONIDO
+    english: SOUND SETTINGS
+  - key: VOLUMENinfo
+    spanish: VOLUMEN
+    english: VOLUME
+  - key: VOLUMEN_GENERAL
+    spanish: VOLUMEN GENERAL
+    english: GENERAL VOLUME
+  - key: MUSICA_
+    spanish: MUSICA
+    english: MUSIC
+  - key: EFECTOS_
+    spanish: EFECTOS
+    english: EFFECTS
+  - key: ASIGNA_TEXT
+    spanish: "ASIGNACI\xD3N DE TECLAS"
+    english: KEY ASSIGNMENT
+  - key: iNVERT_TEXT
+    spanish: INVERTIR EJE Y
+    english: REVERSE Y-AXIS
+  - key: Tooltip_Slider
+    spanish: "\xB7 Ajusta la sensibilidad del rat\xF3n"
+    english: "\xB7 Adjust mouse sensitivity"
+  - key: Tooltip_Teclas
+    spanish: "\xB7 Cambiar la asignaci\xF3n de teclas para rat\xF3n y teclado"
+    english: "\xB7 Change key assignments for mouse and keyboard"
+  - key: sensi
+    spanish: SENSIBILIDAD
+    english: SENSITIVITY
+  - key: iNFOTEXTGRANDE
+    spanish: "AJUSTES DE RAT\xD3N Y TECLADO"
+    english: MOUSE AND KEYBOARD SETTINGS
+  - key: iNFOSUBTEXT
+    spanish: "RAT\xD3N"
+    english: MOUSE
+  - key: Tooltip_Invert
+    spanish: "\xB7 Invierte los ejes del rat\xF3n."
+    english: "\xB7 Inverts the mouse axes."
+  - key: Play_Game
+    spanish: JUGAR
+    english: PLAY
+  - key: Ajustes_mainmenu
+    spanish: AJUSTES
+    english: SETTINGS
+  - key: ExitGame_mainmenu
+    spanish: SALIR DEL JUEGO
+    english: EXIT GAME
+  - key: Info_teclas
+    spanish: "ASIGNACI\xD3N DE TECLAS"
+    english: KEY ASSIGNMENT
+  - key: MiniInfoTExt_teclas
+    spanish: MOVIMIENTO
+    english: MOVEMENT
+  - key: Exit_Text
+    spanish: SALIR AL ESCRITORIO
+    english: EXIT TO DESKTOP
+  - key: Info_textExit
+    spanish: "\xBFSeguro que quieres salir al escritorio?"
+    english: Are you sure you want to go to the desk?
+  - key: Exit_Button
+    spanish: CONFIRMAR
+    english: CONFIRM
+  - key: Cancel_Button
+    spanish: CANCELAR
+    english: CANCEL
+--- !u!4 &2056121108
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2056121106}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 250.78404, y: 0.00001, z: 1827.9191}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &5693805508975165080
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4569,6 +4534,6 @@ SceneRoots:
   - {fileID: 2014231201}
   - {fileID: 1990170558}
   - {fileID: 371033123}
-  - {fileID: 1486466552}
+  - {fileID: 2056121108}
   - {fileID: 1898569710}
   - {fileID: 2050513010}

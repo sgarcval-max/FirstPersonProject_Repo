@@ -545,6 +545,7 @@ GameObject:
   - component: {fileID: 290125986}
   - component: {fileID: 290125988}
   - component: {fileID: 290125987}
+  - component: {fileID: 290125989}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -671,6 +672,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 290125985}
   m_CullTransparentMesh: 1
+--- !u!114 &290125989
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290125985}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16bd0ed8315787441ad46827488cf5ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  key: Exit_Button
 --- !u!1 &299236027
 GameObject:
   m_ObjectHideFlags: 0
@@ -958,6 +972,7 @@ GameObject:
   - component: {fileID: 321160520}
   - component: {fileID: 321160522}
   - component: {fileID: 321160521}
+  - component: {fileID: 321160523}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -1084,6 +1099,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 321160519}
   m_CullTransparentMesh: 1
+--- !u!114 &321160523
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 321160519}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16bd0ed8315787441ad46827488cf5ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  key: Cancel_Button
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -3569,6 +3597,7 @@ GameObject:
   - component: {fileID: 1532281408}
   - component: {fileID: 1532281410}
   - component: {fileID: 1532281409}
+  - component: {fileID: 1532281411}
   m_Layer: 5
   m_Name: InfoText (TMP)
   m_TagString: Untagged
@@ -3695,6 +3724,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1532281407}
   m_CullTransparentMesh: 1
+--- !u!114 &1532281411
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1532281407}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16bd0ed8315787441ad46827488cf5ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  key: Info_textExit
 --- !u!1 &1574611001
 GameObject:
   m_ObjectHideFlags: 0
@@ -3961,6 +4003,18 @@ MonoBehaviour:
   - key: MiniInfoTExt_teclas
     spanish: MOVIMIENTO
     english: MOVEMENT
+  - key: Exit_Text
+    spanish: SALIR AL ESCRITORIO
+    english: EXIT TO DESKTOP
+  - key: Info_textExit
+    spanish: "\xBFSeguro que quieres salir al escritorio?"
+    english: Are you sure you want to go to the desk?
+  - key: Exit_Button
+    spanish: CONFIRMAR
+    english: CONFIRM
+  - key: Cancel_Button
+    spanish: CANCELAR
+    english: CANCEL
 --- !u!4 &1604156563
 Transform:
   m_ObjectHideFlags: 0
@@ -3987,6 +4041,7 @@ GameObject:
   - component: {fileID: 1701510093}
   - component: {fileID: 1701510095}
   - component: {fileID: 1701510094}
+  - component: {fileID: 1701510096}
   m_Layer: 5
   m_Name: ExitText (TMP)
   m_TagString: Untagged
@@ -4115,6 +4170,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1701510092}
   m_CullTransparentMesh: 1
+--- !u!114 &1701510096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1701510092}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16bd0ed8315787441ad46827488cf5ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  key: Exit_Text
 --- !u!1 &1802162766
 GameObject:
   m_ObjectHideFlags: 0
