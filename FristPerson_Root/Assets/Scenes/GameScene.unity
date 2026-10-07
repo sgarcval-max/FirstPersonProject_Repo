@@ -5621,9 +5621,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c9b2294ef750394eb02d824b969bb23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerThrowController
-  projectilePrefab: {fileID: 1078549374559404553, guid: f918c3e0e7c4a6c43bdffa6ca33ce12c, type: 3}
   throwPoint: {fileID: 1612419206}
-  throwForce: 15
   OnThrow:
     m_PersistentCalls:
       m_Calls: []

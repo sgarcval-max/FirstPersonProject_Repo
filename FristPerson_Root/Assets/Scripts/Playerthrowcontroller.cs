@@ -3,56 +3,69 @@ using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Gestiona el lanzamiento de objetos (comida, de momento) desde el jugador.
-/// Escucha la acción "Throw" del Action Map "Combate" (InputManager.Controls),
-/// instancia el prefab del proyectil en el punto de lanzamiento, y lo empuja
-/// hacia adelante con física real.
+/// Gestiona el lanzamiento de objetos del jugador. Escucha "Throw" (lanzar el objeto
+/// actual del inventario) y "NextItem" (cambiar de objeto) del Action Map "Combate".
 /// </summary>
 [RequireComponent(typeof(FirstPersonController))]
+[RequireComponent(typeof(PlayerInventory))]
 public class PlayerThrowController : MonoBehaviour
 {
     [Header("Lanzamiento")]
-    [Tooltip("El prefab del objeto que se lanza (ej: comida). Debe tener Rigidbody y ThrowableProjectile.")]
-    [SerializeField] private GameObject projectilePrefab;
     [Tooltip("Punto desde el que sale el objeto lanzado (normalmente un hijo vacío delante de la cámara).")]
     [SerializeField] private Transform throwPoint;
-    [SerializeField] private float throwForce = 15f;
 
     [Header("Eventos")]
     public UnityEvent OnThrow;
 
     private FirstPersonController playerController;
+    private PlayerInventory inventory;
     private PlayerControls controls => InputManager.Controls;
 
     private void Awake()
     {
         playerController = GetComponent<FirstPersonController>();
+        inventory = GetComponent<PlayerInventory>();
     }
 
     private void OnEnable()
     {
         controls.Combate.Enable();
         controls.Combate.Throw.performed += HandleThrow;
+        controls.Combate.NextItem.performed += HandleNextItem;
     }
 
     private void OnDisable()
     {
         controls.Combate.Throw.performed -= HandleThrow;
+        controls.Combate.NextItem.performed -= HandleNextItem;
         controls.Combate.Disable();
+    }
+
+    private bool IsGameplayActive()
+    {
+        // Si el juego está en pausa, FirstPersonController está desactivado: ignoramos el input.
+        return playerController == null || playerController.enabled;
+    }
+
+    private void HandleNextItem(InputAction.CallbackContext context)
+    {
+        if (!IsGameplayActive()) return;
+        inventory.NextItem();
     }
 
     private void HandleThrow(InputAction.CallbackContext context)
     {
-        // Si el juego está en pausa, FirstPersonController está desactivado: ignoramos el lanzamiento.
-        if (playerController != null && !playerController.enabled) return;
-        if (projectilePrefab == null || throwPoint == null) return;
+        if (!IsGameplayActive()) return;
 
-        GameObject projectile = Instantiate(projectilePrefab, throwPoint.position, throwPoint.rotation);
+        ThrowableItemData item = inventory.CurrentItem;
+        if (item == null || item.projectilePrefab == null || throwPoint == null) return;
+
+        GameObject projectile = Instantiate(item.projectilePrefab, throwPoint.position, throwPoint.rotation);
 
         Rigidbody rb = projectile.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            rb.AddForce(throwPoint.forward * throwForce, ForceMode.VelocityChange);
+            rb.AddForce(throwPoint.forward * item.throwForce, ForceMode.VelocityChange);
         }
 
         OnThrow?.Invoke();
