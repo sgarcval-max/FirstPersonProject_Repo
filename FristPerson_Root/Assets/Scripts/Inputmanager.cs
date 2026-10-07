@@ -2,22 +2,30 @@ using UnityEngine;
 
 /// <summary>
 /// Punto único y central de acceso a los controles del jugador (PlayerControls).
-/// TODOS los demás scripts (FirstPersonController, RebindActionUI, etc.) deben usar
-/// InputManager.Controls en vez de crear su propio "new PlayerControls()".
-/// Esto es imprescindible para que el rebinding funcione: si cada script tuviera su propia
-/// instancia, reasignar una tecla en una no afectaría a las demás (que es justo el bug que teníamos).
+/// TODOS los demás scripts (FirstPersonController, PlayerThrowController, RebindActionUI,
+/// etc.) deben usar InputManager.Controls en vez de crear su propio "new PlayerControls()".
+///
+/// IMPORTANTE: Controls se crea de forma "perezosa" (la primera vez que alguien lo pide),
+/// no en Awake(). Esto es necesario porque Unity no garantiza en qué orden se ejecutan
+/// los Awake()/OnEnable() de distintos objetos — si otro script accede a los controles
+/// antes de que InputManager haya tenido su turno, con Awake() normal daría un error de
+/// referencia nula. Con esta propiedad "perezosa", el primero que lo pide lo crea, sin
+/// importar el orden.
 /// </summary>
 public class InputManager : MonoBehaviour
 {
-    public static PlayerControls Controls { get; private set; }
+    private static PlayerControls controlsInstance;
 
-    private void Awake()
+    public static PlayerControls Controls
     {
-        // Si ya existe una instancia (por ejemplo al recargar escena), no crear otra
-        if (Controls == null)
+        get
         {
-            Controls = new PlayerControls();
-            RebindActionUI.LoadSavedRebinds(Controls.asset);
+            if (controlsInstance == null)
+            {
+                controlsInstance = new PlayerControls();
+                RebindActionUI.LoadSavedRebinds(controlsInstance.asset);
+            }
+            return controlsInstance;
         }
     }
 
@@ -28,6 +36,6 @@ public class InputManager : MonoBehaviour
 
     private void OnDisable()
     {
-        Controls.Disable();
+        controlsInstance?.Disable();
     }
 }

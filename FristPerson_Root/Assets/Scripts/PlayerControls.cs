@@ -229,9 +229,19 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             ""id"": ""c7b22f25-11ee-4c46-814c-1ab19f24121f"",
             ""actions"": [
                 {
-                    ""name"": ""New action"",
+                    ""name"": ""Throw"",
                     ""type"": ""Button"",
                     ""id"": ""47847630-91a3-4aef-9095-5a20ec0924f5"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
+                },
+                {
+                    ""name"": ""NextItem"",
+                    ""type"": ""Button"",
+                    ""id"": ""7ee1f296-f18d-4c87-8171-f347ea3d294e"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -243,11 +253,22 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""f898246c-751a-4fc8-9bf8-6c0fe59ca902"",
-                    ""path"": """",
+                    ""path"": ""<Keyboard>/e"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""New action"",
+                    ""action"": ""Throw"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b0629551-c865-48ac-81e4-81936295bf53"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""NextItem"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -264,7 +285,8 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_Movimiento_Run = m_Movimiento.FindAction("Run", throwIfNotFound: true);
         // Combate
         m_Combate = asset.FindActionMap("Combate", throwIfNotFound: true);
-        m_Combate_Newaction = m_Combate.FindAction("New action", throwIfNotFound: true);
+        m_Combate_Throw = m_Combate.FindAction("Throw", throwIfNotFound: true);
+        m_Combate_NextItem = m_Combate.FindAction("NextItem", throwIfNotFound: true);
     }
 
     ~@PlayerControls()
@@ -475,7 +497,8 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     // Combate
     private readonly InputActionMap m_Combate;
     private List<ICombateActions> m_CombateActionsCallbackInterfaces = new List<ICombateActions>();
-    private readonly InputAction m_Combate_Newaction;
+    private readonly InputAction m_Combate_Throw;
+    private readonly InputAction m_Combate_NextItem;
     /// <summary>
     /// Provides access to input actions defined in input action map "Combate".
     /// </summary>
@@ -488,9 +511,13 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         /// </summary>
         public CombateActions(@PlayerControls wrapper) { m_Wrapper = wrapper; }
         /// <summary>
-        /// Provides access to the underlying input action "Combate/Newaction".
+        /// Provides access to the underlying input action "Combate/Throw".
         /// </summary>
-        public InputAction @Newaction => m_Wrapper.m_Combate_Newaction;
+        public InputAction @Throw => m_Wrapper.m_Combate_Throw;
+        /// <summary>
+        /// Provides access to the underlying input action "Combate/NextItem".
+        /// </summary>
+        public InputAction @NextItem => m_Wrapper.m_Combate_NextItem;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -517,9 +544,12 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         {
             if (instance == null || m_Wrapper.m_CombateActionsCallbackInterfaces.Contains(instance)) return;
             m_Wrapper.m_CombateActionsCallbackInterfaces.Add(instance);
-            @Newaction.started += instance.OnNewaction;
-            @Newaction.performed += instance.OnNewaction;
-            @Newaction.canceled += instance.OnNewaction;
+            @Throw.started += instance.OnThrow;
+            @Throw.performed += instance.OnThrow;
+            @Throw.canceled += instance.OnThrow;
+            @NextItem.started += instance.OnNextItem;
+            @NextItem.performed += instance.OnNextItem;
+            @NextItem.canceled += instance.OnNextItem;
         }
 
         /// <summary>
@@ -531,9 +561,12 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         /// <seealso cref="CombateActions" />
         private void UnregisterCallbacks(ICombateActions instance)
         {
-            @Newaction.started -= instance.OnNewaction;
-            @Newaction.performed -= instance.OnNewaction;
-            @Newaction.canceled -= instance.OnNewaction;
+            @Throw.started -= instance.OnThrow;
+            @Throw.performed -= instance.OnThrow;
+            @Throw.canceled -= instance.OnThrow;
+            @NextItem.started -= instance.OnNextItem;
+            @NextItem.performed -= instance.OnNextItem;
+            @NextItem.canceled -= instance.OnNextItem;
         }
 
         /// <summary>
@@ -611,11 +644,18 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     public interface ICombateActions
     {
         /// <summary>
-        /// Method invoked when associated input action "New action" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "Throw" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnNewaction(InputAction.CallbackContext context);
+        void OnThrow(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "NextItem" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnNextItem(InputAction.CallbackContext context);
     }
 }
