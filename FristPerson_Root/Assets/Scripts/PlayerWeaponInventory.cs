@@ -11,7 +11,8 @@ public class WeaponChangedEvent : UnityEvent<WeaponData> { }
 
 /// <summary>
 /// Gestiona las armas del jugador: tiene 3 "huecos" en total. Las manos (siempre disponibles,
-/// no se pueden perder) y hasta 2 armas. Permite cambiar de hueco, recoger armas y soltarlas.
+/// no se pueden perder) y hasta 2 armas. Permite cambiar de hueco, recoger armas y soltarlas,
+/// y muestra el arma equipada delante de la cámara.
 /// </summary>
 public class PlayerWeaponInventory : MonoBehaviour
 {
@@ -21,6 +22,10 @@ public class PlayerWeaponInventory : MonoBehaviour
     [Header("Inicio")]
     [Tooltip("Arma con la que empieza el jugador, ya equipada (ej: la pistola).")]
     [SerializeField] private WeaponData startingWeapon;
+
+    [Header("Arma en la mano")]
+    [Tooltip("Punto de la cámara donde aparece el arma equipada (un objeto vacío hijo de la cámara, abajo a la derecha).")]
+    [SerializeField] private Transform handPoint;
 
     [Header("Soltar armas")]
     [Tooltip("Punto delante del jugador donde aparece el arma al soltarla (un objeto vacío hijo de la cámara).")]
@@ -33,6 +38,7 @@ public class PlayerWeaponInventory : MonoBehaviour
 
     private readonly WeaponData[] slots = new WeaponData[SLOT_COUNT];
     private int equippedIndex = HANDS;
+    private GameObject heldInstance;
 
     /// <summary>El arma que lleva en la mano ahora mismo, o null si tiene las manos vacías.</summary>
     public WeaponData EquippedWeapon
@@ -48,6 +54,7 @@ public class PlayerWeaponInventory : MonoBehaviour
             equippedIndex = 0;
         }
 
+        RefreshHeldModel();
         if (OnEquippedChanged != null) OnEquippedChanged.Invoke(EquippedWeapon);
     }
 
@@ -116,11 +123,43 @@ public class PlayerWeaponInventory : MonoBehaviour
         if (index == equippedIndex && !forceNotify) return;
 
         equippedIndex = index;
+        RefreshHeldModel();
         if (OnEquippedChanged != null) OnEquippedChanged.Invoke(EquippedWeapon);
 
         if (UIAudioManager.Instance != null)
         {
             UIAudioManager.Instance.PlayButtonClick();
+        }
+    }
+
+    /// <summary>Quita el modelo anterior de la mano y pone el del arma equipada (si hay).</summary>
+    private void RefreshHeldModel()
+    {
+        if (heldInstance != null)
+        {
+            Destroy(heldInstance);
+            heldInstance = null;
+        }
+
+        WeaponData weapon = EquippedWeapon;
+        if (weapon == null || weapon.worldPrefab == null || handPoint == null) return;
+
+        heldInstance = Instantiate(weapon.worldPrefab, handPoint);
+        heldInstance.transform.localPosition = weapon.heldLocalPosition;
+        heldInstance.transform.localEulerAngles = weapon.heldLocalEuler;
+
+        // El modelo de la mano es solo visual: sin colisiones, sin física y sin poder recogerse.
+        foreach (Collider col in heldInstance.GetComponentsInChildren<Collider>())
+        {
+            col.enabled = false;
+        }
+        foreach (Rigidbody body in heldInstance.GetComponentsInChildren<Rigidbody>())
+        {
+            body.isKinematic = true;
+        }
+        foreach (WeaponPickup pickup in heldInstance.GetComponentsInChildren<WeaponPickup>())
+        {
+            pickup.enabled = false;
         }
     }
 

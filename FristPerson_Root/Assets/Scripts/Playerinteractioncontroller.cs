@@ -5,8 +5,8 @@ using TMPro;
 /// <summary>
 /// Conecta las teclas del jugador con el inventario de armas y con los objetos del mundo:
 /// NextItem (cambiar lo que llevas en la mano), Drop (soltar el arma equipada) e
-/// Interact (recoger lo que estás mirando). También muestra el aviso en pantalla
-/// ("[F] Recoger Pistola") cuando miras algo con lo que se puede interactuar.
+/// Interact (recoger lo que estás mirando). Muestra el aviso en pantalla
+/// ("[F] Recoger Pistola") y hace brillar el objeto que tienes delante.
 /// </summary>
 [RequireComponent(typeof(FirstPersonController))]
 [RequireComponent(typeof(PlayerWeaponInventory))]
@@ -87,8 +87,27 @@ public class PlayerInteractionController : MonoBehaviour
     {
         if (newTarget == currentTarget) return;
 
+        SetHighlight(currentTarget, false);
         currentTarget = newTarget;
+        SetHighlight(currentTarget, true);
+
         RefreshPrompt();
+    }
+
+    /// <summary>Enciende o apaga el resplandor del objeto. Si no tiene el componente, se lo añade.</summary>
+    private void SetHighlight(IInteractable target, bool on)
+    {
+        Component component = target as Component;
+        if (component == null) return;
+
+        InteractableHighlight highlight = component.GetComponent<InteractableHighlight>();
+        if (highlight == null)
+        {
+            if (!on) return;
+            highlight = component.gameObject.AddComponent<InteractableHighlight>();
+        }
+
+        highlight.SetHighlighted(on);
     }
 
     private void RefreshPrompt()
@@ -122,11 +141,13 @@ public class PlayerInteractionController : MonoBehaviour
     {
         if (!IsGameplayActive() || currentTarget == null) return;
 
-        currentTarget.Interact(gameObject);
+        IInteractable target = currentTarget;
+        SetHighlight(target, false);
 
-        // El objeto puede haberse destruido al recogerlo: quitamos el aviso y dejamos que
-        // el siguiente frame detecte lo que haya delante ahora.
+        // Limpiamos el objetivo antes de interactuar: el objeto puede destruirse al recogerlo.
         currentTarget = null;
         RefreshPrompt();
+
+        target.Interact(gameObject);
     }
 }

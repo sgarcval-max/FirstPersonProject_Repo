@@ -14,3 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   nameKey: weapon_knife
   worldPrefab: {fileID: 372164396773601764, guid: 50101751ebd49434299250facbeacbfa, type: 3}
+  heldLocalPosition: {x: 0, y: 0, z: 0}
+  heldLocalEuler: {x: 0, y: 0, z: 0}
