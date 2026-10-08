@@ -1906,6 +1906,182 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!1 &348578141
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 348578143}
+  - component: {fileID: 348578142}
+  m_Layer: 0
+  m_Name: LocalizationManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &348578142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 348578141}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efb870a036b5e0448a75aa81a8284d30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizationManager
+  entries:
+  - key: menu_resume
+    spanish: REANUDAR
+    english: RESUME
+  - key: menu_settings
+    spanish: AJUSTES
+    english: SETTINGS
+  - key: menu_main_menu
+    spanish: "SALIR AL MEN\xDA PRINCIPAL"
+    english: EXIT TO MAIN MENU
+  - key: menu_quit
+    spanish: SALIR DEL JUEGO
+    english: QUIT GAME
+  - key: settings_mouse_keyboard
+    spanish: "RAT\xD3N Y TECLADO"
+    english: MOUSE AND KEYBOARD
+  - key: settings_subtitles
+    spanish: SUBTITULOS
+    english: SUBTITLES
+  - key: tooltip_master_volume
+    spanish: "\xB7 Ajusta el volumen general del juego"
+    english: "\xB7 Adjusts the game's overall volume"
+  - key: tooltip_music_volume
+    spanish: "\xB7 Ajusta el volumen de la m\xFAsica del juego"
+    english: "\xB7 Adjust the game music volume"
+  - key: tooltip_sfx_volume
+    spanish: "\xB7 Ajusta el volumen de los efectos de sonido del juego."
+    english: "\xB7 Adjusts the game's sound effect volume."
+  - key: SoundButton
+    spanish: SONIDO
+    english: SOUND
+  - key: RyTButton
+    spanish: "RAT\xD3N Y TECLADO"
+    english: MOUSE AND KEYBOARD
+  - key: InfoAjustes
+    spanish: AJUSTES
+    english: SETTINGS
+  - key: Tooltip_soundButton
+    spanish: "\xB7 Este men\xFA contiene opciones para ajustar el volumen, la musica
+      y los efectos"
+    english: "\xB7 This menu contains options to adjust the volume, music, and effects."
+  - key: Tooltip_RyTButton
+    spanish: "\xB7 Este men\xFA contiene opciones para modificar los controles del
+      raton y teclado"
+    english: "\xB7 This menu contains options to modify mouse and keyboard controls."
+  - key: Tooltip_SubButton
+    spanish: "\xB7 Este men\xFA contiene opciones para modificar el idioma del juego"
+    english: "\xB7 This menu contains options to change the game language."
+  - key: Subinfotext
+    spanish: "AJUSTES DE SUBT\xCDTULOS"
+    english: SUBTITLE SETTINGS
+  - key: iDIOMAteXT
+    spanish: IDIOMA DE LOS TEXTOS
+    english: LANGUAGE OF THE TEXTS
+  - key: iNFOajustessound
+    spanish: AJUSTES SONIDO
+    english: SOUND SETTINGS
+  - key: VOLUMENinfo
+    spanish: VOLUMEN
+    english: VOLUME
+  - key: VOLUMEN_GENERAL
+    spanish: VOLUMEN GENERAL
+    english: GENERAL VOLUME
+  - key: MUSICA_
+    spanish: MUSICA
+    english: MUSIC
+  - key: EFECTOS_
+    spanish: EFECTOS
+    english: EFFECTS
+  - key: ASIGNA_TEXT
+    spanish: "ASIGNACI\xD3N DE TECLAS"
+    english: KEY ASSIGNMENT
+  - key: iNVERT_TEXT
+    spanish: INVERTIR EJE Y
+    english: REVERSE Y-AXIS
+  - key: Tooltip_Slider
+    spanish: "\xB7 Ajusta la sensibilidad del rat\xF3n"
+    english: "\xB7 Adjust mouse sensitivity"
+  - key: Tooltip_Teclas
+    spanish: "\xB7 Cambiar la asignaci\xF3n de teclas para rat\xF3n y teclado"
+    english: "\xB7 Change key assignments for mouse and keyboard"
+  - key: sensi
+    spanish: SENSIBILIDAD
+    english: SENSITIVITY
+  - key: iNFOTEXTGRANDE
+    spanish: "AJUSTES DE RAT\xD3N Y TECLADO"
+    english: MOUSE AND KEYBOARD SETTINGS
+  - key: iNFOSUBTEXT
+    spanish: "RAT\xD3N"
+    english: MOUSE
+  - key: Tooltip_Invert
+    spanish: "\xB7 Invierte los ejes del rat\xF3n."
+    english: "\xB7 Inverts the mouse axes."
+  - key: Play_Game
+    spanish: JUGAR
+    english: PLAY
+  - key: Ajustes_mainmenu
+    spanish: AJUSTES
+    english: SETTINGS
+  - key: ExitGame_mainmenu
+    spanish: SALIR DEL JUEGO
+    english: EXIT GAME
+  - key: Info_teclas
+    spanish: "ASIGNACI\xD3N DE TECLAS"
+    english: KEY ASSIGNMENT
+  - key: MiniInfoTExt_teclas
+    spanish: MOVIMIENTO
+    english: MOVEMENT
+  - key: Exit_Text
+    spanish: SALIR AL ESCRITORIO
+    english: EXIT TO DESKTOP
+  - key: Info_textExit
+    spanish: "\xBFSeguro que quieres salir al escritorio?"
+    english: Are you sure you want to go to the desk?
+  - key: Exit_Button
+    spanish: CONFIRMAR
+    english: CONFIRM
+  - key: Cancel_Button
+    spanish: CANCELAR
+    english: CANCEL
+  - key: weapon_hands
+    spanish: MANOS
+    english: HANDS
+  - key: weapon_pistol
+    spanish: PISTOLA
+    english: PISTOL
+  - key: 'weapon_knife '
+    spanish: CUCHILLO
+    english: KNIFE
+  - key: 'prompt_pickup '
+    spanish: RECOGER
+    english: PICK UP
+--- !u!4 &348578143
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 348578141}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 250.78404, y: 0.00001, z: 1827.9191}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &361324321
 GameObject:
   m_ObjectHideFlags: 0
@@ -1917,7 +2093,7 @@ GameObject:
   - component: {fileID: 361324322}
   - component: {fileID: 361324325}
   - component: {fileID: 361324324}
-  - component: {fileID: 361324323}
+  - component: {fileID: 361324326}
   m_Layer: 5
   m_Name: Text_CurrentItem
   m_TagString: Untagged
@@ -1944,19 +2120,6 @@ RectTransform:
   m_AnchoredPosition: {x: 291, y: 192}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &361324323
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 361324321}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 75746656845689c4696eaa595835360c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CurrentItemDisplay
-  itemNameText: {fileID: 361324324}
 --- !u!114 &361324324
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2057,6 +2220,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 361324321}
   m_CullTransparentMesh: 1
+--- !u!114 &361324326
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 361324321}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a3c27b1b315d254f8aa5300a041c768, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EquippedWeaponDisplay
+  weaponNameText: {fileID: 361324324}
+  handsKey: weapon_hands
 --- !u!1 &371033120
 GameObject:
   m_ObjectHideFlags: 0
@@ -2205,6 +2382,143 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &388903914
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 388903915}
+  - component: {fileID: 388903917}
+  - component: {fileID: 388903916}
+  m_Layer: 5
+  m_Name: 'Text_Prompt '
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &388903915
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 388903914}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1228214322}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: -201}
+  m_SizeDelta: {x: 200, y: 50}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &388903916
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 388903914}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_text: New Text
+  m_isRightToLeft: 0
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontSharedMaterials: []
+  m_fontMaterial: {fileID: 0}
+  m_fontMaterials: []
+  m_fontColor32:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_enableVertexGradient: 0
+  m_colorMode: 3
+  m_fontColorGradient:
+    topLeft: {r: 1, g: 1, b: 1, a: 1}
+    topRight: {r: 1, g: 1, b: 1, a: 1}
+    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
+    bottomRight: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColorGradientPreset: {fileID: 0}
+  m_spriteAsset: {fileID: 0}
+  m_tintAllSprites: 0
+  m_StyleSheet: {fileID: 0}
+  m_TextStyleHashCode: -1183493901
+  m_overrideHtmlColors: 0
+  m_faceColor:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontSize: 36
+  m_fontSizeBase: 36
+  m_fontWeight: 400
+  m_enableAutoSizing: 0
+  m_fontSizeMin: 18
+  m_fontSizeMax: 72
+  m_fontStyle: 0
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 256
+  m_textAlignment: 65535
+  m_characterSpacing: 0
+  m_characterHorizontalScale: 1
+  m_wordSpacing: 0
+  m_lineSpacing: 0
+  m_lineSpacingMax: 0
+  m_paragraphSpacing: 0
+  m_charWidthMaxAdj: 0
+  m_TextWrappingMode: 1
+  m_wordWrappingRatios: 0.4
+  m_overflowMode: 0
+  m_linkedTextComponent: {fileID: 0}
+  parentLinkedComponent: {fileID: 0}
+  m_enableKerning: 0
+  m_ActiveFontFeatures: 6e72656b
+  m_enableExtraPadding: 0
+  checkPaddingRequired: 0
+  m_isRichText: 1
+  m_EmojiFallbackSupport: 1
+  m_parseCtrlCharacters: 1
+  m_isOrthographic: 1
+  m_isCullingEnabled: 0
+  m_horizontalMapping: 0
+  m_verticalMapping: 0
+  m_uvLineOffset: 0
+  m_geometrySortingOrder: 0
+  m_IsTextObjectScaleStatic: 0
+  m_VertexBufferAutoSizeReduction: 0
+  m_useMaxVisibleDescender: 1
+  m_pageToDisplay: 1
+  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_isUsingLegacyAnimationComponent: 0
+  m_isVolumetricText: 0
+  m_hasFontAssetChanged: 0
+  m_baseMaterial: {fileID: 0}
+  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!222 &388903917
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 388903914}
+  m_CullTransparentMesh: 1
 --- !u!1 &398434078
 GameObject:
   m_ObjectHideFlags: 0
@@ -5820,6 +6134,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 361324322}
+  - {fileID: 388903915}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -7477,7 +7792,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1612419206}
   m_Layer: 0
-  m_Name: ThrowPoint
+  m_Name: 'DropPoint '
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7492,7 +7807,7 @@ Transform:
   m_GameObject: {fileID: 1612419205}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 1}
+  m_LocalPosition: {x: 0, y: -0.3, z: 1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7806,11 +8121,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1671297787}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4c9b2294ef750394eb02d824b969bb23, type: 3}
+  m_Script: {fileID: 11500000, guid: 98005a70b8b333c40bc37d427d750e94, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerThrowController
-  throwPoint: {fileID: 1612419206}
-  OnThrow:
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerWeaponInventory
+  startingWeapon: {fileID: 11400000, guid: 787b4fcc117d8c944bd78943d5c9b20e, type: 2}
+  dropPoint: {fileID: 1612419206}
+  dropForce: 3
+  OnEquippedChanged:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &1671297795
@@ -7822,27 +8139,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1671297787}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4592de27e16f2ed4ca670a8e974ee4de, type: 3}
+  m_Script: {fileID: 11500000, guid: 8522ebe74464dc548805e4278d1db3b6, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerInventory
-  items:
-  - {fileID: 11400000, guid: 41d15e1ac462ff040a8ec6797a1e0a73, type: 2}
-  - {fileID: 11400000, guid: 26acc94b6590cc747a693f5287944622, type: 2}
-  OnItemChanged:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 361324323}
-        m_TargetAssemblyTypeName: CurrentItemDisplay, Assembly-CSharp
-        m_MethodName: UpdateDisplay
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInteractionController
+  cameraTransform: {fileID: 330585546}
+  interactDistance: 3
+  promptText: {fileID: 388903916}
 --- !u!1 &1701510092
 GameObject:
   m_ObjectHideFlags: 0
@@ -8973,170 +9275,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1458216354}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &2056121106
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2056121108}
-  - component: {fileID: 2056121107}
-  m_Layer: 0
-  m_Name: LocalizationManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &2056121107
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2056121106}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: efb870a036b5e0448a75aa81a8284d30, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LocalizationManager
-  entries:
-  - key: menu_resume
-    spanish: REANUDAR
-    english: RESUME
-  - key: menu_settings
-    spanish: AJUSTES
-    english: SETTINGS
-  - key: menu_main_menu
-    spanish: "SALIR AL MEN\xDA PRINCIPAL"
-    english: EXIT TO MAIN MENU
-  - key: menu_quit
-    spanish: SALIR DEL JUEGO
-    english: QUIT GAME
-  - key: settings_mouse_keyboard
-    spanish: "RAT\xD3N Y TECLADO"
-    english: MOUSE AND KEYBOARD
-  - key: settings_subtitles
-    spanish: SUBTITULOS
-    english: SUBTITLES
-  - key: tooltip_master_volume
-    spanish: "\xB7 Ajusta el volumen general del juego"
-    english: "\xB7 Adjusts the game's overall volume"
-  - key: tooltip_music_volume
-    spanish: "\xB7 Ajusta el volumen de la m\xFAsica del juego"
-    english: "\xB7 Adjust the game music volume"
-  - key: tooltip_sfx_volume
-    spanish: "\xB7 Ajusta el volumen de los efectos de sonido del juego."
-    english: "\xB7 Adjusts the game's sound effect volume."
-  - key: SoundButton
-    spanish: SONIDO
-    english: SOUND
-  - key: RyTButton
-    spanish: "RAT\xD3N Y TECLADO"
-    english: MOUSE AND KEYBOARD
-  - key: InfoAjustes
-    spanish: AJUSTES
-    english: SETTINGS
-  - key: Tooltip_soundButton
-    spanish: "\xB7 Este men\xFA contiene opciones para ajustar el volumen, la musica
-      y los efectos"
-    english: "\xB7 This menu contains options to adjust the volume, music, and effects."
-  - key: Tooltip_RyTButton
-    spanish: "\xB7 Este men\xFA contiene opciones para modificar los controles del
-      raton y teclado"
-    english: "\xB7 This menu contains options to modify mouse and keyboard controls."
-  - key: Tooltip_SubButton
-    spanish: "\xB7 Este men\xFA contiene opciones para modificar el idioma del juego"
-    english: "\xB7 This menu contains options to change the game language."
-  - key: Subinfotext
-    spanish: "AJUSTES DE SUBT\xCDTULOS"
-    english: SUBTITLE SETTINGS
-  - key: iDIOMAteXT
-    spanish: IDIOMA DE LOS TEXTOS
-    english: LANGUAGE OF THE TEXTS
-  - key: iNFOajustessound
-    spanish: AJUSTES SONIDO
-    english: SOUND SETTINGS
-  - key: VOLUMENinfo
-    spanish: VOLUMEN
-    english: VOLUME
-  - key: VOLUMEN_GENERAL
-    spanish: VOLUMEN GENERAL
-    english: GENERAL VOLUME
-  - key: MUSICA_
-    spanish: MUSICA
-    english: MUSIC
-  - key: EFECTOS_
-    spanish: EFECTOS
-    english: EFFECTS
-  - key: ASIGNA_TEXT
-    spanish: "ASIGNACI\xD3N DE TECLAS"
-    english: KEY ASSIGNMENT
-  - key: iNVERT_TEXT
-    spanish: INVERTIR EJE Y
-    english: REVERSE Y-AXIS
-  - key: Tooltip_Slider
-    spanish: "\xB7 Ajusta la sensibilidad del rat\xF3n"
-    english: "\xB7 Adjust mouse sensitivity"
-  - key: Tooltip_Teclas
-    spanish: "\xB7 Cambiar la asignaci\xF3n de teclas para rat\xF3n y teclado"
-    english: "\xB7 Change key assignments for mouse and keyboard"
-  - key: sensi
-    spanish: SENSIBILIDAD
-    english: SENSITIVITY
-  - key: iNFOTEXTGRANDE
-    spanish: "AJUSTES DE RAT\xD3N Y TECLADO"
-    english: MOUSE AND KEYBOARD SETTINGS
-  - key: iNFOSUBTEXT
-    spanish: "RAT\xD3N"
-    english: MOUSE
-  - key: Tooltip_Invert
-    spanish: "\xB7 Invierte los ejes del rat\xF3n."
-    english: "\xB7 Inverts the mouse axes."
-  - key: Play_Game
-    spanish: JUGAR
-    english: PLAY
-  - key: Ajustes_mainmenu
-    spanish: AJUSTES
-    english: SETTINGS
-  - key: ExitGame_mainmenu
-    spanish: SALIR DEL JUEGO
-    english: EXIT GAME
-  - key: Info_teclas
-    spanish: "ASIGNACI\xD3N DE TECLAS"
-    english: KEY ASSIGNMENT
-  - key: MiniInfoTExt_teclas
-    spanish: MOVIMIENTO
-    english: MOVEMENT
-  - key: Exit_Text
-    spanish: SALIR AL ESCRITORIO
-    english: EXIT TO DESKTOP
-  - key: Info_textExit
-    spanish: "\xBFSeguro que quieres salir al escritorio?"
-    english: Are you sure you want to go to the desk?
-  - key: Exit_Button
-    spanish: CONFIRMAR
-    english: CONFIRM
-  - key: Cancel_Button
-    spanish: CANCELAR
-    english: CANCEL
---- !u!4 &2056121108
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2056121106}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 250.78404, y: 0.00001, z: 1827.9191}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2103073909
 GameObject:
   m_ObjectHideFlags: 0
@@ -9313,5 +9451,5 @@ SceneRoots:
   - {fileID: 2014231201}
   - {fileID: 1990170558}
   - {fileID: 371033123}
-  - {fileID: 2056121108}
+  - {fileID: 348578143}
   - {fileID: 1898569710}

@@ -4015,6 +4015,18 @@ MonoBehaviour:
   - key: Cancel_Button
     spanish: CANCELAR
     english: CANCEL
+  - key: weapon_hands
+    spanish: MANOS
+    english: HANDS
+  - key: weapon_pistol
+    spanish: PISTOLA
+    english: PISTOL
+  - key: 'weapon_knife '
+    spanish: CUCHILLO
+    english: KNIFE
+  - key: 'prompt_pickup '
+    spanish: RECOGER
+    english: PICK UP
 --- !u!4 &1604156563
 Transform:
   m_ObjectHideFlags: 0

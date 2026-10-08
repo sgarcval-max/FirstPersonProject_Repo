@@ -247,6 +247,26 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""initialStateCheck"": false,
                     ""priority"": 0
+                },
+                {
+                    ""name"": ""Interact"",
+                    ""type"": ""Button"",
+                    ""id"": ""cb98b225-2883-426f-9f7f-5db5982c03eb"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
+                },
+                {
+                    ""name"": ""Drop"",
+                    ""type"": ""Button"",
+                    ""id"": ""da02e96c-87ec-4273-9532-35d12c1cccb4"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
                 }
             ],
             ""bindings"": [
@@ -271,6 +291,28 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""action"": ""NextItem"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a3c5290b-9a2e-4668-9cf1-7c7fd5a0a227"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Interact"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""530b343a-df21-4975-86ab-af81116b6de2"",
+                    ""path"": ""<Keyboard>/g"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Drop"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -287,6 +329,8 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_Combate = asset.FindActionMap("Combate", throwIfNotFound: true);
         m_Combate_Throw = m_Combate.FindAction("Throw", throwIfNotFound: true);
         m_Combate_NextItem = m_Combate.FindAction("NextItem", throwIfNotFound: true);
+        m_Combate_Interact = m_Combate.FindAction("Interact", throwIfNotFound: true);
+        m_Combate_Drop = m_Combate.FindAction("Drop", throwIfNotFound: true);
     }
 
     ~@PlayerControls()
@@ -499,6 +543,8 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private List<ICombateActions> m_CombateActionsCallbackInterfaces = new List<ICombateActions>();
     private readonly InputAction m_Combate_Throw;
     private readonly InputAction m_Combate_NextItem;
+    private readonly InputAction m_Combate_Interact;
+    private readonly InputAction m_Combate_Drop;
     /// <summary>
     /// Provides access to input actions defined in input action map "Combate".
     /// </summary>
@@ -518,6 +564,14 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Combate/NextItem".
         /// </summary>
         public InputAction @NextItem => m_Wrapper.m_Combate_NextItem;
+        /// <summary>
+        /// Provides access to the underlying input action "Combate/Interact".
+        /// </summary>
+        public InputAction @Interact => m_Wrapper.m_Combate_Interact;
+        /// <summary>
+        /// Provides access to the underlying input action "Combate/Drop".
+        /// </summary>
+        public InputAction @Drop => m_Wrapper.m_Combate_Drop;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -550,6 +604,12 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @NextItem.started += instance.OnNextItem;
             @NextItem.performed += instance.OnNextItem;
             @NextItem.canceled += instance.OnNextItem;
+            @Interact.started += instance.OnInteract;
+            @Interact.performed += instance.OnInteract;
+            @Interact.canceled += instance.OnInteract;
+            @Drop.started += instance.OnDrop;
+            @Drop.performed += instance.OnDrop;
+            @Drop.canceled += instance.OnDrop;
         }
 
         /// <summary>
@@ -567,6 +627,12 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @NextItem.started -= instance.OnNextItem;
             @NextItem.performed -= instance.OnNextItem;
             @NextItem.canceled -= instance.OnNextItem;
+            @Interact.started -= instance.OnInteract;
+            @Interact.performed -= instance.OnInteract;
+            @Interact.canceled -= instance.OnInteract;
+            @Drop.started -= instance.OnDrop;
+            @Drop.performed -= instance.OnDrop;
+            @Drop.canceled -= instance.OnDrop;
         }
 
         /// <summary>
@@ -657,5 +723,19 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnNextItem(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Interact" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnInteract(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Drop" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnDrop(InputAction.CallbackContext context);
     }
 }
