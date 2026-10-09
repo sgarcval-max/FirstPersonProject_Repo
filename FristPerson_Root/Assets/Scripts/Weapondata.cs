@@ -3,13 +3,16 @@ using UnityEngine;
 /// <summary>
 /// Representa UN TIPO de arma (pistola, cuchillo...). Se crea como asset en el Project
 /// (click derecho > Create > Juego > Arma), no se pone directamente en la escena.
+/// El nombre va escrito aquí mismo en español e inglés, sin depender del LocalizationManager.
 /// </summary>
 [CreateAssetMenu(fileName = "NuevaArma", menuName = "Juego/Arma")]
 public class WeaponData : ScriptableObject
 {
-    [Tooltip("Clave de LocalizationManager con el nombre del arma (ej: weapon_pistol).")]
-    public string nameKey;
+    [Header("Nombre")]
+    public string spanishName = "Arma";
+    public string englishName = "Weapon";
 
+    [Header("Modelo")]
     [Tooltip("Prefab que aparece en el mundo cuando el arma está en el suelo o se suelta. Debe tener Rigidbody, un Collider y el componente WeaponPickup. También se usa como modelo cuando la llevas en la mano.")]
     public GameObject worldPrefab;
 
@@ -19,4 +22,14 @@ public class WeaponData : ScriptableObject
 
     [Tooltip("Rotación del modelo respecto al punto de la mano, en grados.")]
     public Vector3 heldLocalEuler = Vector3.zero;
+
+    /// <summary>El nombre en el idioma actual del juego.</summary>
+    public string GetDisplayName()
+    {
+        if (GameLanguage.IsEnglish && !string.IsNullOrEmpty(englishName))
+        {
+            return englishName;
+        }
+        return spanishName;
+    }
 }

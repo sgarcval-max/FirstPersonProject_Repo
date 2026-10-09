@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25de003a0fb07314e9d4a1b5f3a4056c, type: 3}
   m_Name: Weapon_Knife
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
-  nameKey: weapon_knife
+  spanishName: 'Cuchillo '
+  englishName: Knife
   worldPrefab: {fileID: 372164396773601764, guid: 50101751ebd49434299250facbeacbfa, type: 3}
   heldLocalPosition: {x: 0, y: 0, z: 0}
   heldLocalEuler: {x: 0, y: 0, z: 0}

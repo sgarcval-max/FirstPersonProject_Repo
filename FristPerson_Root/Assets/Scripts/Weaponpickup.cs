@@ -13,8 +13,8 @@ public class WeaponPickup : MonoBehaviour, IInteractable
 
     public string GetPrompt()
     {
-        string pickupText = Localize("prompt_pickup");
-        string weaponName = weapon != null ? Localize(weapon.nameKey) : "?";
+        string pickupText = GameLanguage.IsEnglish ? "Pick up" : "Recoger";
+        string weaponName = weapon != null ? weapon.GetDisplayName() : "?";
         return pickupText + " " + weaponName;
     }
 
@@ -29,14 +29,5 @@ public class WeaponPickup : MonoBehaviour, IInteractable
         {
             Destroy(gameObject);
         }
-    }
-
-    private static string Localize(string key)
-    {
-        if (LocalizationManager.Instance != null)
-        {
-            return LocalizationManager.Instance.GetText(key);
-        }
-        return key;
     }
 }

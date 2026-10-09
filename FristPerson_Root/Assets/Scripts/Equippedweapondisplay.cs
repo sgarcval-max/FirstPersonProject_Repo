@@ -4,15 +4,15 @@ using TMPro;
 /// <summary>
 /// Texto de HUD que muestra el nombre del arma equipada (o "Manos" si no llevas ninguna).
 /// Se conecta SOLO al PlayerWeaponInventory de la escena: no hace falta cablear ningún
-/// evento en el Inspector. El nombre se traduce con LocalizationManager y se actualiza
-/// al cambiar de idioma.
+/// evento en el Inspector. Se actualiza al cambiar de arma y al cambiar de idioma.
 /// </summary>
 public class EquippedWeaponDisplay : MonoBehaviour
 {
     [SerializeField] private TMP_Text weaponNameText;
 
-    [Tooltip("Clave de LocalizationManager para el texto cuando no llevas ningún arma.")]
-    [SerializeField] private string handsKey = "weapon_hands";
+    [Header("Texto cuando no llevas ningún arma")]
+    [SerializeField] private string handsNameSpanish = "Manos";
+    [SerializeField] private string handsNameEnglish = "Hands";
 
     private PlayerWeaponInventory inventory;
     private WeaponData currentWeapon;
@@ -60,15 +60,13 @@ public class EquippedWeaponDisplay : MonoBehaviour
     {
         if (weaponNameText == null) return;
 
-        string key = currentWeapon != null ? currentWeapon.nameKey : handsKey;
-
-        if (LocalizationManager.Instance != null)
+        if (currentWeapon != null)
         {
-            weaponNameText.text = LocalizationManager.Instance.GetText(key);
+            weaponNameText.text = currentWeapon.GetDisplayName();
         }
         else
         {
-            weaponNameText.text = key;
+            weaponNameText.text = GameLanguage.IsEnglish ? handsNameEnglish : handsNameSpanish;
         }
     }
 }

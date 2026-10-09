@@ -178,6 +178,9 @@ public class PlayerWeaponInventory : MonoBehaviour
         Rigidbody rb = dropped.GetComponent<Rigidbody>();
         if (rb != null)
         {
+            // Detección continua: evita que un objeto fino (como el cuchillo) atraviese el suelo
+            // al caer rápido, que es lo que pasa con la detección normal (Discrete).
+            rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
             rb.AddForce(dropPoint.forward * dropForce, ForceMode.VelocityChange);
         }
     }
