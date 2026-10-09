@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 946f612c56b4ec84e96745fb8fecf783, type: 3}
   m_Name: Key_Tarjeta
   m_EditorClassIdentifier: Assembly-CSharp::KeyItemData
-  spanishName: Key_Tarjeta
+  spanishName: Tarjeta de acceso
   englishName: Access card
