@@ -175,6 +175,12 @@ public class PlayerWeaponInventory : MonoBehaviour
 
         GameObject dropped = Instantiate(weapon.worldPrefab, dropPoint.position, dropPoint.rotation);
 
+        // Un arma soltada hace ruido al chocar contra el suelo.
+        if (dropped.GetComponent<NoiseOnImpact>() == null)
+        {
+            dropped.AddComponent<NoiseOnImpact>();
+        }
+
         Rigidbody rb = dropped.GetComponent<Rigidbody>();
         if (rb != null)
         {
