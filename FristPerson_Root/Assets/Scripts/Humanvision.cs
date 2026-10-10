@@ -53,6 +53,12 @@ public class HumanVision : MonoBehaviour
     /// <summary>Nivel de sospecha actual, de 0 (tranquilo) a 1 (te ha detectado).</summary>
     public float Suspicion { get; private set; }
 
+    /// <summary>True si, en este mismo momento, el humano está viendo al jugador.</summary>
+    public bool CanSeePlayerNow { get; private set; }
+
+    /// <summary>El último sitio donde el humano vio al jugador.</summary>
+    public Vector3 LastSeenPosition { get; private set; }
+
     public bool HasDetectedPlayer
     {
         get { return detected; }
@@ -107,6 +113,12 @@ public class HumanVision : MonoBehaviour
 
         float distance;
         bool seen = CanSeePlayer(out distance);
+
+        CanSeePlayerNow = seen;
+        if (seen)
+        {
+            LastSeenPosition = player.position;
+        }
 
         if (seen)
         {

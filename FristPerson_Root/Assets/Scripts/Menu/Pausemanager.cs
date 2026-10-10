@@ -107,7 +107,8 @@ public class PauseManager : MonoBehaviour
             }
 
             // Esto SÍ depende del interruptor: en el Menú Principal no hay "pausa" que alternar.
-            if (enablePauseFunctionality)
+            // Tampoco se puede pausar si el jugador ya ha muerto (se está mostrando el Game Over).
+            if (enablePauseFunctionality && !PlayerHealth.IsPlayerDead)
             {
                 TogglePause();
             }
