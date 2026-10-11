@@ -9,54 +9,30 @@ using UnityEngine.Events;
 /// Estados:
 ///  - Patrol: patrulla su ruta (lo hace HumanPatrol).
 ///  - Investigate: ha oído un ruido; va hasta allí, mira alrededor y vuelve a patrullar.
-///  - Chase: te ha visto del todo; corre hacia ti y, al alcanzarte, te ataca.
-///  - Search: te ha perdido de vista; va a donde te vio por última vez y busca por los
-///    alrededores. Si te vuelve a ver te persigue al instante; si no, se rinde y patrulla.
+///  - Catch: su barra de detección ha llegado al máximo. Se para, se gira hacia el jugador y lo
+///    atrapa (PlayerCapture se encarga del Game Over).
+///
+/// No hay persecución: en cuanto te detecta del todo, pierdes, estés lejos o cerca.
 /// </summary>
 [RequireComponent(typeof(NavMeshAgent))]
 public class HumanAI : MonoBehaviour
 {
-    public enum State { Patrol, Investigate, Chase, Search }
-
-    [Header("Velocidades")]
-    [SerializeField] private float investigateSpeed = 2.5f;
-    [SerializeField] private float chaseSpeed = 5f;
-    [SerializeField] private float searchSpeed = 2.5f;
+    public enum State { Patrol, Investigate, Catch }
 
     [Header("Investigar un ruido")]
+    [SerializeField] private float investigateSpeed = 2.5f;
     [Tooltip("Segundos que se queda mirando alrededor al llegar al sitio del ruido.")]
     [SerializeField] private float lookAroundTime = 3f;
     [Tooltip("Lo rápido que gira sobre sí mismo al mirar alrededor (grados por segundo).")]
     [SerializeField] private float lookAroundTurnSpeed = 60f;
 
-    [Header("Perseguir")]
-    [Tooltip("Cada cuántos segundos recalcula el camino hacia el jugador.")]
-    [SerializeField] private float repathInterval = 0.2f;
-    [Tooltip("Segundos sin ver al jugador tras los que deja de perseguir y pasa a buscar.")]
-    [SerializeField] private float chaseMemoryTime = 4f;
-
-    [Header("Atacar")]
-    [Tooltip("A qué distancia del jugador empieza a atacar.")]
-    [SerializeField] private float attackRange = 1.8f;
-    [SerializeField] private float attackDamage = 15f;
-    [Tooltip("Segundos que tarda en dar el primer golpe al llegar hasta el jugador.")]
-    [SerializeField] private float attackWindup = 0.5f;
-    [Tooltip("Segundos entre un golpe y el siguiente.")]
-    [SerializeField] private float attackCooldown = 1.2f;
-    [Tooltip("Lo rápido que se gira hacia el jugador mientras ataca.")]
-    [SerializeField] private float attackTurnSpeed = 8f;
-
-    [Header("Buscar")]
-    [Tooltip("Cuántos puntos revisa en total (el primero es donde te vio por última vez).")]
-    [SerializeField] private int searchPointCount = 3;
-    [Tooltip("A qué distancia máxima del último punto visto elige los demás sitios.")]
-    [SerializeField] private float searchRadius = 5f;
-    [Tooltip("Segundos que se queda mirando en cada punto de búsqueda.")]
-    [SerializeField] private float searchWaitTime = 2f;
+    [Header("Atrapar")]
+    [Tooltip("Lo rápido que se da la vuelta hacia el jugador al atraparlo.")]
+    [SerializeField] private float catchTurnSpeed = 8f;
 
     [Header("Eventos")]
-    [Tooltip("Se dispara cada vez que da un golpe (para sonidos o animaciones futuras).")]
-    public UnityEvent OnAttack;
+    [Tooltip("Se dispara cuando este guardia te atrapa (para sonidos o animaciones futuras).")]
+    public UnityEvent OnCaughtPlayer;
 
     public State CurrentState { get; private set; }
 
@@ -64,16 +40,9 @@ public class HumanAI : MonoBehaviour
     private HumanPatrol patrol;
     private HumanVision vision;
     private HumanHearing hearing;
-    private PlayerHealth playerHealth;
 
-    private float repathTimer;
-    private float timeSinceSeen;
-    private float attackTimer;
     private float stateTimer;
     private bool arrived;
-    private bool waiting;
-    private int pointsLeft;
-    private Vector3 searchCenter;
 
     private void Awake()
     {
@@ -85,6 +54,12 @@ public class HumanAI : MonoBehaviour
         if (patrol == null || vision == null)
         {
             Debug.LogWarning("HumanAI: este guardia necesita también los componentes Human Patrol y Human Vision.");
+        }
+
+        // La barra flotante encima de la cabeza se la añadimos automáticamente a cada guardia.
+        if (vision != null && GetComponent<DetectionBar>() == null)
+        {
+            gameObject.AddComponent<DetectionBar>();
         }
 
         CurrentState = State.Patrol;
@@ -106,27 +81,19 @@ public class HumanAI : MonoBehaviour
         }
     }
 
-    private void Start()
-    {
-        playerHealth = FindObjectOfType<PlayerHealth>();
-        if (playerHealth == null)
-        {
-            Debug.LogWarning("HumanAI: no se encontró PlayerHealth en la escena.");
-        }
-    }
-
     private void Update()
     {
-        if (playerHealth == null || vision == null || patrol == null) return;
-        if (PlayerHealth.IsPlayerDead) return;
+        if (vision == null || patrol == null) return;
         if (!agent.isOnNavMesh) return;
+
+        // Si otro guardia ya ha atrapado al jugador, este se queda como estaba.
+        if (PlayerCapture.IsCaught && CurrentState != State.Catch) return;
 
         switch (CurrentState)
         {
             case State.Patrol: UpdatePatrol(); break;
             case State.Investigate: UpdateInvestigate(); break;
-            case State.Chase: UpdateChase(); break;
-            case State.Search: UpdateSearch(); break;
+            case State.Catch: UpdateCatch(); break;
         }
     }
 
@@ -156,46 +123,34 @@ public class HumanAI : MonoBehaviour
         arrived = false;
     }
 
-    private void EnterChase()
+    private void BeginCatch()
     {
-        SetState(State.Chase);
+        if (PlayerCapture.Instance == null || PlayerCapture.IsCaught) return;
+
+        SetState(State.Catch);
         patrol.enabled = false;
+        agent.isStopped = true;
 
-        agent.speed = chaseSpeed;
-        agent.isStopped = false;
+        PlayerCapture.Instance.BeginCapture(transform);
 
-        timeSinceSeen = 0f;
-        repathTimer = 0f;
-        attackTimer = attackWindup;
-    }
-
-    private void EnterSearch(Vector3 center)
-    {
-        SetState(State.Search);
-        patrol.enabled = false;
-
-        agent.speed = searchSpeed;
-        searchCenter = center;
-        pointsLeft = searchPointCount;
-
-        MoveToNextSearchPoint(true);
+        if (OnCaughtPlayer != null) OnCaughtPlayer.Invoke();
     }
 
     // ------------------------------------------------------------------ Lo que hace en cada estado
 
     private void UpdatePatrol()
     {
-        if (vision.HasDetectedPlayer && vision.CanSeePlayerNow)
+        if (vision.HasDetectedPlayer)
         {
-            EnterChase();
+            BeginCatch();
         }
     }
 
     private void UpdateInvestigate()
     {
-        if (vision.HasDetectedPlayer && vision.CanSeePlayerNow)
+        if (vision.HasDetectedPlayer)
         {
-            EnterChase();
+            BeginCatch();
             return;
         }
 
@@ -219,108 +174,27 @@ public class HumanAI : MonoBehaviour
         }
     }
 
-    private void UpdateChase()
+    private void UpdateCatch()
     {
-        bool sees = vision.CanSeePlayerNow;
+        if (PlayerCapture.Instance == null) return;
 
-        if (sees) timeSinceSeen = 0f;
-        else timeSinceSeen += Time.deltaTime;
-
-        Vector3 playerPosition = playerHealth.transform.position;
-        Vector3 toPlayer = playerPosition - transform.position;
+        // Se da la vuelta hacia el jugador mientras la cámara de este gira hacia él.
+        Vector3 toPlayer = PlayerCapture.Instance.transform.position - transform.position;
         toPlayer.y = 0f;
-
-        // Si está lo bastante cerca y lo ve, deja de moverse y ataca.
-        if (sees && toPlayer.magnitude <= attackRange)
-        {
-            agent.isStopped = true;
-            FaceTowards(toPlayer);
-
-            attackTimer -= Time.deltaTime;
-            if (attackTimer <= 0f)
-            {
-                attackTimer = attackCooldown;
-                playerHealth.TakeDamage(attackDamage);
-                if (OnAttack != null) OnAttack.Invoke();
-            }
-            return;
-        }
-
-        // Si no, sigue corriendo: hacia el jugador si lo ve, o hacia donde lo vio por última vez.
-        agent.isStopped = false;
-        attackTimer = attackWindup;
-
-        repathTimer -= Time.deltaTime;
-        if (repathTimer <= 0f)
-        {
-            repathTimer = repathInterval;
-            Vector3 target = sees ? playerPosition : vision.LastSeenPosition;
-            agent.SetDestination(SnapToNavMesh(target));
-        }
-
-        if (!sees && (timeSinceSeen > chaseMemoryTime || HasArrived()))
-        {
-            EnterSearch(vision.LastSeenPosition);
-        }
-    }
-
-    private void UpdateSearch()
-    {
-        // Ya está en alerta: si te ve, te persigue al instante, sin esperar a sospechar.
-        if (vision.CanSeePlayerNow)
-        {
-            EnterChase();
-            return;
-        }
-
-        if (waiting)
-        {
-            stateTimer -= Time.deltaTime;
-            transform.Rotate(0f, lookAroundTurnSpeed * Time.deltaTime, 0f);
-
-            if (stateTimer <= 0f)
-            {
-                if (pointsLeft <= 0) EnterPatrol();
-                else MoveToNextSearchPoint(false);
-            }
-            return;
-        }
-
-        if (HasArrived())
-        {
-            waiting = true;
-            stateTimer = searchWaitTime;
-            agent.isStopped = true;
-        }
+        FaceTowards(toPlayer);
     }
 
     // ------------------------------------------------------------------ Auxiliares
 
     private void HandleNoiseHeard(Vector3 position)
     {
-        if (PlayerHealth.IsPlayerDead) return;
+        if (PlayerCapture.IsCaught) return;
 
-        // Si ya está persiguiendo o buscando, un ruido no le cambia nada: ya está en alerta.
+        // Solo reacciona a un ruido si está tranquilo; si ya está capturando, no le afecta.
         if (CurrentState == State.Patrol || CurrentState == State.Investigate)
         {
             EnterInvestigate(position);
         }
-    }
-
-    private void MoveToNextSearchPoint(bool first)
-    {
-        pointsLeft--;
-        waiting = false;
-
-        Vector3 target = searchCenter;
-        if (!first)
-        {
-            Vector2 offset = Random.insideUnitCircle * searchRadius;
-            target = searchCenter + new Vector3(offset.x, 0f, offset.y);
-        }
-
-        agent.isStopped = false;
-        agent.SetDestination(SnapToNavMesh(target));
     }
 
     private bool HasArrived()
@@ -333,7 +207,7 @@ public class HumanAI : MonoBehaviour
         if (flatDirection.sqrMagnitude < 0.001f) return;
 
         Quaternion target = Quaternion.LookRotation(flatDirection);
-        transform.rotation = Quaternion.Slerp(transform.rotation, target, attackTurnSpeed * Time.deltaTime);
+        transform.rotation = Quaternion.Slerp(transform.rotation, target, catchTurnSpeed * Time.deltaTime);
     }
 
     private Vector3 SnapToNavMesh(Vector3 position)

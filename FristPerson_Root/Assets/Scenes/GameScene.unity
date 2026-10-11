@@ -478,81 +478,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 78474868}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &84504996
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 84504997}
-  - component: {fileID: 84504999}
-  - component: {fileID: 84504998}
-  m_Layer: 5
-  m_Name: ' BarraVida_Relleno'
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &84504997
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 84504996}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 292994478}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &84504998
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 84504996}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0, b: 0, a: 1}
-  m_RaycastTarget: 0
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &84504999
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 84504996}
-  m_CullTransparentMesh: 1
 --- !u!1 &118407232
 GameObject:
   m_ObjectHideFlags: 0
@@ -1651,82 +1576,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
   key: Exit_Button
---- !u!1 &292994477
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 292994478}
-  - component: {fileID: 292994480}
-  - component: {fileID: 292994479}
-  m_Layer: 5
-  m_Name: BarraVida_Fondo
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &292994478
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 292994477}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 84504997}
-  m_Father: {fileID: 1228214322}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 150, y: 15}
-  m_SizeDelta: {x: 300, y: 30}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &292994479
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 292994477}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 0.46226418, g: 0.46226418, b: 0.46226418, a: 1}
-  m_RaycastTarget: 0
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &292994480
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 292994477}
-  m_CullTransparentMesh: 1
 --- !u!1 &299236027
 GameObject:
   m_ObjectHideFlags: 0
@@ -7266,8 +7115,8 @@ GameObject:
   - component: {fileID: 1228214320}
   - component: {fileID: 1228214319}
   - component: {fileID: 1228214323}
-  - component: {fileID: 1228214324}
   - component: {fileID: 1228214325}
+  - component: {fileID: 1228214326}
   m_Layer: 5
   m_Name: GameplayCanvas
   m_TagString: Untagged
@@ -7352,7 +7201,6 @@ RectTransform:
   m_Children:
   - {fileID: 361324322}
   - {fileID: 388903915}
-  - {fileID: 292994478}
   - {fileID: 1065585364}
   - {fileID: 1751027281}
   - {fileID: 1087774256}
@@ -7377,22 +7225,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::KeyItemInventoryUI
   panel: {fileID: 1087774255}
   listText: {fileID: 1785081855}
---- !u!114 &1228214324
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1228214318}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fc66fe09298699b4a8183d1c0e359750, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HealthHUD
-  fillRect: {fileID: 84504997}
-  damageFlash: {fileID: 1065585365}
-  flashAlpha: 0.35
-  flashFadeSpeed: 1.5
 --- !u!114 &1228214325
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7410,6 +7242,21 @@ MonoBehaviour:
   restartButtonText: {fileID: 355752751}
   menuButtonText: {fileID: 2054917504}
   mainMenuSceneName: MainMenu
+--- !u!114 &1228214326
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1228214318}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cba9e1560f9126b40a7832c94c94b7d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DetectionOverlay
+  overlay: {fileID: 1065585365}
+  maxAlpha: 0.6
+  responseSpeed: 6
 --- !u!1 &1247692322
 GameObject:
   m_ObjectHideFlags: 0
@@ -8410,21 +8257,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HumanAI
   investigateSpeed: 2.5
-  chaseSpeed: 5
-  searchSpeed: 2.5
   lookAroundTime: 3
   lookAroundTurnSpeed: 60
-  repathInterval: 0.2
-  chaseMemoryTime: 4
-  attackRange: 1.8
-  attackDamage: 15
-  attackWindup: 0.5
-  attackCooldown: 1.2
-  attackTurnSpeed: 8
-  searchPointCount: 3
-  searchRadius: 5
-  searchWaitTime: 2
-  OnAttack:
+  catchTurnSpeed: 8
+  OnCaughtPlayer:
     m_PersistentCalls:
       m_Calls: []
 --- !u!1 &1458216353
@@ -10008,10 +9844,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1671297787}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f70b99593eb681349aef90650a123f8d, type: 3}
+  m_Script: {fileID: 11500000, guid: 7acd2975b5883e44ab521614f79d4120, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
-  maxHealth: 100
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCapture
+  captureDuration: 1.2
 --- !u!1 &1701510092
 GameObject:
   m_ObjectHideFlags: 0

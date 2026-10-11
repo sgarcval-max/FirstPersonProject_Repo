@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -72,6 +73,47 @@ public class HumanVision : MonoBehaviour
     {
         if (Suspicion >= maxLevel) return;
         Suspicion = Mathf.Min(maxLevel, Suspicion + amount);
+    }
+
+    /// <summary>Deja al humano completamente tranquilo: sospecha a 0 y sin haberte detectado.</summary>
+    public void ResetSuspicion()
+    {
+        Suspicion = 0f;
+        detected = false;
+        CanSeePlayerNow = false;
+    }
+
+    // Lista de todos los humanos con visión activos en la escena, para consultar el nivel de alerta global.
+    private static readonly List<HumanVision> allVisions = new List<HumanVision>();
+
+    /// <summary>El mayor nivel de sospecha de entre todos los humanos de la escena (0 a 1).</summary>
+    public static float HighestSuspicion
+    {
+        get
+        {
+            float highest = 0f;
+            for (int i = 0; i < allVisions.Count; i++)
+            {
+                if (allVisions[i] != null && allVisions[i].Suspicion > highest)
+                {
+                    highest = allVisions[i].Suspicion;
+                }
+            }
+            return highest;
+        }
+    }
+
+    private void OnEnable()
+    {
+        if (!allVisions.Contains(this))
+        {
+            allVisions.Add(this);
+        }
+    }
+
+    private void OnDisable()
+    {
+        allVisions.Remove(this);
     }
 
     private void Awake()
