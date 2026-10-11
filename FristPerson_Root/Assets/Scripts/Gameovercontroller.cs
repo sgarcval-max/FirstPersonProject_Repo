@@ -71,10 +71,23 @@ public class GameOverController : MonoBehaviour
         if (menuButtonText != null) menuButtonText.text = english ? "Main menu" : "Menú principal";
     }
 
-    /// <summary>Conectar al botón Reiniciar. De momento recarga la escena entera.</summary>
+    /// <summary>
+    /// Conectar al botón Reiniciar. Oculta el panel y hace reaparecer al jugador en el punto de
+    /// inicio con un fundido a negro; lo que llevaba se queda en el suelo donde lo atraparon.
+    /// </summary>
     public void Restart()
     {
-        LoadScene(SceneManager.GetActiveScene().name);
+        if (panel != null) panel.SetActive(false);
+
+        if (capture != null)
+        {
+            capture.RespawnWithFade();
+        }
+        else
+        {
+            // Si por algún motivo no hay PlayerCapture, recargamos la escena como último recurso.
+            LoadScene(SceneManager.GetActiveScene().name);
+        }
     }
 
     /// <summary>Conectar al botón Menú principal.</summary>

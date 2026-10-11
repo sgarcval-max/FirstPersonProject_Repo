@@ -54,6 +54,28 @@ public class SceneTransitionManager : MonoBehaviour
         StartCoroutine(TransitionRoutine(sceneName));
     }
 
+    /// <summary>
+    /// Funde la pantalla a negro (con la música bajando), ejecuta una acción mientras está todo
+    /// negro, y vuelve a mostrar la pantalla. Es como LoadScene pero sin cambiar de escena:
+    /// sirve, por ejemplo, para reaparecer tras un Game Over sin que se vea el "salto".
+    /// </summary>
+    public void RunWithFade(System.Action actionWhileBlack)
+    {
+        StartCoroutine(RunWithFadeRoutine(actionWhileBlack));
+    }
+
+    private IEnumerator RunWithFadeRoutine(System.Action actionWhileBlack)
+    {
+        yield return FadeOut();
+
+        if (actionWhileBlack != null)
+        {
+            actionWhileBlack();
+        }
+
+        yield return FadeIn();
+    }
+
     private IEnumerator TransitionRoutine(string sceneName)
     {
         yield return FadeOut();

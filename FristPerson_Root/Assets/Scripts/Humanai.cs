@@ -43,9 +43,14 @@ public class HumanAI : MonoBehaviour
 
     private float stateTimer;
     private bool arrived;
+    private Vector3 startPosition;
+    private Quaternion startRotation;
 
     private void Awake()
     {
+        startPosition = transform.position;
+        startRotation = transform.rotation;
+
         agent = GetComponent<NavMeshAgent>();
         patrol = GetComponent<HumanPatrol>();
         vision = GetComponent<HumanVision>();
@@ -95,6 +100,33 @@ public class HumanAI : MonoBehaviour
             case State.Investigate: UpdateInvestigate(); break;
             case State.Catch: UpdateCatch(); break;
         }
+    }
+
+    /// <summary>
+    /// Devuelve al guardia a su sitio inicial, tranquilo y patrullando desde cero. Se usa cuando
+    /// el jugador reaparece tras un Game Over.
+    /// </summary>
+    public void ResetToStart()
+    {
+        if (agent.isOnNavMesh)
+        {
+            agent.ResetPath();
+            agent.Warp(startPosition);
+        }
+        else
+        {
+            transform.position = startPosition;
+        }
+
+        transform.rotation = startRotation;
+        agent.isStopped = false;
+
+        if (vision != null) vision.ResetSuspicion();
+        if (hearing != null) hearing.HasHeardNoise = false;
+
+        // Desactivar y volver a activar la patrulla hace que empiece su ruta de nuevo.
+        patrol.enabled = false;
+        EnterPatrol();
     }
 
     // ------------------------------------------------------------------ Cambios de estado

@@ -10,6 +10,26 @@ public class KeyItemPickup : MonoBehaviour, IInteractable
     [Tooltip("Qué objeto clave representa este objeto del mundo.")]
     [SerializeField] private KeyItemData item;
 
+    /// <summary>
+    /// Crea en el mundo un objeto clave recogible (de momento un cubito, hasta que haya modelos
+    /// de verdad). Se usa para soltar los objetos clave del jugador cuando lo atrapan.
+    /// </summary>
+    public static KeyItemPickup SpawnInWorld(KeyItemData data, Vector3 position)
+    {
+        GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        go.name = data.GetDisplayName() + " (suelo)";
+        go.transform.position = position;
+        go.transform.localScale = Vector3.one * 0.2f;
+
+        KeyItemPickup pickup = go.AddComponent<KeyItemPickup>();
+        pickup.item = data;
+
+        Rigidbody rb = go.AddComponent<Rigidbody>();
+        rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+
+        return pickup;
+    }
+
     public string GetPrompt()
     {
         string pickupText = GameLanguage.IsEnglish ? "Pick up" : "Recoger";

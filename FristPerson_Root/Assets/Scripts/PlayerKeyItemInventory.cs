@@ -38,4 +38,21 @@ public class PlayerKeyItemInventory : MonoBehaviour
         }
         return true;
     }
+
+    /// <summary>
+    /// Suelta TODOS los objetos clave al suelo, repartidos alrededor de un punto, y vacía el
+    /// inventario. Normalmente los objetos clave no se pueden soltar: esto solo se usa cuando
+    /// te atrapa un guardia, para que tengas que volver a recogerlos.
+    /// </summary>
+    public void DropAllAt(Vector3 center, float radius)
+    {
+        foreach (KeyItemData item in items)
+        {
+            Vector3 position = DropUtility.GetGroundPoint(center, radius);
+            KeyItemPickup.SpawnInWorld(item, position);
+        }
+
+        items.Clear();
+        if (OnChanged != null) OnChanged.Invoke();
+    }
 }

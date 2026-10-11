@@ -163,6 +163,45 @@ public class PlayerWeaponInventory : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Suelta TODAS las armas (la equipada y la guardada) al suelo, repartidas alrededor de un
+    /// punto, y deja al jugador con las manos vacías. Se usa cuando te atrapa un guardia.
+    /// </summary>
+    public void DropAllAt(Vector3 center, float radius)
+    {
+        for (int i = 0; i < SLOT_COUNT; i++)
+        {
+            if (slots[i] == null) continue;
+
+            SpawnWeaponOnGround(slots[i], center, radius);
+            slots[i] = null;
+        }
+
+        equippedIndex = HANDS;
+        RefreshHeldModel();
+        if (OnEquippedChanged != null) OnEquippedChanged.Invoke(null);
+    }
+
+    private void SpawnWeaponOnGround(WeaponData weapon, Vector3 center, float radius)
+    {
+        if (weapon.worldPrefab == null)
+        {
+            Debug.LogWarning("PlayerWeaponInventory: el arma " + weapon.name + " no tiene World Prefab, desaparece al soltarla.");
+            return;
+        }
+
+        Vector3 position = DropUtility.GetGroundPoint(center, radius);
+        Quaternion rotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
+
+        GameObject dropped = Instantiate(weapon.worldPrefab, position, rotation);
+
+        Rigidbody rb = dropped.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+        }
+    }
+
     private void SpawnDroppedWeapon(WeaponData weapon)
     {
         if (weapon == null) return;
