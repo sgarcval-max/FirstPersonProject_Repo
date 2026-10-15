@@ -22,6 +22,11 @@ public class HumanVision : MonoBehaviour
     [SerializeField] private float viewAngle = 100f;
     [Tooltip("Qué punto del jugador intenta ver (relativo a los pies del jugador).")]
     [SerializeField] private Vector3 targetOffset = new Vector3(0f, 1f, 0f);
+    [Tooltip("Cuando el jugador está agachado, el guardia solo lo ve a esta fracción de su distancia de visión (0.6 = un 60 %).")]
+    [Range(0.1f, 1f)]
+    [SerializeField] private float crouchViewMultiplier = 0.6f;
+    [Tooltip("Cuando el jugador está agachado, el guardia apunta a este punto del jugador (más bajo, así los muros bajos lo cubren).")]
+    [SerializeField] private Vector3 crouchTargetOffset = new Vector3(0f, 0.5f, 0f);
     [Tooltip("Qué capas pueden bloquear la visión.")]
     [SerializeField] private LayerMask obstacleMask = ~0;
 
@@ -47,6 +52,7 @@ public class HumanVision : MonoBehaviour
     public UnityEvent OnDetectionReset;
 
     private Transform player;
+    private PlayerCrouch playerCrouch;
     private Material materialInstance;
     private readonly RaycastHit[] hitBuffer = new RaycastHit[16];
     private bool detected;
@@ -134,6 +140,7 @@ public class HumanVision : MonoBehaviour
         if (playerController != null)
         {
             player = playerController.transform;
+            playerCrouch = playerController.GetComponent<PlayerCrouch>();
         }
         else
         {
@@ -192,11 +199,24 @@ public class HumanVision : MonoBehaviour
     private bool CanSeePlayer(out float distance)
     {
         Vector3 eye = transform.TransformPoint(eyeOffset);
-        Vector3 target = player.position + targetOffset;
+        bool crouched = playerCrouch != null && playerCrouch.IsCrouching;
+
+        // Agachado, el jugador es un blanco más bajo y más difícil de ver de lejos.
+        Vector3 target = player.position + (crouched ? crouchTargetOffset : targetOffset);
+        float maxDistance = crouched ? viewDistance * crouchViewMultiplier : viewDistance;
+
         Vector3 direction = target - eye;
         distance = direction.magnitude;
 
-        if (distance > viewDistance) return false;
+        // Los escondites reducen (o anulan del todo) la distancia a la que te pueden ver.
+        PlayerConcealment concealment = PlayerConcealment.Instance;
+        if (concealment != null)
+        {
+            if (concealment.SightMultiplier <= 0.001f) return false;
+            maxDistance *= concealment.SightMultiplier;
+        }
+
+        if (distance > maxDistance) return false;
         if (Vector3.Angle(transform.forward, direction) > viewAngle * 0.5f) return false;
 
         // Lanzamos un rayo hacia el jugador: lo primero que choque (ignorando el propio cuerpo

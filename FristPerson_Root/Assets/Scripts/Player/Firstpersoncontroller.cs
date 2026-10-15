@@ -41,6 +41,7 @@ public class FirstPersonController : MonoBehaviour
     public UnityEvent OnFootstep;
 
     private CharacterController controller;
+    private PlayerCrouch crouch; // opcional: si el jugador lo tiene, puede agacharse
 
     private Vector3 velocity;
     private float pitch = 0f;
@@ -70,6 +71,7 @@ public class FirstPersonController : MonoBehaviour
     private void Awake()
     {
         controller = GetComponent<CharacterController>();
+        crouch = GetComponent<PlayerCrouch>();
 
         if (cameraTransform == null && Camera.main != null)
         {
@@ -134,12 +136,14 @@ public class FirstPersonController : MonoBehaviour
         }
 
         Vector2 moveInput = controls.Movimiento.Move.ReadValue<Vector2>();
-        bool isRunning = controls.Movimiento.Run.IsPressed();
+        bool crouching = crouch != null && crouch.IsCrouching;
+        bool isRunning = controls.Movimiento.Run.IsPressed() && !crouching;
 
         Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
         move = Vector3.ClampMagnitude(move, 1f);
 
         float currentSpeed = isRunning ? runSpeed : walkSpeed;
+        if (crouching) currentSpeed *= crouch.SpeedMultiplier;
         controller.Move(move * currentSpeed * Time.deltaTime);
 
         bool isMoving = move.sqrMagnitude > 0.001f;
@@ -163,7 +167,7 @@ public class FirstPersonController : MonoBehaviour
             }
         }
 
-        if (controls.Movimiento.Jump.WasPressedThisFrame() && isGrounded)
+        if (controls.Movimiento.Jump.WasPressedThisFrame() && isGrounded && !crouching)
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
             OnJump?.Invoke();

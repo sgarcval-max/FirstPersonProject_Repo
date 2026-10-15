@@ -14,12 +14,17 @@ public class PlayerNoise : MonoBehaviour
     [SerializeField] private float jumpNoiseRadius = 4f;
     [SerializeField] private float landNoiseRadius = 6f;
 
+    [Tooltip("Radio del ruido de los pasos cuando vas agachado (casi silencioso).")]
+    [SerializeField] private float crouchNoiseRadius = 0.8f;
+
     private FirstPersonController controller;
+    private PlayerCrouch crouch;
     private bool running;
 
     private void Awake()
     {
         controller = GetComponent<FirstPersonController>();
+        crouch = GetComponent<PlayerCrouch>();
     }
 
     private void OnEnable()
@@ -52,7 +57,14 @@ public class PlayerNoise : MonoBehaviour
 
     private void HandleFootstep()
     {
-        Emit(running ? runNoiseRadius : walkNoiseRadius);
+        if (crouch != null && crouch.IsCrouching)
+        {
+            Emit(crouchNoiseRadius);
+        }
+        else
+        {
+            Emit(running ? runNoiseRadius : walkNoiseRadius);
+        }
     }
 
     private void HandleJump()
@@ -69,6 +81,14 @@ public class PlayerNoise : MonoBehaviour
     {
         // Al empezar la partida el jugador "aterriza" en el suelo y eso no debe contar como ruido.
         if (Time.timeSinceLevelLoad < 1f) return;
+
+        // Un escondite puede amortiguar (o anular del todo) el ruido que haces.
+        PlayerConcealment concealment = PlayerConcealment.Instance;
+        if (concealment != null)
+        {
+            radius *= concealment.NoiseMultiplier;
+        }
+        if (radius <= 0.01f) return;
 
         NoiseSystem.Emit(transform.position, radius);
     }
