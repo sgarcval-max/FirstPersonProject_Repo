@@ -34,7 +34,35 @@ public class RebindActionUI : MonoBehaviour
 
     private void OnEnable()
     {
-        action = InputManager.Controls.asset.FindActionMap(actionMapName).FindAction(actionName);
+        InputActionAsset asset = InputManager.Controls.asset;
+
+        InputActionMap map = asset.FindActionMap(actionMapName);
+        if (map == null)
+        {
+            string available = "";
+            foreach (InputActionMap m in asset.actionMaps) available += "'" + m.name + "' ";
+
+            Debug.LogWarning("RebindActionUI (" + name + "): no existe el mapa '" + actionMapName +
+                             "'. Mapas que existen: " + available +
+                             ". Revisa el campo Action Map Name (sin espacios y sin estar vacío).");
+            MarkAsBroken();
+            return;
+        }
+
+        action = map.FindAction(actionName);
+        if (action == null)
+        {
+            string available = "";
+            foreach (InputAction a in map.actions) available += "'" + a.name + "' ";
+
+            Debug.LogWarning("RebindActionUI (" + name + "): no existe la acción '" + actionName +
+                             "' en el mapa '" + actionMapName + "'. Acciones que existen en ese mapa: " + available +
+                             ". Revisa el campo Action Name.");
+            MarkAsBroken();
+            return;
+        }
+
+        if (rebindButton != null) rebindButton.interactable = true;
         bindingIndex = ResolveBindingIndex();
 
         if (actionNameText != null)
@@ -47,6 +75,13 @@ public class RebindActionUI : MonoBehaviour
         {
             rebindButton.onClick.AddListener(StartRebind);
         }
+    }
+
+    /// <summary>La fila tiene un nombre mal escrito: la dejamos inutilizada y marcada con "?" en vez de romper el menú.</summary>
+    private void MarkAsBroken()
+    {
+        if (bindingDisplayText != null) bindingDisplayText.text = "?";
+        if (rebindButton != null) rebindButton.interactable = false;
     }
 
     private void OnDisable()

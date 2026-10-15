@@ -10398,7 +10398,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd6dda141d5aeb14ebd57546cbbb39cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RebindActionUI
-  actionMapName: 'Movimiento '
+  actionMapName: Movimiento
   actionName: Crouch
   compositePartName: 
   actionNameText: {fileID: 6077422037449404218}
