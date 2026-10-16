@@ -23,6 +23,22 @@ public class WeaponData : ScriptableObject
     [Tooltip("Rotación del modelo respecto al punto de la mano, en grados.")]
     public Vector3 heldLocalEuler = Vector3.zero;
 
+    [Header("Disparo (solo armas a distancia, como la pistola)")]
+    [Tooltip("Marcado: esta arma dispara al pulsar la tecla de atacar. Déjalo desmarcado en armas cuerpo a cuerpo.")]
+    public bool isRanged = false;
+
+    [Tooltip("Hasta qué distancia llega el disparo, en metros.")]
+    public float range = 40f;
+
+    [Tooltip("Segundos que queda aturdido un guardia al recibir un disparo.")]
+    public float stunDuration = 8f;
+
+    [Tooltip("Segundos que tarda el arma en poder usarse otra vez tras disparar (90 = minuto y medio).")]
+    public float rechargeTime = 90f;
+
+    [Tooltip("Hasta qué distancia se oye el disparo, en metros. Los guardias que lo oigan irán a investigar. 0 = silenciada.")]
+    public float shotNoiseRadius = 15f;
+
     /// <summary>El nombre en el idioma actual del juego.</summary>
     public string GetDisplayName()
     {

@@ -67,6 +67,12 @@ public class HumanAI : MonoBehaviour
             gameObject.AddComponent<DetectionBar>();
         }
 
+        // Y la capacidad de ser aturdido (con la pistola, por ejemplo).
+        if (GetComponent<HumanStun>() == null)
+        {
+            gameObject.AddComponent<HumanStun>();
+        }
+
         CurrentState = State.Patrol;
     }
 
@@ -108,6 +114,10 @@ public class HumanAI : MonoBehaviour
     /// </summary>
     public void ResetToStart()
     {
+        // Si estaba aturdido, lo recuperamos primero para que todos sus componentes vuelvan a estar activos.
+        HumanStun stun = GetComponent<HumanStun>();
+        if (stun != null) stun.RecoverImmediately();
+
         if (agent.isOnNavMesh)
         {
             agent.ResetPath();
@@ -126,6 +136,16 @@ public class HumanAI : MonoBehaviour
 
         // Desactivar y volver a activar la patrulla hace que empiece su ruta de nuevo.
         patrol.enabled = false;
+        EnterPatrol();
+    }
+
+    /// <summary>Retoma la patrulla desde donde esté (se usa al recuperarse de un aturdimiento).</summary>
+    public void ResumePatrol()
+    {
+        if (agent.isOnNavMesh)
+        {
+            agent.isStopped = false;
+        }
         EnterPatrol();
     }
 
