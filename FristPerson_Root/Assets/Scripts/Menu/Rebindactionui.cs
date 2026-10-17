@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -30,6 +31,7 @@ public class RebindActionUI : MonoBehaviour
     private InputAction action;
     private int bindingIndex = -1; // -1 = acción simple (usa el binding tal cual); >=0 = índice de la parte del composite
     private InputActionRebindingExtensions.RebindingOperation rebindingOperation;
+    private bool isRebinding;
     private const string REBINDS_KEY = "input_rebinds";
 
     private void OnEnable()
@@ -90,7 +92,18 @@ public class RebindActionUI : MonoBehaviour
         {
             rebindButton.onClick.RemoveListener(StartRebind);
         }
-        rebindingOperation?.Dispose();
+        // Si te vas de la pantalla a mitad de una reasignación, la cancelamos y devolvemos la acción
+        // a su estado normal (durante la reasignación estaba desactivada).
+        if (isRebinding)
+        {
+            if (rebindingOperation != null)
+            {
+                rebindingOperation.Dispose();
+                rebindingOperation = null;
+            }
+            if (action != null) action.Enable();
+            isRebinding = false;
+        }
     }
 
     /// <summary>Busca el índice del binding correspondiente a la parte del composite (por nombre), o -1 si la acción es simple.</summary>
@@ -123,32 +136,57 @@ public class RebindActionUI : MonoBehaviour
 
     public void StartRebind()
     {
+        if (isRebinding || action == null) return;
+        StartCoroutine(StartRebindRoutine());
+    }
+
+    private IEnumerator StartRebindRoutine()
+    {
+        isRebinding = true;
+
         if (UIAudioManager.Instance != null) UIAudioManager.Instance.PlayKeyRebindStart();
 
         action.Disable();
         bindingDisplayText.text = "Pulsa una tecla...";
 
+        // Esperamos un instante para que el clic que ha pulsado el botón Reasignar no se registre
+        // como la tecla nueva (importante ahora que los botones del ratón se pueden asignar).
+        yield return new WaitForSecondsRealtime(0.2f);
+
         InputActionRebindingExtensions.RebindingOperation rebind = bindingIndex >= 0
             ? action.PerformInteractiveRebinding(bindingIndex)
             : action.PerformInteractiveRebinding();
 
+        // Se admiten teclas y botones del ratón (clic izquierdo, derecho, central...), pero se
+        // ignora el movimiento del ratón y la rueda, que si no se asignarían solos al mover el ratón.
+        // ESC cancela la reasignación sin cambiar nada.
         rebindingOperation = rebind
-            .WithControlsExcluding("Mouse")
+            .WithControlsExcluding("<Mouse>/position")
+            .WithControlsExcluding("<Mouse>/delta")
+            .WithControlsExcluding("<Mouse>/scroll")
+            .WithControlsExcluding("<Pointer>/position")
+            .WithControlsExcluding("<Pointer>/delta")
+            .WithCancelingThrough("<Keyboard>/escape")
             .OnMatchWaitForAnother(0.1f)
-            .OnComplete(operation =>
-            {
-                rebindingOperation.Dispose();
-                action.Enable();
-                UpdateBindingDisplay();
-                SaveAllRebinds();
-            })
-            .OnCancel(operation =>
-            {
-                rebindingOperation.Dispose();
-                action.Enable();
-                UpdateBindingDisplay();
-            })
+            .OnComplete(operation => FinishRebind(true))
+            .OnCancel(operation => FinishRebind(false))
             .Start();
+    }
+
+    private void FinishRebind(bool save)
+    {
+        isRebinding = false;
+
+        if (rebindingOperation != null)
+        {
+            rebindingOperation.Dispose();
+            rebindingOperation = null;
+        }
+
+        action.Enable();
+        UpdateBindingDisplay();
+
+        if (save) SaveAllRebinds();
     }
 
     /// <summary>Guarda TODAS las reasignaciones del asset completo en PlayerPrefs.</summary>

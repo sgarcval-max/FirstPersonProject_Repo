@@ -42,6 +42,7 @@ public class FirstPersonController : MonoBehaviour
 
     private CharacterController controller;
     private PlayerCrouch crouch; // opcional: si el jugador lo tiene, puede agacharse
+    private PlayerAim aim;       // opcional: si el jugador lo tiene, puede apuntar
 
     private Vector3 velocity;
     private float pitch = 0f;
@@ -72,6 +73,7 @@ public class FirstPersonController : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
         crouch = GetComponent<PlayerCrouch>();
+        aim = GetComponent<PlayerAim>();
 
         if (cameraTransform == null && Camera.main != null)
         {
@@ -105,8 +107,10 @@ public class FirstPersonController : MonoBehaviour
     {
         Vector2 lookInput = controls.Movimiento.Look.ReadValue<Vector2>();
 
-        float mouseX = lookInput.x * mouseSensitivity * LOOK_SCALE;
-        float mouseY = lookInput.y * mouseSensitivity * LOOK_SCALE;
+        // Al apuntar, la cámara gira más despacio para poder afinar la puntería.
+        float lookMultiplier = aim != null ? aim.LookMultiplier : 1f;
+        float mouseX = lookInput.x * mouseSensitivity * LOOK_SCALE * lookMultiplier;
+        float mouseY = lookInput.y * mouseSensitivity * LOOK_SCALE * lookMultiplier;
 
         if (invertY)
         {
@@ -137,13 +141,15 @@ public class FirstPersonController : MonoBehaviour
 
         Vector2 moveInput = controls.Movimiento.Move.ReadValue<Vector2>();
         bool crouching = crouch != null && crouch.IsCrouching;
-        bool isRunning = controls.Movimiento.Run.IsPressed() && !crouching;
+        bool aiming = aim != null && aim.IsAiming;
+        bool isRunning = controls.Movimiento.Run.IsPressed() && !crouching && !aiming;
 
         Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
         move = Vector3.ClampMagnitude(move, 1f);
 
         float currentSpeed = isRunning ? runSpeed : walkSpeed;
         if (crouching) currentSpeed *= crouch.SpeedMultiplier;
+        if (aiming) currentSpeed *= aim.SpeedMultiplier;
         controller.Move(move * currentSpeed * Time.deltaTime);
 
         bool isMoving = move.sqrMagnitude > 0.001f;

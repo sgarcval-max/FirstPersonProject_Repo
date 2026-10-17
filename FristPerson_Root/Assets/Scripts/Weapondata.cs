@@ -27,8 +27,8 @@ public class WeaponData : ScriptableObject
     [Tooltip("Marcado: esta arma dispara al pulsar la tecla de atacar. Déjalo desmarcado en armas cuerpo a cuerpo.")]
     public bool isRanged = false;
 
-    [Tooltip("Hasta qué distancia llega el disparo, en metros.")]
-    public float range = 40f;
+    [Tooltip("Hasta qué distancia llega el disparo, en metros. Más allá de esto, la bala no alcanza (ni aturde).")]
+    public float range = 20f;
 
     [Tooltip("Segundos que queda aturdido un guardia al recibir un disparo.")]
     public float stunDuration = 8f;
