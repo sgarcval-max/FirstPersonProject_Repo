@@ -4027,6 +4027,9 @@ MonoBehaviour:
   - key: 'prompt_pickup '
     spanish: RECOGER
     english: PICK UP
+  - key: MiniInfo2TExt_teclas
+    spanish: COMBATE
+    english: COMBAT
 --- !u!4 &1604156563
 Transform:
   m_ObjectHideFlags: 0
