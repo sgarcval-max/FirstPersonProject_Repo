@@ -25,6 +25,8 @@ public class PlayerWeaponFire : MonoBehaviour
     [Header("Trazador visual (provisional)")]
     [SerializeField] private Color tracerColor = new Color(1f, 0.9f, 0.4f, 1f);
     [SerializeField] private float tracerDuration = 0.06f;
+    [Tooltip("Opcional: el material del trazador. Si se deja vacío, copia el material del arma que llevas, que seguro funciona en la build.")]
+    [SerializeField] private Material tracerMaterial;
 
     [Header("Eventos")]
     [Tooltip("Se dispara cada vez que disparas (para sonidos o efectos futuros).")]
@@ -141,7 +143,7 @@ public class PlayerWeaponFire : MonoBehaviour
         Vector3 tracerStart = muzzlePoint != null
             ? muzzlePoint.position
             : origin + cameraTransform.right * 0.25f - cameraTransform.up * 0.2f + direction * 0.5f;
-        SpawnTracer(tracerStart, endPoint);
+        SpawnTracer(tracerStart, endPoint, weapon);
 
         // Un disparo suena: los guardias cercanos que no estén aturdidos irán a investigar.
         if (weapon.shotNoiseRadius > 0f)
@@ -153,7 +155,7 @@ public class PlayerWeaponFire : MonoBehaviour
     }
 
     // Una línea fina y breve que marca por dónde ha ido el disparo, hasta que haya efectos de verdad.
-    private void SpawnTracer(Vector3 from, Vector3 to)
+    private void SpawnTracer(Vector3 from, Vector3 to, WeaponData weapon)
     {
         Vector3 delta = to - from;
         float length = delta.magnitude;
@@ -169,8 +171,37 @@ public class PlayerWeaponFire : MonoBehaviour
         tracer.transform.localScale = new Vector3(0.02f, 0.02f, length);
 
         Renderer tracerRenderer = tracer.GetComponent<Renderer>();
-        if (tracerRenderer != null) tracerRenderer.material.color = tracerColor;
+        if (tracerRenderer != null)
+        {
+            // El material por defecto de CreatePrimitive sale rosa/morado en las builds, así que lo
+            // sustituimos por una copia de un material que sabemos que funciona en tu proyecto.
+            Material source = ResolveTracerMaterial(weapon);
+            if (source != null)
+            {
+                Material instance = new Material(source);
+
+                if (instance.HasProperty("_BaseColor")) instance.SetColor("_BaseColor", tracerColor);
+                else if (instance.HasProperty("_Color")) instance.SetColor("_Color", tracerColor);
+
+                tracerRenderer.sharedMaterial = instance;
+                Destroy(instance, tracerDuration + 0.1f);
+            }
+        }
 
         Destroy(tracer, tracerDuration);
+    }
+
+    private Material ResolveTracerMaterial(WeaponData weapon)
+    {
+        if (tracerMaterial != null) return tracerMaterial;
+
+        // Copiamos el material del propio modelo del arma (el mismo que ves en la mano).
+        if (weapon != null && weapon.worldPrefab != null)
+        {
+            Renderer weaponRenderer = weapon.worldPrefab.GetComponentInChildren<Renderer>(true);
+            if (weaponRenderer != null) return weaponRenderer.sharedMaterial;
+        }
+
+        return null;
     }
 }

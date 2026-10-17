@@ -44,9 +44,10 @@ public class KeyItemPickup : MonoBehaviour, IInteractable
         PlayerKeyItemInventory inventory = player.GetComponent<PlayerKeyItemInventory>();
         if (inventory == null) return;
 
-        if (inventory.AddItem(item))
+        if (inventory.AddItem(item, gameObject))
         {
-            Destroy(gameObject);
+            // No se destruye: el inventario lo guarda para devolverlo al suelo tal cual si te atrapan.
+            gameObject.SetActive(false);
         }
     }
 }
