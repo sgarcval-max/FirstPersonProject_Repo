@@ -63,6 +63,9 @@ public class PlayerWeaponFire : MonoBehaviour
             return;
         }
 
+        // Con un panel abierto (inventario), el clic es para los botones, no para disparar.
+        if (playerController.UiFocused) return;
+
         // El primer fotograma tras recuperar el control lo ignoramos: así el clic que pulsa el
         // botón Reanudar del menú no se convierte en un disparo.
         if (!wasGameplayActive)

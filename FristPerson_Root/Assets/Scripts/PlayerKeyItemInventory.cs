@@ -56,6 +56,37 @@ public class PlayerKeyItemInventory : MonoBehaviour
     }
 
     /// <summary>
+    /// Suelta UN objeto concreto al suelo, delante del jugador (es lo que hace el botón "Soltar" del
+    /// inventario). El objeto vuelve a aparecer tal cual era y se puede volver a recoger. Devuelve
+    /// false si no lo tenías.
+    /// </summary>
+    public bool DropItem(KeyItemData item)
+    {
+        int index = items.IndexOf(item);
+        if (index < 0) return false;
+
+        GameObject worldObject = worldObjects[index];
+
+        // Cae un poco por delante del jugador, para no aparecer dentro de su propio cuerpo.
+        Vector3 position = DropUtility.GetGroundPoint(transform.position + transform.forward * 1.6f, 0.8f);
+
+        items.RemoveAt(index);
+        worldObjects.RemoveAt(index);
+
+        if (worldObject != null)
+        {
+            RestoreWorldObject(worldObject, position);
+        }
+        else
+        {
+            KeyItemPickup.SpawnInWorld(item, position);
+        }
+
+        if (OnChanged != null) OnChanged.Invoke();
+        return true;
+    }
+
+    /// <summary>
     /// Suelta TODOS los objetos clave al suelo, repartidos alrededor de un punto, y vacía el
     /// inventario. Normalmente los objetos clave no se pueden soltar: esto solo se usa cuando
     /// te atrapa un guardia, para que tengas que volver a recogerlos.

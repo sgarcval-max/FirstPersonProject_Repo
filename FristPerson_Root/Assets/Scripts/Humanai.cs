@@ -139,6 +139,29 @@ public class HumanAI : MonoBehaviour
         EnterPatrol();
     }
 
+    /// <summary>
+    /// Tras reaparecer el jugador: el guardia se calma y retoma su patrulla DESDE DONDE ESTÁ (no
+    /// vuelve a su sitio inicial). El guardia que atrapó al jugador se queda así junto a lo que este
+    /// soltó. Un guardia aturdido sigue aturdido hasta que se le pase.
+    /// </summary>
+    public void ResetForRespawn()
+    {
+        HumanStun stun = GetComponent<HumanStun>();
+        if (stun != null && stun.IsStunned) return;
+
+        if (vision != null) vision.ResetSuspicion();
+        if (hearing != null) hearing.HasHeardNoise = false;
+
+        if (agent.isOnNavMesh)
+        {
+            agent.isStopped = false;
+        }
+
+        // Desactivar y volver a activar la patrulla hace que retome su ruta hacia el siguiente punto.
+        patrol.enabled = false;
+        EnterPatrol();
+    }
+
     /// <summary>Retoma la patrulla desde donde esté (se usa al recuperarse de un aturdimiento).</summary>
     public void ResumePatrol()
     {

@@ -80,6 +80,9 @@ public class PlayerAim : MonoBehaviour
         // En pausa, atrapado o escondido, los controles están desactivados: no se apunta.
         if (!playerController.enabled) return false;
 
+        // Con un panel abierto (inventario) no se apunta.
+        if (playerController.UiFocused) return false;
+
         // Solo se apunta con un arma a distancia en la mano.
         WeaponData weapon = inventory.EquippedWeapon;
         if (weapon == null || !weapon.isRanged) return false;

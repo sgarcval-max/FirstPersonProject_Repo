@@ -69,6 +69,13 @@ public class FirstPersonController : MonoBehaviour
         set => invertY = value;
     }
 
+    /// <summary>
+    /// True mientras el jugador está usando un panel con el ratón (por ejemplo el inventario).
+    /// Con esto activo la cámara no gira, y el disparo y el apuntado se ignoran, para que un clic en
+    /// un botón no se convierta en un disparo. El jugador sigue pudiendo andar.
+    /// </summary>
+    public bool UiFocused { get; set; }
+
     private void Awake()
     {
         controller = GetComponent<CharacterController>();
@@ -105,6 +112,8 @@ public class FirstPersonController : MonoBehaviour
 
     private void HandleMouseLook()
     {
+        if (UiFocused) return;
+
         Vector2 lookInput = controls.Movimiento.Look.ReadValue<Vector2>();
 
         // Al apuntar, la cámara gira más despacio para poder afinar la puntería.

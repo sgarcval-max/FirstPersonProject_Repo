@@ -158,10 +158,10 @@ public class PlayerCapture : MonoBehaviour
             cam.transform.localRotation = Quaternion.identity;
         }
 
-        // 2) Los guardias vuelven a su sitio y a su ruta, tranquilos.
+        // 2) Los guardias se calman y siguen su ruta desde donde estaban (no vuelven a su sitio inicial).
         foreach (HumanAI guard in FindObjectsOfType<HumanAI>())
         {
-            guard.ResetToStart();
+            guard.ResetForRespawn();
         }
 
         // 3) Se reanuda el juego.
