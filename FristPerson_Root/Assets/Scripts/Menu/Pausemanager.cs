@@ -108,7 +108,7 @@ public class PauseManager : MonoBehaviour
 
             // Esto SÍ depende del interruptor: en el Menú Principal no hay "pausa" que alternar.
             // Tampoco se puede pausar si el jugador ya ha sido atrapado (se está mostrando el Game Over).
-            if (enablePauseFunctionality && !PlayerCapture.IsCaught)
+            if (enablePauseFunctionality && !PlayerCapture.IsCaught && !MatchManager.IsMatchOver)
             {
                 TogglePause();
             }

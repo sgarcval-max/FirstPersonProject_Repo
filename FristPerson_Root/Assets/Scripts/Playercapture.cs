@@ -70,7 +70,7 @@ public class PlayerCapture : MonoBehaviour
     /// <summary>Lo llama el guardia que acaba de detectar al jugador del todo.</summary>
     public void BeginCapture(Transform guard)
     {
-        if (IsCaught) return;
+        if (IsCaught || MatchManager.IsMatchOver) return;
 
         IsCaught = true;
         caughtPosition = transform.position;
@@ -112,6 +112,9 @@ public class PlayerCapture : MonoBehaviour
 
             yield return null;
         }
+
+        // Si el tiempo se ha acabado justo durante la captura, manda la pantalla de resultados.
+        if (MatchManager.IsMatchOver) yield break;
 
         // Todo lo que llevaba cae al suelo en el sitio donde lo han atrapado.
         DropEverything();

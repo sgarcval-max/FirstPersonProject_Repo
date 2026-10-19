@@ -98,6 +98,9 @@ public class HidingSpot : MonoBehaviour, IInteractable
     {
         if (!IsOccupied) return;
 
+        // Con la partida terminada, el jugador se queda donde está: se muestra la pantalla de resultados.
+        if (MatchManager.IsMatchOver) return;
+
         // Si te atrapan estando dentro, soltamos el escondite sin mover al jugador:
         // PlayerCapture se encarga de todo lo que viene después.
         if (PlayerCapture.IsCaught)

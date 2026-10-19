@@ -52,6 +52,8 @@ public class GameOverController : MonoBehaviour
 
     private void ShowGameOver()
     {
+        if (MatchManager.IsMatchOver) return;
+
         ApplyTexts();
 
         if (panel != null) panel.SetActive(true);
