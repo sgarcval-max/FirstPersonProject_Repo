@@ -5,38 +5,26 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// Inventario de objetos clave. Se abre y se cierra con la acción "Inventory" del mapa "Combate"
-/// (Tab por defecto). Muestra una fila por cada objeto, con su nombre, sus puntos y un botón
-/// "Soltar". Al soltar uno, su fila desaparece, las de debajo suben para no dejar huecos, y el
-/// objeto cae al suelo delante del jugador (se puede volver a recoger).
-///
-/// Las filas se crean por código, no hay que montarlas en la escena.
-///
-/// Mientras el inventario está abierto aparece el cursor para poder pulsar los botones, y el jugador
-/// no gira la cámara ni dispara (para que un clic en "Soltar" no sea un disparo). Sí puede andar.
-///
-/// IMPORTANTE: este script debe ir en un objeto que esté SIEMPRE activo (por ejemplo el Canvas del
-/// HUD), NO en el propio panel, porque si el panel se desactiva el script dejaría de escuchar la
-/// tecla y no podría volver a abrirlo.
+/// Inventario de objetos clave. Agrupa objetos idénticos (ej: Vaso x2),
+/// permite soltarlos uno a uno y posiciona las filas ordenadamente desde arriba.
 /// </summary>
 public class KeyItemInventoryUI : MonoBehaviour
 {
     [Header("Panel")]
     [Tooltip("El panel que se muestra/oculta (fondo del inventario). Empieza oculto.")]
     [SerializeField] private GameObject panel;
-    [Tooltip("El texto de arriba del panel: aquí se escribe el título y, si no hay nada, el aviso de inventario vacío.")]
+    [Tooltip("Texto del título superior.")]
     [SerializeField] private TMP_Text listText;
 
-    [Header("Filas (se crean solas)")]
-    [Tooltip("Espacio reservado arriba del panel para el título, antes de empezar las filas.")]
-    [SerializeField] private float titleHeight = 90f;
-    [SerializeField] private float rowHeight = 48f;
-    [SerializeField] private float rowSpacing = 10f;
-    [SerializeField] private float rowFontSize = 28f;
+    [Header("Ajustes de Filas")]
+    [SerializeField] private float titleHeight = 70f;
+    [SerializeField] private float rowHeight = 40f;
+    [SerializeField] private float rowSpacing = 8f;
+    [SerializeField] private float rowFontSize = 22f;
     [SerializeField] private Color textColor = Color.white;
     [SerializeField] private Color pointsColor = new Color(1f, 0.85f, 0.3f, 1f);
     [SerializeField] private Color dropButtonColor = new Color(0.75f, 0.2f, 0.2f, 1f);
-    [SerializeField] private float dropButtonWidth = 130f;
+    [SerializeField] private float dropButtonWidth = 100f;
 
     private PlayerKeyItemInventory inventory;
     private FirstPersonController playerController;
@@ -46,16 +34,11 @@ public class KeyItemInventoryUI : MonoBehaviour
 
     private void OnEnable()
     {
-        // Buscamos la acción por nombre. Si aún no existe en PlayerControls, avisamos en vez de fallar.
         toggleAction = InputManager.Controls.asset.FindAction("Combate/Inventory");
 
         if (toggleAction != null)
         {
             toggleAction.performed += OnTogglePerformed;
-        }
-        else
-        {
-            Debug.LogWarning("KeyItemInventoryUI: no existe la acción 'Inventory' en el mapa 'Combate' de PlayerControls. Créala y asígnale la tecla Tab.");
         }
 
         LocalizationManager.OnLanguageChanged += Refresh;
@@ -96,8 +79,6 @@ public class KeyItemInventoryUI : MonoBehaviour
 
     private void Update()
     {
-        // Si el juego entra en pausa (o te atrapan, o te escondes) con el inventario abierto, lo cerramos.
-        // El cursor ya lo gestiona quien haya causado el cambio, así que no lo tocamos.
         if (panel != null && panel.activeSelf && !IsGameplayActive())
         {
             CloseInventory(false);
@@ -124,7 +105,6 @@ public class KeyItemInventoryUI : MonoBehaviour
 
         if (playerController != null) playerController.UiFocused = true;
 
-        // Cursor libre para poder pulsar los botones "Soltar".
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
@@ -146,27 +126,28 @@ public class KeyItemInventoryUI : MonoBehaviour
         if (UIAudioManager.Instance != null) UIAudioManager.Instance.PlayPanelClose();
     }
 
-    // ------------------------------------------------------------------ Filas
-
-    // Crea (una sola vez) el contenedor donde se colocan las filas, debajo del título del panel.
     private void BuildListContainer()
     {
         if (panel == null) return;
 
-        GameObject containerObject = new GameObject("ItemList", typeof(RectTransform), typeof(VerticalLayoutGroup));
+        GameObject containerObject = new GameObject("ItemListContainer", typeof(RectTransform), typeof(VerticalLayoutGroup));
         containerObject.transform.SetParent(panel.transform, false);
 
         listContainer = containerObject.GetComponent<RectTransform>();
-        listContainer.anchorMin = Vector2.zero;
-        listContainer.anchorMax = Vector2.one;
-        listContainer.offsetMin = new Vector2(20f, 20f);
-        listContainer.offsetMax = new Vector2(-20f, -titleHeight);
+
+        // Anclar arriba para que las filas no se centren verticalmente en el medio
+        listContainer.anchorMin = new Vector2(0f, 1f);
+        listContainer.anchorMax = new Vector2(1f, 1f);
+        listContainer.pivot = new Vector2(0.5f, 1f);
+
+        listContainer.anchoredPosition = new Vector2(0f, -titleHeight);
+        listContainer.sizeDelta = new Vector2(-40f, 0f);
 
         VerticalLayoutGroup layout = containerObject.GetComponent<VerticalLayoutGroup>();
         layout.childAlignment = TextAnchor.UpperLeft;
         layout.spacing = rowSpacing;
         layout.childControlWidth = true;
-        layout.childControlHeight = true;
+        layout.childControlHeight = false;
         layout.childForceExpandWidth = true;
         layout.childForceExpandHeight = false;
     }
@@ -174,7 +155,19 @@ public class KeyItemInventoryUI : MonoBehaviour
     private void Refresh()
     {
         bool english = GameLanguage.IsEnglish;
-        bool empty = inventory == null || inventory.Items.Count == 0;
+
+        Dictionary<KeyItemData, int> groupedItems = new Dictionary<KeyItemData, int>();
+        if (inventory != null)
+        {
+            foreach (KeyItemData item in inventory.Items)
+            {
+                if (item == null) continue;
+                if (groupedItems.ContainsKey(item)) groupedItems[item]++;
+                else groupedItems[item] = 1;
+            }
+        }
+
+        bool empty = groupedItems.Count == 0;
 
         if (listText != null)
         {
@@ -185,11 +178,11 @@ public class KeyItemInventoryUI : MonoBehaviour
         }
 
         ClearRows();
-        if (listContainer == null || inventory == null) return;
+        if (listContainer == null || empty) return;
 
-        foreach (KeyItemData item in inventory.Items)
+        foreach (KeyValuePair<KeyItemData, int> pair in groupedItems)
         {
-            CreateRow(item, english);
+            CreateRow(pair.Key, pair.Value, english);
         }
     }
 
@@ -198,16 +191,13 @@ public class KeyItemInventoryUI : MonoBehaviour
         foreach (GameObject row in rows)
         {
             if (row == null) continue;
-
-            // Se desactiva antes de destruirla: así el Layout Group la ignora ya y las demás filas
-            // suben al instante, sin esperar al final del fotograma.
             row.SetActive(false);
             Destroy(row);
         }
         rows.Clear();
     }
 
-    private void CreateRow(KeyItemData item, bool english)
+    private void CreateRow(KeyItemData item, int count, bool english)
     {
         GameObject row = new GameObject("Fila_" + item.name,
             typeof(RectTransform), typeof(HorizontalLayoutGroup), typeof(LayoutElement));
@@ -217,26 +207,31 @@ public class KeyItemInventoryUI : MonoBehaviour
         row.GetComponent<LayoutElement>().preferredHeight = rowHeight;
 
         HorizontalLayoutGroup rowLayout = row.GetComponent<HorizontalLayoutGroup>();
-        rowLayout.spacing = 12f;
+        rowLayout.spacing = 10f;
         rowLayout.childAlignment = TextAnchor.MiddleLeft;
         rowLayout.childControlWidth = true;
         rowLayout.childControlHeight = true;
         rowLayout.childForceExpandWidth = false;
         rowLayout.childForceExpandHeight = true;
 
-        // Texto: nombre del objeto y sus puntos.
+        // Texto: Nombre (xCantidad) + Puntos
         GameObject labelObject = new GameObject("Texto", typeof(RectTransform), typeof(LayoutElement));
         labelObject.transform.SetParent(row.transform, false);
         labelObject.GetComponent<LayoutElement>().flexibleWidth = 1f;
 
         TextMeshProUGUI label = labelObject.AddComponent<TextMeshProUGUI>();
-        label.text = item.GetDisplayName() + "   " + ColorTag(pointsColor) + item.points + " pts</color>";
+
+        string nameString = item.GetDisplayName();
+        if (count > 1) nameString += " <color=#AAAAAA>x" + count + "</color>";
+
+        int totalPoints = item.points * count;
+        label.text = nameString + "   " + ColorTag(pointsColor) + totalPoints + " pts</color>";
         label.fontSize = rowFontSize;
         label.color = textColor;
         label.alignment = TextAlignmentOptions.MidlineLeft;
         label.raycastTarget = false;
 
-        // Botón "Soltar".
+        // Botón "Soltar"
         GameObject buttonObject = new GameObject("BotonSoltar",
             typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
         buttonObject.transform.SetParent(row.transform, false);
@@ -249,8 +244,8 @@ public class KeyItemInventoryUI : MonoBehaviour
         button.targetGraphic = buttonImage;
 
         ColorBlock colors = button.colors;
-        colors.highlightedColor = new Color(1f, 0.85f, 0.6f, 1f);
-        colors.selectedColor = new Color(1f, 0.85f, 0.6f, 1f);
+        colors.highlightedColor = new Color(1f, 0.4f, 0.4f, 1f);
+        colors.selectedColor = new Color(1f, 0.4f, 0.4f, 1f);
         button.colors = colors;
 
         GameObject buttonTextObject = new GameObject("Texto", typeof(RectTransform));
@@ -269,7 +264,6 @@ public class KeyItemInventoryUI : MonoBehaviour
         buttonLabel.alignment = TextAlignmentOptions.Center;
         buttonLabel.raycastTarget = false;
 
-        // Sonidos de hover y click, igual que los demás botones del juego.
         buttonObject.AddComponent<UIButtonAudioFeedback>();
 
         KeyItemData itemToDrop = item;
@@ -280,7 +274,6 @@ public class KeyItemInventoryUI : MonoBehaviour
     {
         if (inventory != null)
         {
-            // Al soltarlo, el inventario avisa con OnChanged y la lista se reconstruye sola.
             inventory.DropItem(item);
         }
     }

@@ -1,13 +1,10 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using TMPro;
 
 /// <summary>
-/// Lleva la puntuación del jugador: es la suma de los puntos de los objetos clave que lleva en el
-/// inventario en este momento. Recoger un objeto suma sus puntos; soltarlo (o que te atrapen y se
-/// te caiga todo) los resta. Así no hace falta llevar ninguna cuenta aparte.
-///
-/// Debe ir en un objeto que esté siempre activo (por ejemplo el Canvas del HUD).
+/// Lleva la puntuación con animación de conteo progresivo y cambios de color (verde al subir, rojo al bajar).
 /// </summary>
 public class ScoreManager : MonoBehaviour
 {
@@ -16,13 +13,20 @@ public class ScoreManager : MonoBehaviour
     [Tooltip("El texto del HUD donde se muestra la puntuación.")]
     [SerializeField] private TMP_Text scoreText;
 
-    /// <summary>La puntuación actual: los puntos de todo lo que llevas en el inventario.</summary>
-    public int Score { get; private set; }
+    [Header("Colores de Animación")]
+    [SerializeField] private Color normalColor = Color.white;
+    [SerializeField] private Color gainColor = new Color(0.2f, 0.9f, 0.3f, 1f); // Verde
+    [SerializeField] private Color lossColor = new Color(1f, 0.25f, 0.2f, 1f);  // Rojo
 
-    /// <summary>Se dispara cada vez que cambia la puntuación.</summary>
+    [Header("Animación")]
+    [SerializeField] private float animDuration = 0.6f;
+
+    public int Score { get; private set; }
     public event Action<int> OnScoreChanged;
 
     private PlayerKeyItemInventory inventory;
+    private Coroutine scoreAnimRoutine;
+    private int currentDisplayedScore = 0;
 
     private void Awake()
     {
@@ -31,12 +35,12 @@ public class ScoreManager : MonoBehaviour
 
     private void OnEnable()
     {
-        LocalizationManager.OnLanguageChanged += RefreshText;
+        LocalizationManager.OnLanguageChanged += ForceRefreshText;
     }
 
     private void OnDisable()
     {
-        LocalizationManager.OnLanguageChanged -= RefreshText;
+        LocalizationManager.OnLanguageChanged -= ForceRefreshText;
     }
 
     private void Start()
@@ -46,10 +50,6 @@ public class ScoreManager : MonoBehaviour
         if (inventory != null)
         {
             inventory.OnChanged += Recalculate;
-        }
-        else
-        {
-            Debug.LogWarning("ScoreManager: no se encontró PlayerKeyItemInventory en la escena.");
         }
 
         Recalculate();
@@ -76,25 +76,71 @@ public class ScoreManager : MonoBehaviour
         {
             foreach (KeyItemData item in inventory.Items)
             {
-                total += item.points;
+                if (item != null) total += item.points;
             }
         }
 
-        bool changed = total != Score;
+        int previousScore = Score;
         Score = total;
 
-        RefreshText();
-
-        if (changed && OnScoreChanged != null)
+        if (previousScore != Score)
         {
-            OnScoreChanged.Invoke(Score);
+            if (scoreAnimRoutine != null) StopCoroutine(scoreAnimRoutine);
+            scoreAnimRoutine = StartCoroutine(AnimateScoreRoutine(previousScore, Score));
+
+            if (OnScoreChanged != null) OnScoreChanged.Invoke(Score);
+        }
+        else
+        {
+            currentDisplayedScore = Score;
+            ForceRefreshText();
         }
     }
 
-    private void RefreshText()
+    private IEnumerator AnimateScoreRoutine(int startVal, int targetVal)
+    {
+        bool isGaining = targetVal > startVal;
+        if (scoreText != null)
+        {
+            scoreText.color = isGaining ? gainColor : lossColor;
+        }
+
+        float elapsed = 0f;
+        while (elapsed < animDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / animDuration);
+            float eased = 1f - Mathf.Pow(1f - t, 2f);
+
+            currentDisplayedScore = Mathf.RoundToInt(Mathf.Lerp(startVal, targetVal, eased));
+            UpdateTextDisplay(currentDisplayedScore);
+
+            yield return null;
+        }
+
+        currentDisplayedScore = targetVal;
+        UpdateTextDisplay(currentDisplayedScore);
+
+        if (scoreText != null)
+        {
+            scoreText.color = normalColor;
+        }
+
+        scoreAnimRoutine = null;
+    }
+
+    private void ForceRefreshText()
+    {
+        UpdateTextDisplay(currentDisplayedScore);
+        if (scoreText != null && scoreAnimRoutine == null)
+        {
+            scoreText.color = normalColor;
+        }
+    }
+
+    private void UpdateTextDisplay(int value)
     {
         if (scoreText == null) return;
-
-        scoreText.text = (GameLanguage.IsEnglish ? "Score: " : "Puntos: ") + Score;
+        scoreText.text = (GameLanguage.IsEnglish ? "Score: " : "Puntos: ") + value;
     }
 }

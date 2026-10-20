@@ -4,9 +4,8 @@ using UnityEngine.InputSystem;
 
 /// <summary>
 /// Controlador de personaje en primera persona usando el New Input System.
-/// Lee las acciones del Action Map "Movimiento" del asset PlayerControls
-/// (generado a partir de PlayerControls.inputactions con "Generate C# Class").
-/// Mantiene los mismos UnityEvents que antes para no romper nada ya conectado en el Inspector.
+/// Lee las acciones del Action Map "Movimiento" del asset PlayerControls.
+/// Integrado con PlayerStamina para impedir correr cuando se agota la energía.
 /// </summary>
 [RequireComponent(typeof(CharacterController))]
 public class FirstPersonController : MonoBehaviour
@@ -41,8 +40,9 @@ public class FirstPersonController : MonoBehaviour
     public UnityEvent OnFootstep;
 
     private CharacterController controller;
-    private PlayerCrouch crouch; // opcional: si el jugador lo tiene, puede agacharse
-    private PlayerAim aim;       // opcional: si el jugador lo tiene, puede apuntar
+    private PlayerCrouch crouch;   // opcional: si el jugador lo tiene, puede agacharse
+    private PlayerAim aim;         // opcional: si el jugador lo tiene, puede apuntar
+    private PlayerStamina stamina; // integrado: gestiona el cansancio al correr
 
     private Vector3 velocity;
     private float pitch = 0f;
@@ -81,6 +81,7 @@ public class FirstPersonController : MonoBehaviour
         controller = GetComponent<CharacterController>();
         crouch = GetComponent<PlayerCrouch>();
         aim = GetComponent<PlayerAim>();
+        stamina = GetComponent<PlayerStamina>();
 
         if (cameraTransform == null && Camera.main != null)
         {
@@ -151,7 +152,10 @@ public class FirstPersonController : MonoBehaviour
         Vector2 moveInput = controls.Movimiento.Move.ReadValue<Vector2>();
         bool crouching = crouch != null && crouch.IsCrouching;
         bool aiming = aim != null && aim.IsAiming;
-        bool isRunning = controls.Movimiento.Run.IsPressed() && !crouching && !aiming;
+
+        // Validación de estamina: solo permite correr si le queda energía y no está agotado
+        bool canRun = stamina == null || stamina.CanRun;
+        bool isRunning = controls.Movimiento.Run.IsPressed() && !crouching && !aiming && canRun;
 
         Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
         move = Vector3.ClampMagnitude(move, 1f);
