@@ -5,26 +5,25 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// Inventario de objetos clave. Agrupa objetos idénticos (ej: Vaso x2),
-/// permite soltarlos uno a uno y posiciona las filas ordenadamente desde arriba.
+/// Inventario compacto estilo nota en la esquina inferior izquierda con contador de capacidad (ej: 0/5).
 /// </summary>
 public class KeyItemInventoryUI : MonoBehaviour
 {
     [Header("Panel")]
-    [Tooltip("El panel que se muestra/oculta (fondo del inventario). Empieza oculto.")]
+    [Tooltip("El panel que se muestra/oculta. Debe estar anclado abajo a la izquierda en el Canvas.")]
     [SerializeField] private GameObject panel;
-    [Tooltip("Texto del título superior.")]
+    [Tooltip("Texto del título superior donde se muestra el contador (ej: Inventario 2/5).")]
     [SerializeField] private TMP_Text listText;
 
-    [Header("Ajustes de Filas")]
-    [SerializeField] private float titleHeight = 70f;
-    [SerializeField] private float rowHeight = 40f;
-    [SerializeField] private float rowSpacing = 8f;
-    [SerializeField] private float rowFontSize = 22f;
+    [Header("Ajustes de Filas (Estilo Nota)")]
+    [SerializeField] private float titleHeight = 45f;
+    [SerializeField] private float rowHeight = 32f;
+    [SerializeField] private float rowSpacing = 6f;
+    [SerializeField] private float rowFontSize = 18f;
     [SerializeField] private Color textColor = Color.white;
     [SerializeField] private Color pointsColor = new Color(1f, 0.85f, 0.3f, 1f);
     [SerializeField] private Color dropButtonColor = new Color(0.75f, 0.2f, 0.2f, 1f);
-    [SerializeField] private float dropButtonWidth = 100f;
+    [SerializeField] private float dropButtonWidth = 80f;
 
     private PlayerKeyItemInventory inventory;
     private FirstPersonController playerController;
@@ -135,13 +134,13 @@ public class KeyItemInventoryUI : MonoBehaviour
 
         listContainer = containerObject.GetComponent<RectTransform>();
 
-        // Anclar arriba para que las filas no se centren verticalmente en el medio
+        // Anclar arriba dentro del panel
         listContainer.anchorMin = new Vector2(0f, 1f);
         listContainer.anchorMax = new Vector2(1f, 1f);
         listContainer.pivot = new Vector2(0.5f, 1f);
 
         listContainer.anchoredPosition = new Vector2(0f, -titleHeight);
-        listContainer.sizeDelta = new Vector2(-40f, 0f);
+        listContainer.sizeDelta = new Vector2(-20f, 0f);
 
         VerticalLayoutGroup layout = containerObject.GetComponent<VerticalLayoutGroup>();
         layout.childAlignment = TextAnchor.UpperLeft;
@@ -155,6 +154,9 @@ public class KeyItemInventoryUI : MonoBehaviour
     private void Refresh()
     {
         bool english = GameLanguage.IsEnglish;
+
+        int currentCount = inventory != null ? inventory.Count : 0;
+        int maxCapacity = inventory != null ? inventory.MaxCapacity : 5;
 
         Dictionary<KeyItemData, int> groupedItems = new Dictionary<KeyItemData, int>();
         if (inventory != null)
@@ -171,9 +173,10 @@ public class KeyItemInventoryUI : MonoBehaviour
 
         if (listText != null)
         {
-            string title = "<b>" + (english ? "Inventory" : "Inventario") + "</b>";
+            string titleName = english ? "Inventory" : "Inventario";
+            string title = "<b>" + titleName + " " + currentCount + "/" + maxCapacity + "</b>";
             listText.text = empty
-                ? title + "\n\n" + (english ? "Nothing found yet." : "Aún no has encontrado nada.")
+                ? title + "\n<size=14><color=#AAAAAA>" + (english ? "Empty" : "Vacío") + "</color></size>"
                 : title;
         }
 
@@ -207,14 +210,14 @@ public class KeyItemInventoryUI : MonoBehaviour
         row.GetComponent<LayoutElement>().preferredHeight = rowHeight;
 
         HorizontalLayoutGroup rowLayout = row.GetComponent<HorizontalLayoutGroup>();
-        rowLayout.spacing = 10f;
+        rowLayout.spacing = 8f;
         rowLayout.childAlignment = TextAnchor.MiddleLeft;
         rowLayout.childControlWidth = true;
         rowLayout.childControlHeight = true;
         rowLayout.childForceExpandWidth = false;
         rowLayout.childForceExpandHeight = true;
 
-        // Texto: Nombre (xCantidad) + Puntos
+        // Texto compacto: Nombre (xCant) + Puntos
         GameObject labelObject = new GameObject("Texto", typeof(RectTransform), typeof(LayoutElement));
         labelObject.transform.SetParent(row.transform, false);
         labelObject.GetComponent<LayoutElement>().flexibleWidth = 1f;
@@ -225,13 +228,13 @@ public class KeyItemInventoryUI : MonoBehaviour
         if (count > 1) nameString += " <color=#AAAAAA>x" + count + "</color>";
 
         int totalPoints = item.points * count;
-        label.text = nameString + "   " + ColorTag(pointsColor) + totalPoints + " pts</color>";
+        label.text = nameString + "  " + ColorTag(pointsColor) + totalPoints + "pts</color>";
         label.fontSize = rowFontSize;
         label.color = textColor;
         label.alignment = TextAlignmentOptions.MidlineLeft;
         label.raycastTarget = false;
 
-        // Botón "Soltar"
+        // Botón "Soltar" compacto
         GameObject buttonObject = new GameObject("BotonSoltar",
             typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
         buttonObject.transform.SetParent(row.transform, false);
@@ -259,7 +262,7 @@ public class KeyItemInventoryUI : MonoBehaviour
 
         TextMeshProUGUI buttonLabel = buttonTextObject.AddComponent<TextMeshProUGUI>();
         buttonLabel.text = english ? "Drop" : "Soltar";
-        buttonLabel.fontSize = rowFontSize * 0.85f;
+        buttonLabel.fontSize = rowFontSize * 0.8f;
         buttonLabel.color = Color.white;
         buttonLabel.alignment = TextAlignmentOptions.Center;
         buttonLabel.raycastTarget = false;
