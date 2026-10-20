@@ -6,6 +6,7 @@ using TMPro;
 
 /// <summary>
 /// Inventario compacto estilo nota en la esquina inferior izquierda con contador de capacidad (ej: 0/5).
+/// Permite personalizar totalmente el Padding y espaciado del Vertical Layout Group desde el Inspector.
 /// </summary>
 public class KeyItemInventoryUI : MonoBehaviour
 {
@@ -25,10 +26,21 @@ public class KeyItemInventoryUI : MonoBehaviour
     [SerializeField] private Color dropButtonColor = new Color(0.75f, 0.2f, 0.2f, 1f);
     [SerializeField] private float dropButtonWidth = 80f;
 
+    [Header("Padding / Márgenes de la Lista (Vertical Layout Group)")]
+    [Tooltip("Margen izquierdo en píxeles.")]
+    [SerializeField] private int paddingLeft = 10;
+    [Tooltip("Margen derecho en píxeles.")]
+    [SerializeField] private int paddingRight = 10;
+    [Tooltip("Margen superior en píxeles.")]
+    [SerializeField] private int paddingTop = 5;
+    [Tooltip("Margen inferior en píxeles.")]
+    [SerializeField] private int paddingBottom = 5;
+
     private PlayerKeyItemInventory inventory;
     private FirstPersonController playerController;
     private InputAction toggleAction;
     private RectTransform listContainer;
+    private VerticalLayoutGroup containerLayoutGroup;
     private readonly List<GameObject> rows = new List<GameObject>();
 
     private void OnEnable()
@@ -134,25 +146,36 @@ public class KeyItemInventoryUI : MonoBehaviour
 
         listContainer = containerObject.GetComponent<RectTransform>();
 
-        // Anclar arriba dentro del panel
+        // Anclar arriba en la parte superior del panel
         listContainer.anchorMin = new Vector2(0f, 1f);
         listContainer.anchorMax = new Vector2(1f, 1f);
         listContainer.pivot = new Vector2(0.5f, 1f);
 
         listContainer.anchoredPosition = new Vector2(0f, -titleHeight);
-        listContainer.sizeDelta = new Vector2(-20f, 0f);
+        listContainer.sizeDelta = new Vector2(0f, 0f);
 
-        VerticalLayoutGroup layout = containerObject.GetComponent<VerticalLayoutGroup>();
-        layout.childAlignment = TextAnchor.UpperLeft;
-        layout.spacing = rowSpacing;
-        layout.childControlWidth = true;
-        layout.childControlHeight = false;
-        layout.childForceExpandWidth = true;
-        layout.childForceExpandHeight = false;
+        containerLayoutGroup = containerObject.GetComponent<VerticalLayoutGroup>();
+        ApplyLayoutSettings();
+    }
+
+    private void ApplyLayoutSettings()
+    {
+        if (containerLayoutGroup == null) return;
+
+        // Configuración de Padding personalizada desde el Inspector
+        containerLayoutGroup.padding = new RectOffset(paddingLeft, paddingRight, paddingTop, paddingBottom);
+        containerLayoutGroup.spacing = rowSpacing;
+        containerLayoutGroup.childAlignment = TextAnchor.UpperLeft;
+        containerLayoutGroup.childControlWidth = true;
+        containerLayoutGroup.childControlHeight = false;
+        containerLayoutGroup.childForceExpandWidth = true;
+        containerLayoutGroup.childForceExpandHeight = false;
     }
 
     private void Refresh()
     {
+        ApplyLayoutSettings();
+
         bool english = GameLanguage.IsEnglish;
 
         int currentCount = inventory != null ? inventory.Count : 0;
