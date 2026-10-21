@@ -3964,7 +3964,7 @@ MonoBehaviour:
   itemsToSpawn:
   - itemPrefab: {fileID: 2560502239431674254, guid: 259c5c4b61209b549b0be26ffc1d902d, type: 3}
     amountToSpawn: 3
-  - itemPrefab: {fileID: 6299294521583207562, guid: 868cccaa994a2934ea8eee26fdecf47e, type: 3}
+  - itemPrefab: {fileID: 5047281800772331677, guid: 8721621f8de58bf4c951ba47c7bcbba0, type: 3}
     amountToSpawn: 2
   - itemPrefab: {fileID: 1998054018732691239, guid: ec8dc3093fa3cd0468795204974ed4f0, type: 3}
     amountToSpawn: 3
@@ -3972,7 +3972,7 @@ MonoBehaviour:
     amountToSpawn: 2
   - itemPrefab: {fileID: 7793814782954826435, guid: 53a13df3e2de5b7478269f673f3f674e, type: 3}
     amountToSpawn: 2
-  - itemPrefab: {fileID: 7790325144964628733, guid: a32eef74843ba48479e716b87fb720dc, type: 3}
+  - itemPrefab: {fileID: 4488800072966777587, guid: e51e105a5f8333042a6492028609916b, type: 3}
     amountToSpawn: 2
   - itemPrefab: {fileID: 1174575586585064286, guid: 0f77388ca0841bd44892dc77bde8b1bd, type: 3}
     amountToSpawn: 3
