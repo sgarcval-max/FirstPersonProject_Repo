@@ -3149,7 +3149,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.5449829, y: -0.60498047}
+  m_AnchoredPosition: {x: 0.5449219, y: -0.60498047}
   m_SizeDelta: {x: 2.9300132, y: 4.9900694}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1171674050
@@ -5207,7 +5207,7 @@ MonoBehaviour:
   gameplayPlaylist:
   - {fileID: 8300000, guid: 548bb2e3ce723e442800770292b359d9, type: 3}
   - {fileID: 8300000, guid: 139066fbf17bd5a48a8de2800a370299, type: 3}
-  musicAudioSource: {fileID: 2080779662}
+  musicOutputGroup: {fileID: 0}
   fadeDuration: 1
 --- !u!4 &2080779661
 Transform:

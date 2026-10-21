@@ -141,6 +141,37 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 1895651947933065317, guid: 750cf5beac4cef242b57579211d89fc7, type: 3}
+--- !u!1 &30113625
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 30113626}
+  m_Layer: 0
+  m_Name: SpawnPoint_01 (25)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &30113626
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 30113625}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -50.7, y: 0.53, z: 33.1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2078263497}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &65319061
 GameObject:
   m_ObjectHideFlags: 0
@@ -2034,6 +2065,37 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
   key: Cancel_Button
+--- !u!1 &322246412
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 322246413}
+  m_Layer: 0
+  m_Name: SpawnPoint_01 (23)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &322246413
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 322246412}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -42.9, y: 0.53, z: 33.1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2078263497}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -2173,6 +2235,37 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!1 &342760237
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 342760238}
+  m_Layer: 0
+  m_Name: SpawnPoint_01 (24)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &342760238
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 342760237}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -35, y: 0.53, z: 33.1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2078263497}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &355752749
 GameObject:
   m_ObjectHideFlags: 0
@@ -3874,20 +3967,20 @@ MonoBehaviour:
   - itemPrefab: {fileID: 6299294521583207562, guid: 868cccaa994a2934ea8eee26fdecf47e, type: 3}
     amountToSpawn: 2
   - itemPrefab: {fileID: 1998054018732691239, guid: ec8dc3093fa3cd0468795204974ed4f0, type: 3}
-    amountToSpawn: 4
+    amountToSpawn: 3
   - itemPrefab: {fileID: 4271530726242342760, guid: 9effe52003bf7d74aa3899a66c04cadf, type: 3}
     amountToSpawn: 2
   - itemPrefab: {fileID: 7793814782954826435, guid: 53a13df3e2de5b7478269f673f3f674e, type: 3}
-    amountToSpawn: 4
+    amountToSpawn: 2
   - itemPrefab: {fileID: 7790325144964628733, guid: a32eef74843ba48479e716b87fb720dc, type: 3}
-    amountToSpawn: 4
-  - itemPrefab: {fileID: 8396601741505909506, guid: 095b32c6846e0ef4e97b4bf9c9dd4b6a, type: 3}
+    amountToSpawn: 2
+  - itemPrefab: {fileID: 1174575586585064286, guid: 0f77388ca0841bd44892dc77bde8b1bd, type: 3}
     amountToSpawn: 3
   - itemPrefab: {fileID: 2140997611552715025, guid: 9516fee7ab0366b42b4561a622b8dee8, type: 3}
     amountToSpawn: 2
   - itemPrefab: {fileID: 4060054629240817150, guid: d1bf43222cef6484b95d375630b5b895, type: 3}
     amountToSpawn: 2
-  - itemPrefab: {fileID: 3419074257296718289, guid: a53670a575d52854a8306682fa50fbd3, type: 3}
+  - itemPrefab: {fileID: 8561148778891730124, guid: 744f4ae7c0aeece488e2e1ede1f411ec, type: 3}
     amountToSpawn: 4
   candidateSpawnPoints:
   - {fileID: 1939282862}
@@ -3913,6 +4006,9 @@ MonoBehaviour:
   - {fileID: 1053119419}
   - {fileID: 989978702}
   - {fileID: 1019921057}
+  - {fileID: 322246413}
+  - {fileID: 342760238}
+  - {fileID: 30113626}
   showGizmos: 1
   gizmoColor: {r: 0, g: 1, b: 1, a: 1}
   gizmoRadius: 0.35
@@ -13560,6 +13656,9 @@ Transform:
   - {fileID: 1053119419}
   - {fileID: 989978702}
   - {fileID: 1019921057}
+  - {fileID: 322246413}
+  - {fileID: 342760238}
+  - {fileID: 30113626}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2103073909
