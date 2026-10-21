@@ -119,7 +119,7 @@ public class KeyItemInventoryUI : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        if (UIAudioManager.Instance != null) UIAudioManager.Instance.PlayPanelOpen();
+        if (UIAudioManager.Instance != null) UIAudioManager.Instance.PlayInventoryOpen();
     }
 
     private void CloseInventory(bool relockCursor)
@@ -134,7 +134,7 @@ public class KeyItemInventoryUI : MonoBehaviour
             Cursor.visible = false;
         }
 
-        if (UIAudioManager.Instance != null) UIAudioManager.Instance.PlayPanelClose();
+        if (UIAudioManager.Instance != null) UIAudioManager.Instance.PlayInventoryClose();
     }
 
     private void BuildListContainer()

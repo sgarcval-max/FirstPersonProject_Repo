@@ -1,46 +1,101 @@
 using UnityEngine;
 
 /// <summary>
-/// Gestor central de los efectos de sonido de la interfaz (menús, botones).
-/// Reproduce los clips a través de un AudioSource cuyo Output debe apuntar al grupo
-/// "SFX" del Audio Mixer, para que respete el slider de volumen de Efectos de Ajustes.
+/// Gestor central de efectos de sonido para la interfaz de usuario (UI), paneles e inventario.
 /// </summary>
 public class UIAudioManager : MonoBehaviour
 {
     public static UIAudioManager Instance { get; private set; }
 
-    [Header("Fuente de audio (Output debe ser el grupo SFX del Mixer)")]
-    [SerializeField] private AudioSource sfxSource;
+    [Header("Configuración de AudioSource")]
+    [SerializeField] private AudioSource uiAudioSource;
 
-    [Header("Clips")]
-    [SerializeField] private AudioClip panelOpenClip;
-    [SerializeField] private AudioClip panelCloseClip;
+    [Header("Botones")]
     [SerializeField] private AudioClip buttonClickClip;
     [SerializeField] private AudioClip buttonHoverClip;
-    [SerializeField] private AudioClip keyRebindClip;
+
+    [Header("Paneles Generales")]
+    [SerializeField] private AudioClip panelOpenClip;
+    [SerializeField] private AudioClip panelCloseClip;
+
+    [Header("Inventario / Mochila (Exclusivos)")]
+    [Tooltip("Sonido único al abrir el inventario. Si no asignas nada, usará el sonido de abrir panel.")]
+    [SerializeField] private AudioClip inventoryOpenClip;
+    [Tooltip("Sonido único al cerrar el inventario. Si no asignas nada, usará el sonido de cerrar panel.")]
+    [SerializeField] private AudioClip inventoryCloseClip;
+
+    [Header("Ajustes y Reasignación de Teclas")]
+    [SerializeField] private AudioClip keyRebindStartClip;
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
         {
             Destroy(gameObject);
             return;
         }
-        Instance = this;
+
+        if (uiAudioSource == null)
+        {
+            uiAudioSource = GetComponent<AudioSource>();
+            if (uiAudioSource == null)
+            {
+                uiAudioSource = gameObject.AddComponent<AudioSource>();
+            }
+        }
     }
 
-    public void PlayPanelOpen() => PlayClip(panelOpenClip);
-    public void PlayPanelClose() => PlayClip(panelCloseClip);
-    public void PlayButtonClick() => PlayClip(buttonClickClip);
-    public void PlayButtonHover() => PlayClip(buttonHoverClip);
-    public void PlayKeyRebindStart() => PlayClip(keyRebindClip);
+    // --- MÉTODOS DE BOTONES ---
+    public void PlayButtonClick()
+    {
+        PlayClip(buttonClickClip);
+    }
+
+    public void PlayButtonHover()
+    {
+        PlayClip(buttonHoverClip);
+    }
+
+    // --- MÉTODOS DE PANELES Y MENÚS ---
+    public void PlayPanelOpen()
+    {
+        PlayClip(panelOpenClip);
+    }
+
+    public void PlayPanelClose()
+    {
+        PlayClip(panelCloseClip);
+    }
+
+    // --- MÉTODOS EXCLUSIVOS DE INVENTARIO ---
+    public void PlayInventoryOpen()
+    {
+        AudioClip clip = inventoryOpenClip != null ? inventoryOpenClip : panelOpenClip;
+        PlayClip(clip);
+    }
+
+    public void PlayInventoryClose()
+    {
+        AudioClip clip = inventoryCloseClip != null ? inventoryCloseClip : panelCloseClip;
+        PlayClip(clip);
+    }
+
+    // --- MÉTODOS DE CONFIGURACIÓN ---
+    public void PlayKeyRebindStart()
+    {
+        PlayClip(keyRebindStartClip);
+    }
 
     private void PlayClip(AudioClip clip)
     {
-        if (clip != null && sfxSource != null)
+        if (uiAudioSource != null && clip != null)
         {
-            // PlayOneShot permite que se solapen varios sonidos sin cortar el anterior
-            sfxSource.PlayOneShot(clip);
+            uiAudioSource.PlayOneShot(clip);
         }
     }
 }
