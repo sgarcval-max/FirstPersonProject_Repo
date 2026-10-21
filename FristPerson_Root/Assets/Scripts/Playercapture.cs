@@ -153,9 +153,10 @@ public class PlayerCapture : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
+        // 7) Los guardias se calman. Si están pegados al spawn, se reubican lejos.
         foreach (HumanAI guard in FindObjectsOfType<HumanAI>())
         {
-            guard.ResetForRespawn();
+            guard.ResetForRespawn(startPosition, 5f);
         }
 
         OnRespawned?.Invoke();

@@ -140,15 +140,24 @@ public class HumanAI : MonoBehaviour
     }
 
     /// <summary>
-    /// Tras reaparecer el jugador: el guardia se calma y retoma su patrulla DESDE DONDE ESTÁ (no
-    /// vuelve a su sitio inicial). El guardia que atrapó al jugador se queda así junto a lo que este
-    /// soltó. Un guardia aturdido sigue aturdido hasta que se le pase.
+    /// Tras reaparecer el jugador: el guardia se calma y retoma su patrulla.
+    /// Si el guardia está demasiado cerca del punto de reaparición del jugador,
+    /// se teletransporta a su origen para evitar bucles de captura.
     /// </summary>
-    public void ResetForRespawn()
+    public void ResetForRespawn(Vector3 playerSpawnPoint, float safeDistance = 5f)
     {
+        // 1. Si el guardia está dentro del radio de seguridad del respawn, vuelve a su inicio
+        if (Vector3.Distance(transform.position, playerSpawnPoint) < safeDistance)
+        {
+            ResetToStart();
+            return;
+        }
+
+        // 2. Si estaba aturdido, dejamos que siga aturdido
         HumanStun stun = GetComponent<HumanStun>();
         if (stun != null && stun.IsStunned) return;
 
+        // 3. Limpiar sospecha y reanudar patrulla desde donde está
         if (vision != null) vision.ResetSuspicion();
         if (hearing != null) hearing.HasHeardNoise = false;
 
@@ -157,7 +166,6 @@ public class HumanAI : MonoBehaviour
             agent.isStopped = false;
         }
 
-        // Desactivar y volver a activar la patrulla hace que retome su ruta hacia el siguiente punto.
         patrol.enabled = false;
         EnterPatrol();
     }
