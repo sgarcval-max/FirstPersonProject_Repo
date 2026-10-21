@@ -3327,12 +3327,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ca711646e77ba74390058d941d04ec9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIAudioManager
-  sfxSource: {fileID: 371033122}
-  panelOpenClip: {fileID: 8300000, guid: 01f1e81521323c14caaa7576c53ddb5e, type: 3}
-  panelCloseClip: {fileID: 8300000, guid: dedd2cd9e4b3e1047bb4d6527b77b057, type: 3}
+  uiAudioSource: {fileID: 0}
   buttonClickClip: {fileID: 8300000, guid: 19f0809a013647b4b9518d1c3dc0c1e4, type: 3}
   buttonHoverClip: {fileID: 8300000, guid: cba5b3dce03b6e145a89541804b80e12, type: 3}
-  keyRebindClip: {fileID: 0}
+  panelOpenClip: {fileID: 8300000, guid: 01f1e81521323c14caaa7576c53ddb5e, type: 3}
+  panelCloseClip: {fileID: 8300000, guid: dedd2cd9e4b3e1047bb4d6527b77b057, type: 3}
+  inventoryOpenClip: {fileID: 0}
+  inventoryCloseClip: {fileID: 0}
+  keyRebindStartClip: {fileID: 0}
 --- !u!82 &371033122
 AudioSource:
   m_ObjectHideFlags: 0
@@ -15200,7 +15202,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: -4543875893180963210, guid: 8a3e6c73505593c419a005317f6c6055, type: 2}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: 685e37cddbc25824b991b45acc1f90a8, type: 3}
+  m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
