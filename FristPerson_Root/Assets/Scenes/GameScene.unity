@@ -10464,6 +10464,7 @@ GameObject:
   - component: {fileID: 1671297801}
   - component: {fileID: 1671297802}
   - component: {fileID: 1671297803}
+  - component: {fileID: 1671297804}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -10802,6 +10803,43 @@ MonoBehaviour:
   recoveryRate: 16
   staminaFillImage: {fileID: 112699614}
   staminaBarContainer: {fileID: 0}
+--- !u!114 &1671297804
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1671297787}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d3ee4ce7198d2d54295cbffd050da54f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerBobAndSway
+  playerCamera: {fileID: 330585546}
+  weaponHolder: {fileID: 702735132}
+  characterController: {fileID: 1671297788}
+  enableCameraBob: 1
+  enableWeaponBob: 1
+  camBobFrequency: 12
+  camBobHorizontalAmount: 0.03
+  camBobVerticalAmount: 0.05
+  weaponBobHorizontalAmount: 0.04
+  weaponBobVerticalAmount: 0.04
+  sprintFreqMultiplier: 1.35
+  sprintAmpMultiplier: 1.4
+  crouchFreqMultiplier: 0.65
+  crouchAmpMultiplier: 0.35
+  enableWeaponSway: 1
+  swayAmount: 0.05
+  maxSwayAmount: 0.12
+  swaySmoothness: 8
+  enableJumpLandImpact: 1
+  jumpDipAmount: -0.06
+  landImpactAmount: -0.1
+  impactRecoverySpeed: 8
+  aimingCameraBobMultiplier: 0.2
+  aimingWeaponBobMultiplier: 0.2
+  aimingSwayMultiplier: 0.15
 --- !u!1 &1700814133
 GameObject:
   m_ObjectHideFlags: 0
