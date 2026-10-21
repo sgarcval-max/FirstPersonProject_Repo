@@ -4,8 +4,7 @@ using UnityEngine.InputSystem;
 
 /// <summary>
 /// Controlador de personaje en primera persona usando el New Input System.
-/// Lee las acciones del Action Map "Movimiento" del asset PlayerControls.
-/// Integrado con PlayerStamina para impedir correr cuando se agota la energía.
+/// Adaptado para personajes de escala reducida (mono 0.15).
 /// </summary>
 [RequireComponent(typeof(CharacterController))]
 public class FirstPersonController : MonoBehaviour
@@ -40,9 +39,9 @@ public class FirstPersonController : MonoBehaviour
     public UnityEvent OnFootstep;
 
     private CharacterController controller;
-    private PlayerCrouch crouch;   // opcional: si el jugador lo tiene, puede agacharse
-    private PlayerAim aim;         // opcional: si el jugador lo tiene, puede apuntar
-    private PlayerStamina stamina; // integrado: gestiona el cansancio al correr
+    private PlayerCrouch crouch;
+    private PlayerAim aim;
+    private PlayerStamina stamina;
 
     private Vector3 velocity;
     private float pitch = 0f;
@@ -51,10 +50,7 @@ public class FirstPersonController : MonoBehaviour
     private bool wasGroundedLastFrame = true;
     private float distanceSinceLastStep = 0f;
 
-    // Acceso directo a los controles compartidos (una sola instancia para todo el juego)
     private PlayerControls controls => InputManager.Controls;
-
-    // Multiplicador extra para que el Mouse Delta del Input System se sienta similar a antes
     private const float LOOK_SCALE = 0.02f;
 
     public float MouseSensitivity
@@ -69,11 +65,6 @@ public class FirstPersonController : MonoBehaviour
         set => invertY = value;
     }
 
-    /// <summary>
-    /// True mientras el jugador está usando un panel con el ratón (por ejemplo el inventario).
-    /// Con esto activo la cámara no gira, y el disparo y el apuntado se ignoran, para que un clic en
-    /// un botón no se convierta en un disparo. El jugador sigue pudiendo andar.
-    /// </summary>
     public bool UiFocused { get; set; }
 
     private void Awake()
@@ -82,6 +73,13 @@ public class FirstPersonController : MonoBehaviour
         crouch = GetComponent<PlayerCrouch>();
         aim = GetComponent<PlayerAim>();
         stamina = GetComponent<PlayerStamina>();
+
+        // Adaptación indispensable de físicas para escala 0.15
+        if (controller != null)
+        {
+            controller.skinWidth = 0.005f;
+            controller.minMoveDistance = 0f;
+        }
 
         if (cameraTransform == null && Camera.main != null)
         {
@@ -105,6 +103,20 @@ public class FirstPersonController : MonoBehaviour
         Cursor.visible = false;
     }
 
+    /// <summary>
+    /// Restablece los parámetros de velocidad y físicas al reaparecer tras un Game Over.
+    /// </summary>
+    public void ResetState()
+    {
+        velocity = Vector3.zero;
+        pitch = 0f;
+        wasGroundedLastFrame = true;
+        wasMovingLastFrame = false;
+        wasRunningLastFrame = false;
+        distanceSinceLastStep = 0f;
+        UiFocused = false;
+    }
+
     private void Update()
     {
         HandleMouseLook();
@@ -117,21 +129,20 @@ public class FirstPersonController : MonoBehaviour
 
         Vector2 lookInput = controls.Movimiento.Look.ReadValue<Vector2>();
 
-        // Al apuntar, la cámara gira más despacio para poder afinar la puntería.
         float lookMultiplier = aim != null ? aim.LookMultiplier : 1f;
         float mouseX = lookInput.x * mouseSensitivity * LOOK_SCALE * lookMultiplier;
         float mouseY = lookInput.y * mouseSensitivity * LOOK_SCALE * lookMultiplier;
 
-        if (invertY)
-        {
-            mouseY *= -1f;
-        }
+        if (invertY) mouseY *= -1f;
 
         transform.Rotate(Vector3.up * mouseX);
 
         pitch -= mouseY;
         pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
-        cameraTransform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+        if (cameraTransform != null)
+        {
+            cameraTransform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+        }
     }
 
     private void HandleMovement()
@@ -153,7 +164,6 @@ public class FirstPersonController : MonoBehaviour
         bool crouching = crouch != null && crouch.IsCrouching;
         bool aiming = aim != null && aim.IsAiming;
 
-        // Validación de estamina: solo permite correr si le queda energía y no está agotado
         bool canRun = stamina == null || stamina.CanRun;
         bool isRunning = controls.Movimiento.Run.IsPressed() && !crouching && !aiming && canRun;
 
@@ -163,7 +173,18 @@ public class FirstPersonController : MonoBehaviour
         float currentSpeed = isRunning ? runSpeed : walkSpeed;
         if (crouching) currentSpeed *= crouch.SpeedMultiplier;
         if (aiming) currentSpeed *= aim.SpeedMultiplier;
-        controller.Move(move * currentSpeed * Time.deltaTime);
+
+        if (controls.Movimiento.Jump.WasPressedThisFrame() && isGrounded && !crouching)
+        {
+            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            OnJump?.Invoke();
+        }
+
+        velocity.y += gravity * Time.deltaTime;
+
+        // Combinación en una única llamada de físicas para evitar bloqueos
+        Vector3 finalMovement = (move * currentSpeed) + velocity;
+        controller.Move(finalMovement * Time.deltaTime);
 
         bool isMoving = move.sqrMagnitude > 0.001f;
 
@@ -185,14 +206,5 @@ public class FirstPersonController : MonoBehaviour
                 OnFootstep?.Invoke();
             }
         }
-
-        if (controls.Movimiento.Jump.WasPressedThisFrame() && isGrounded && !crouching)
-        {
-            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
-            OnJump?.Invoke();
-        }
-
-        velocity.y += gravity * Time.deltaTime;
-        controller.Move(velocity * Time.deltaTime);
     }
 }

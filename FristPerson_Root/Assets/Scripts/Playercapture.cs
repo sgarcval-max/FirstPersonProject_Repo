@@ -3,42 +3,29 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// Gestiona cuando un guardia atrapa al jugador y lo que viene después.
-///
-/// Al ser atrapado: el jugador pierde el control, su cámara gira hacia el guardia, y todo lo que
-/// llevaba (armas e inventario de objetos clave) cae al suelo en ese sitio. Después se congela
-/// el juego y se avisa con OnCaught para que salga el Game Over.
-///
-/// Al reiniciar (RespawnWithFade): pantalla a negro, el jugador reaparece en su punto de inicio,
-/// los guardias vuelven a su ruta, y lo que soltó se queda donde lo atraparon.
+/// Gestiona la captura del jugador por los guardias y la reaparición tras Game Over.
 /// </summary>
 [RequireComponent(typeof(FirstPersonController))]
 [RequireComponent(typeof(CharacterController))]
 public class PlayerCapture : MonoBehaviour
 {
     public static PlayerCapture Instance { get; private set; }
-
-    /// <summary>True desde que un guardia empieza a atrapar al jugador. La pausa y otros guardias lo consultan.</summary>
     public static bool IsCaught { get; private set; }
 
     [Header("Captura")]
-    [Tooltip("Segundos que pasan desde que el guardia te detecta del todo hasta que sale el Game Over.")]
     [SerializeField] private float captureDuration = 1.2f;
 
     [Header("Al ser atrapado")]
-    [Tooltip("A qué distancia máxima del sitio donde te atrapan caen tus cosas.")]
     [SerializeField] private float dropRadius = 1.5f;
 
-    /// <summary>Se dispara cuando termina la captura y debe mostrarse el Game Over.</summary>
     public event Action OnCaught;
-
-    /// <summary>Se dispara cuando el jugador ha reaparecido tras un Game Over.</summary>
     public event Action OnRespawned;
 
     private FirstPersonController controller;
     private CharacterController characterController;
     private PlayerWeaponInventory weapons;
     private PlayerKeyItemInventory keyItems;
+    private PlayerCrouch crouch;
 
     private Vector3 startPosition;
     private Quaternion startRotation;
@@ -47,36 +34,29 @@ public class PlayerCapture : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        IsCaught = false; // es estática y sobrevive a recargar la escena, así que se resetea aquí
+        IsCaught = false;
 
         controller = GetComponent<FirstPersonController>();
         characterController = GetComponent<CharacterController>();
         weapons = GetComponent<PlayerWeaponInventory>();
         keyItems = GetComponent<PlayerKeyItemInventory>();
+        crouch = GetComponent<PlayerCrouch>();
 
-        // El punto donde empieza el jugador es al que volverá tras un Game Over.
         startPosition = transform.position;
         startRotation = transform.rotation;
     }
 
     private void OnDestroy()
     {
-        if (Instance == this)
-        {
-            Instance = null;
-        }
+        if (Instance == this) Instance = null;
     }
 
-    /// <summary>Lo llama el guardia que acaba de detectar al jugador del todo.</summary>
     public void BeginCapture(Transform guard)
     {
         if (IsCaught || MatchManager.IsMatchOver) return;
 
         IsCaught = true;
         caughtPosition = transform.position;
-
-        // Desactivar FirstPersonController bloquea el movimiento, la cámara y también las
-        // acciones de armas e inventario (que comprueban si está activo).
         controller.enabled = false;
 
         StartCoroutine(CaptureRoutine(guard));
@@ -95,7 +75,6 @@ public class PlayerCapture : MonoBehaviour
             elapsed += Time.deltaTime;
             float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / captureDuration));
 
-            // La cámara gira poco a poco hacia la cara del guardia.
             if (guard != null && cam != null)
             {
                 Vector3 toGuard = (guard.position + Vector3.up * 0.6f) - cam.position;
@@ -113,20 +92,15 @@ public class PlayerCapture : MonoBehaviour
             yield return null;
         }
 
-        // Si el tiempo se ha acabado justo durante la captura, manda la pantalla de resultados.
         if (MatchManager.IsMatchOver) yield break;
 
-        // Todo lo que llevaba cae al suelo en el sitio donde lo han atrapado.
         DropEverything();
 
-        // Fin de la captura: se congela el juego y se muestra el cursor para el Game Over.
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
         Time.timeScale = 0f;
 
-        Debug.Log("[Jugador] Atrapado.");
-
-        if (OnCaught != null) OnCaught.Invoke();
+        OnCaught?.Invoke();
     }
 
     private void DropEverything()
@@ -135,7 +109,6 @@ public class PlayerCapture : MonoBehaviour
         if (keyItems != null) keyItems.DropAllAt(caughtPosition, dropRadius);
     }
 
-    /// <summary>Conectado al botón Reiniciar del Game Over: reaparece con un fundido a negro.</summary>
     public void RespawnWithFade()
     {
         if (SceneTransitionManager.Instance != null)
@@ -150,7 +123,16 @@ public class PlayerCapture : MonoBehaviour
 
     private void PerformRespawn()
     {
-        // 1) El jugador vuelve al punto de inicio (el CharacterController hay que apagarlo para teletransportarlo).
+        Time.timeScale = 1f;
+        IsCaught = false;
+
+        // 1. Limpiar agachado
+        if (crouch != null)
+        {
+            crouch.ResetCrouch();
+        }
+
+        // 2. Reposicionar en punto inicial
         characterController.enabled = false;
         transform.SetPositionAndRotation(startPosition, startRotation);
         characterController.enabled = true;
@@ -161,21 +143,22 @@ public class PlayerCapture : MonoBehaviour
             cam.transform.localRotation = Quaternion.identity;
         }
 
-        // 2) Los guardias se calman y siguen su ruta desde donde estaban (no vuelven a su sitio inicial).
+        // 3. Limpiar físicas e inercia de movimiento
+        if (controller != null)
+        {
+            controller.ResetState();
+            controller.enabled = true;
+        }
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
         foreach (HumanAI guard in FindObjectsOfType<HumanAI>())
         {
             guard.ResetForRespawn();
         }
 
-        // 3) Se reanuda el juego.
-        Time.timeScale = 1f;
-        IsCaught = false;
-        controller.enabled = true;
-
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-
-        if (OnRespawned != null) OnRespawned.Invoke();
+        OnRespawned?.Invoke();
     }
 
     private static float NormalizeAngle(float angle)
