@@ -3,33 +3,45 @@ using UnityEngine;
 using UnityEngine.Events;
 
 /// <summary>
-/// Da visión a un humano: ve al jugador dentro de su cono de visión o por proximidad directa.
+/// Proporciona visión a un humano adaptado a cualquier escala.
+/// Respeta la postura del jugador (agachado/de pie) y escala el tiempo de sospecha.
 /// </summary>
 public class HumanVision : MonoBehaviour
 {
-    [Header("Visión")]
-    [Tooltip("Posición de los ojos respecto al centro del humano.")]
-    [SerializeField] private Vector3 eyeOffset = new Vector3(0f, 0.6f, 0f);
-    [SerializeField] private float viewDistance = 10f;
-    [Tooltip("Ángulo total del cono de visión, en grados.")]
+    [Header("Referencias de Visión")]
+    [Tooltip("Transform opcional de la cabeza u ojos del modelo.")]
+    [SerializeField] private Transform eyeTransform;
+
+    [Tooltip("Posición relativa de los ojos si no se asigna 'eyeTransform'.")]
+    [SerializeField] private Vector3 eyeOffset = new Vector3(0f, 1.6f, 0f);
+
+    [Header("Parámetros de Visión")]
+    [Tooltip("Distancia máxima de visión estando el jugador de pie.")]
+    [SerializeField] private float viewDistance = 30f;
+
+    [Tooltip("Ángulo horizontal total del cono de visión (grados).")]
     [Range(10f, 360f)]
-    [SerializeField] private float viewAngle = 100f;
+    [SerializeField] private float viewAngle = 110f;
 
-    [Tooltip("Radio de presencia inmediata: si el mono está a esta distancia o menos de las piernas del guardia, lo detecta aunque esté fuera del cono visual.")]
-    [SerializeField] private float proximityRadius = 1.2f;
+    [Tooltip("Radio de presencia inmediata alrededor del gigante (de pie).")]
+    [SerializeField] private float proximityRadius = 3.5f;
 
-    [Tooltip("Qué punto del jugador intenta ver (si no se encuentra colisionador).")]
-    [SerializeField] private Vector3 targetOffset = new Vector3(0f, 0.3f, 0f);
-    [Tooltip("Cuando el jugador está agachado, el guardia solo lo ve a esta fracción de su distancia de visión (0.6 = un 60 %).")]
+    [Tooltip("Multiplicador de visión y proximidad cuando el jugador está agachado (0.5 = 50% menos visión).")]
     [Range(0.1f, 1f)]
-    [SerializeField] private float crouchViewMultiplier = 0.6f;
-    [Tooltip("Qué capas pueden bloquear la visión.")]
+    [SerializeField] private float crouchViewMultiplier = 0.5f;
+
+    [Tooltip("Punto del jugador que intenta ver (offset vertical).")]
+    [SerializeField] private Vector3 targetOffset = new Vector3(0f, 0.9f, 0f);
+
+    [Tooltip("Capas de obstáculos que bloquean la visión.")]
     [SerializeField] private LayerMask obstacleMask = ~0;
 
     [Header("Sospecha")]
-    [SerializeField] private float timeToDetectClose = 1f;
-    [SerializeField] private float timeToDetectFar = 3f;
-    [SerializeField] private float decayPerSecond = 0.5f;
+    [Tooltip("Tiempo (en segundos) para ser detectado a corta distancia.")]
+    [SerializeField] private float timeToDetectClose = 0.6f;
+    [Tooltip("Tiempo (en segundos) para ser detectado a larga distancia.")]
+    [SerializeField] private float timeToDetectFar = 2.2f;
+    [SerializeField] private float decayPerSecond = 0.4f;
 
     [Header("Aviso visual (provisional)")]
     [SerializeField] private Renderer colorRenderer;
@@ -45,13 +57,12 @@ public class HumanVision : MonoBehaviour
     private Collider playerCollider;
     private PlayerCrouch playerCrouch;
     private Material materialInstance;
-    private readonly RaycastHit[] hitBuffer = new RaycastHit[16];
+    private readonly RaycastHit[] hitBuffer = new RaycastHit[32];
     private bool detected;
 
     public float Suspicion { get; private set; }
     public bool CanSeePlayerNow { get; private set; }
     public Vector3 LastSeenPosition { get; private set; }
-
     public bool HasDetectedPlayer => detected;
 
     public void AddSuspicion(float amount, float maxLevel)
@@ -121,15 +132,23 @@ public class HumanVision : MonoBehaviour
     {
         if (player == null) return;
 
-        bool seen = CanSeePlayer(out float distance);
+        bool isCrouched = playerCrouch != null && playerCrouch.IsCrouching;
+        bool seen = CanSeePlayer(isCrouched, out float distance);
         CanSeePlayerNow = seen;
 
         if (seen)
         {
             LastSeenPosition = player.position;
             float distance01 = Mathf.Clamp01(distance / viewDistance);
-            float secondsToFill = Mathf.Lerp(timeToDetectClose, timeToDetectFar, distance01);
-            Suspicion = Mathf.Min(1f, Suspicion + Time.deltaTime / Mathf.Max(0.01f, secondsToFill));
+            float baseDetectionTime = Mathf.Lerp(timeToDetectClose, timeToDetectFar, distance01);
+
+            // Si el jugador está agachado, el tiempo necesario para detectarlo se multiplica
+            if (isCrouched)
+            {
+                baseDetectionTime /= crouchViewMultiplier;
+            }
+
+            Suspicion = Mathf.Min(1f, Suspicion + Time.deltaTime / Mathf.Max(0.01f, baseDetectionTime));
         }
         else
         {
@@ -150,16 +169,16 @@ public class HumanVision : MonoBehaviour
         UpdateColor();
     }
 
-    private bool CanSeePlayer(out float distance)
+    private bool CanSeePlayer(bool isCrouched, out float distance)
     {
-        Vector3 eye = transform.TransformPoint(eyeOffset);
-        bool crouched = playerCrouch != null && playerCrouch.IsCrouching;
-
+        Vector3 eye = eyeTransform != null ? eyeTransform.position : transform.TransformPoint(eyeOffset);
         Vector3 target = playerCollider != null ? playerCollider.bounds.center : player.position + targetOffset;
-        float maxDistance = crouched ? viewDistance * crouchViewMultiplier : viewDistance;
 
         Vector3 direction = target - eye;
         distance = direction.magnitude;
+
+        float maxDistance = isCrouched ? viewDistance * crouchViewMultiplier : viewDistance;
+        float currentProximityRadius = isCrouched ? proximityRadius * crouchViewMultiplier : proximityRadius;
 
         PlayerConcealment concealment = PlayerConcealment.Instance;
         if (concealment != null)
@@ -168,36 +187,39 @@ public class HumanVision : MonoBehaviour
             maxDistance *= concealment.SightMultiplier;
         }
 
-        // DETECCIÓN POR PROXIMIDAD: Si está pegado a sus pies, ignora el ángulo del cono
-        bool insideProximity = distance <= proximityRadius;
+        // 1. Detección por proximidad (agachado reduce el radio a la mitad)
+        bool insideProximity = distance <= currentProximityRadius;
 
         if (!insideProximity)
         {
             if (distance > maxDistance) return false;
-            if (Vector3.Angle(transform.forward, direction) > viewAngle * 0.5f) return false;
-        }
 
-        // Comprobación de paredes u obstáculos
-        int count = Physics.RaycastNonAlloc(eye, direction.normalized, hitBuffer, distance,
-                                            obstacleMask, QueryTriggerInteraction.Ignore);
+            // 2. Comprobación del cono de visión horizontal (XZ)
+            Vector3 flatForward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
+            Vector3 flatDirection = Vector3.ProjectOnPlane(direction, Vector3.up).normalized;
 
-        float nearestDistance = float.MaxValue;
-        Transform nearest = null;
-
-        for (int i = 0; i < count; i++)
-        {
-            RaycastHit hit = hitBuffer[i];
-            if (hit.transform.IsChildOf(transform)) continue;
-
-            if (hit.distance < nearestDistance)
+            if (flatDirection.sqrMagnitude > 0.001f)
             {
-                nearestDistance = hit.distance;
-                nearest = hit.transform;
+                float horizontalAngle = Vector3.Angle(flatForward, flatDirection);
+                if (horizontalAngle > viewAngle * 0.5f) return false;
             }
         }
 
-        if (nearest == null) return false;
-        return nearest == player || nearest.IsChildOf(player);
+        // 3. Comprobación de visión despejada (Raycast)
+        int count = Physics.RaycastNonAlloc(eye, direction.normalized, hitBuffer, distance, obstacleMask, QueryTriggerInteraction.Ignore);
+
+        for (int i = 0; i < count; i++)
+        {
+            Transform hitTransform = hitBuffer[i].transform;
+
+            if (hitTransform == transform || hitTransform.IsChildOf(transform)) continue;
+            if (hitTransform == player || hitTransform.IsChildOf(player)) continue;
+
+            // Si hay una pared o cobertura en medio -> No te ve
+            return false;
+        }
+
+        return true;
     }
 
     private void UpdateColor()
@@ -209,5 +231,37 @@ public class HumanVision : MonoBehaviour
             : Color.Lerp(suspiciousColor, alertColor, (Suspicion - 0.5f) / 0.5f);
 
         materialInstance.color = color;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Vector3 eye = eyeTransform != null ? eyeTransform.position : transform.TransformPoint(eyeOffset);
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawSphere(eye, 0.25f);
+
+        Gizmos.color = new Color(0f, 0.7f, 1f, 0.8f);
+        Gizmos.DrawWireSphere(transform.position, proximityRadius);
+
+        Gizmos.color = Color.red;
+        Vector3 flatForward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
+
+        if (flatForward.sqrMagnitude > 0.001f)
+        {
+            float halfAngle = viewAngle * 0.5f;
+            Vector3 leftRay = Quaternion.AngleAxis(-halfAngle, Vector3.up) * flatForward;
+            Vector3 rightRay = Quaternion.AngleAxis(halfAngle, Vector3.up) * flatForward;
+
+            Gizmos.DrawRay(eye, leftRay * viewDistance);
+            Gizmos.DrawRay(eye, rightRay * viewDistance);
+            Gizmos.DrawRay(eye, flatForward * viewDistance);
+        }
+
+        if (Application.isPlaying && player != null)
+        {
+            Vector3 target = playerCollider != null ? playerCollider.bounds.center : player.position + targetOffset;
+            Gizmos.color = CanSeePlayerNow ? Color.green : Color.gray;
+            Gizmos.DrawLine(eye, target);
+        }
     }
 }

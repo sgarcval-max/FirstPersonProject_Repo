@@ -18,7 +18,7 @@ MonoBehaviour:
   heldLocalPosition: {x: 0, y: 0, z: 0}
   heldLocalEuler: {x: 0, y: 0, z: 0}
   isRanged: 1
-  range: 10
+  range: 30
   stunDuration: 8
   rechargeTime: 90
-  shotNoiseRadius: 15
+  shotNoiseRadius: 30
