@@ -1440,6 +1440,7 @@ MonoBehaviour:
   inventoryCloseClip: {fileID: 8300000, guid: 6573e9c90192f6b4a982d83d28a9f417, type: 3}
   keyRebindStartClip: {fileID: 0}
   countdownWarningClip: {fileID: 8300000, guid: 3d01813c74b9c9249a186735ac89031f, type: 3}
+  matchEndClip: {fileID: 8300000, guid: d38ffa13a37646545a6e1fdcb7617da1, type: 3}
   footstepClips:
   - {fileID: 8300000, guid: f6c1ff7631eeb50498a3699201bcc501, type: 3}
   - {fileID: 8300000, guid: 77b0bdfd231c28b4496e0126512d37b4, type: 3}

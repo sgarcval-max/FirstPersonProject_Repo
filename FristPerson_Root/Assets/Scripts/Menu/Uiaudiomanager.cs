@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Gestor central de efectos de sonido para la interfaz de usuario (UI), paneles, inventario, pisadas y armas.
+/// Gestor central de efectos de sonido para la interfaz de usuario (UI), paneles, inventario, pisadas, armas y fin de partida.
 /// </summary>
 public class UIAudioManager : MonoBehaviour
 {
@@ -29,9 +29,11 @@ public class UIAudioManager : MonoBehaviour
     [Header("Ajustes y Reasignación de Teclas")]
     [SerializeField] private AudioClip keyRebindStartClip;
 
-    [Header("Cuenta Atrás")]
+    [Header("Cuenta Atrás y Fin de Partida")]
     [Tooltip("Efecto de sonido cuando quedan 10 segundos en la partida.")]
     [SerializeField] private AudioClip countdownWarningClip;
+    [Tooltip("Efecto de sonido al terminar la partida (panel de resultados).")]
+    [SerializeField] private AudioClip matchEndClip;
 
     [Header("SFX de Pisadas")]
     [Tooltip("Lista desplegable de efectos de sonido para las pisadas. Se elegirá uno al azar en cada paso.")]
@@ -105,7 +107,7 @@ public class UIAudioManager : MonoBehaviour
         PlayClip(keyRebindStartClip);
     }
 
-    // --- MÉTODOS DE CUENTA ATRÁS ---
+    // --- MÉTODOS DE CUENTA ATRÁS Y FIN DE PARTIDA ---
     public void PlayCountdownWarning(bool loop = true)
     {
         if (uiAudioSource == null || countdownWarningClip == null) return;
@@ -127,6 +129,14 @@ public class UIAudioManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Reproduce el efecto de sonido de fin de partida.
+    /// </summary>
+    public void PlayMatchEnd()
+    {
+        PlayClip(matchEndClip);
+    }
+
     // --- MÉTODOS DE PISADAS ---
     public void PlayRandomFootstep()
     {
@@ -138,9 +148,6 @@ public class UIAudioManager : MonoBehaviour
     }
 
     // --- MÉTODOS DE ARMAS ---
-    /// <summary>
-    /// Reproduce el efecto de sonido de disparo.
-    /// </summary>
     public void PlayWeaponShoot()
     {
         PlayClip(weaponShootClip);

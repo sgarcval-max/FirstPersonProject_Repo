@@ -79,9 +79,10 @@ public class ResultsScreen : MonoBehaviour
 
         if (panel != null) panel.SetActive(true);
 
+        // Reproduce el sonido de fin de partida cuando aparece el panel
         if (UIAudioManager.Instance != null)
         {
-            UIAudioManager.Instance.PlayPanelOpen();
+            UIAudioManager.Instance.PlayMatchEnd();
         }
 
         StartCoroutine(AnimateScore(finalScore, newRecord));
@@ -93,8 +94,6 @@ public class ResultsScreen : MonoBehaviour
 
         RectTransform scoreRect = scoreText.rectTransform;
 
-        // 1) El número sube de 0 a la puntuación, rápido al principio y frenando al llegar.
-        //    Se usa tiempo sin escalar porque el juego está congelado (Time.timeScale = 0).
         float elapsed = 0f;
         while (elapsed < countDuration)
         {
@@ -104,7 +103,6 @@ public class ResultsScreen : MonoBehaviour
 
             scoreText.text = Mathf.RoundToInt(finalScore * eased).ToString();
 
-            // Un pequeño latido mientras sube, para que se sienta que "trabaja".
             scoreRect.localScale = Vector3.one * (1f + 0.05f * Mathf.Sin(elapsed * 20f));
 
             yield return null;
@@ -112,7 +110,6 @@ public class ResultsScreen : MonoBehaviour
 
         scoreText.text = finalScore.ToString();
 
-        // 2) Al llegar, el número "salta": se agranda de golpe y vuelve a su tamaño.
         float popTime = 0.35f;
         float popElapsed = 0f;
         while (popElapsed < popTime)
@@ -125,7 +122,6 @@ public class ResultsScreen : MonoBehaviour
         }
         scoreRect.localScale = Vector3.one;
 
-        // 3) Si es récord, aparece el aviso y se queda latiendo.
         if (newRecord && newRecordText != null)
         {
             newRecordText.gameObject.SetActive(true);
@@ -140,13 +136,11 @@ public class ResultsScreen : MonoBehaviour
         }
     }
 
-    /// <summary>Conectar al botón Volver a jugar: empieza una partida nueva desde cero.</summary>
     public void PlayAgain()
     {
         LoadScene(SceneManager.GetActiveScene().name);
     }
 
-    /// <summary>Conectar al botón Menú principal.</summary>
     public void GoToMainMenu()
     {
         LoadScene(mainMenuSceneName);
@@ -154,7 +148,6 @@ public class ResultsScreen : MonoBehaviour
 
     private void LoadScene(string sceneName)
     {
-        // Al acabar el tiempo se congela el juego: hay que devolverlo a la normalidad antes de cambiar de escena.
         Time.timeScale = 1f;
 
         if (SceneTransitionManager.Instance != null)
