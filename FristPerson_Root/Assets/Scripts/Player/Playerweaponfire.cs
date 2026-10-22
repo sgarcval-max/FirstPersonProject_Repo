@@ -30,9 +30,9 @@ public class PlayerWeaponFire : MonoBehaviour
 
     [Header("Eventos")]
     [Tooltip("Se dispara cada vez que disparas (para sonidos o efectos futuros).")]
-    public UnityEvent OnFired;
+    [SerializeField] public UnityEvent OnFired;
     [Tooltip("Se dispara si intentas disparar mientras el arma aún está recargando (por ejemplo, para el sonido de 'clic').")]
-    public UnityEvent OnTriedWhileRecharging;
+    [SerializeField] public UnityEvent OnTriedWhileRecharging;
 
     private FirstPersonController playerController;
     private PlayerWeaponInventory inventory;
@@ -154,10 +154,15 @@ public class PlayerWeaponFire : MonoBehaviour
             NoiseSystem.Emit(transform.position, weapon.shotNoiseRadius);
         }
 
+        // --- SONIDO DE DISPARO CENTRALIZADO ---
+        if (UIAudioManager.Instance != null)
+        {
+            UIAudioManager.Instance.PlayWeaponShoot();
+        }
+
         if (OnFired != null) OnFired.Invoke();
     }
 
-    // Una línea fina y breve que marca por dónde ha ido el disparo, hasta que haya efectos de verdad.
     private void SpawnTracer(Vector3 from, Vector3 to, WeaponData weapon)
     {
         Vector3 delta = to - from;
@@ -176,8 +181,6 @@ public class PlayerWeaponFire : MonoBehaviour
         Renderer tracerRenderer = tracer.GetComponent<Renderer>();
         if (tracerRenderer != null)
         {
-            // El material por defecto de CreatePrimitive sale rosa/morado en las builds, así que lo
-            // sustituimos por una copia de un material que sabemos que funciona en tu proyecto.
             Material source = ResolveTracerMaterial(weapon);
             if (source != null)
             {
@@ -198,7 +201,6 @@ public class PlayerWeaponFire : MonoBehaviour
     {
         if (tracerMaterial != null) return tracerMaterial;
 
-        // Copiamos el material del propio modelo del arma (el mismo que ves en la mano).
         if (weapon != null && weapon.worldPrefab != null)
         {
             Renderer weaponRenderer = weapon.worldPrefab.GetComponentInChildren<Renderer>(true);

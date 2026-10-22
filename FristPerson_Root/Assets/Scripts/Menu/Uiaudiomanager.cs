@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Gestor central de efectos de sonido para la interfaz de usuario (UI), paneles, inventario y pisadas del jugador.
+/// Gestor central de efectos de sonido para la interfaz de usuario (UI), paneles, inventario, pisadas y armas.
 /// </summary>
 public class UIAudioManager : MonoBehaviour
 {
@@ -36,6 +36,10 @@ public class UIAudioManager : MonoBehaviour
     [Header("SFX de Pisadas")]
     [Tooltip("Lista desplegable de efectos de sonido para las pisadas. Se elegirá uno al azar en cada paso.")]
     [SerializeField] private List<AudioClip> footstepClips = new List<AudioClip>();
+
+    [Header("Armas")]
+    [Tooltip("Efecto de sonido al disparar el arma.")]
+    [SerializeField] private AudioClip weaponShootClip;
 
     private void Awake()
     {
@@ -124,9 +128,6 @@ public class UIAudioManager : MonoBehaviour
     }
 
     // --- MÉTODOS DE PISADAS ---
-    /// <summary>
-    /// Reproduce un efecto de pisada aleatorio de la lista asignada en el Inspector.
-    /// </summary>
     public void PlayRandomFootstep()
     {
         if (footstepClips == null || footstepClips.Count == 0) return;
@@ -134,6 +135,15 @@ public class UIAudioManager : MonoBehaviour
         int randomIndex = Random.Range(0, footstepClips.Count);
         AudioClip clip = footstepClips[randomIndex];
         PlayClip(clip);
+    }
+
+    // --- MÉTODOS DE ARMAS ---
+    /// <summary>
+    /// Reproduce el efecto de sonido de disparo.
+    /// </summary>
+    public void PlayWeaponShoot()
+    {
+        PlayClip(weaponShootClip);
     }
 
     private void PlayClip(AudioClip clip)
