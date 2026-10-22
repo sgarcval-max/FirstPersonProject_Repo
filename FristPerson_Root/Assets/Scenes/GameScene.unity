@@ -605,6 +605,95 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2078263497}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &103371094 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3262369452401342037, guid: 750cf5beac4cef242b57579211d89fc7, type: 3}
+  m_PrefabInstance: {fileID: 1978220838}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &103371098
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 103371094}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.075027905, y: 0.002788868, z: 0.035525262}
+  m_Center: {x: 0.07897565, y: -0.0041652163, z: 0.017653117}
+--- !u!65 &103371099
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 103371094}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.0070344037, y: 0.033177912, z: 0.035525262}
+  m_Center: {x: 0.12202076, y: 0.01569341, z: 0.017653117}
+--- !u!65 &103371100
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 103371094}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.006774648, y: 0.014480385, z: 0.010648695}
+  m_Center: {x: 0.121751785, y: 0.039558712, z: 0.030091446}
+--- !u!65 &103371101
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 103371094}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.0070439996, y: 0.026001845, z: 0.035525262}
+  m_Center: {x: 0.12177104, y: 0.059787937, z: 0.017653117}
 --- !u!1 &112699613
 GameObject:
   m_ObjectHideFlags: 0
@@ -3963,7 +4052,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RandomItemSpawner
   itemsToSpawn:
-  - itemPrefab: {fileID: 2560502239431674254, guid: 259c5c4b61209b549b0be26ffc1d902d, type: 3}
+  - itemPrefab: {fileID: 3311799086592659546, guid: 8261d1777f68d964d9d0ce8aa1a9c64a, type: 3}
     amountToSpawn: 3
   - itemPrefab: {fileID: 5047281800772331677, guid: 8721621f8de58bf4c951ba47c7bcbba0, type: 3}
     amountToSpawn: 2
@@ -8445,7 +8534,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb7777f966f3e54f9261fe1736a6e49, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MatchManager
-  matchDuration: 30
+  matchDuration: 300
   timerText: {fileID: 1864265867}
   lowTimeThreshold: 30
   normalColor: {r: 1, g: 1, b: 1, a: 1}
@@ -12684,6 +12773,18 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -4331403601777749635, guid: 750cf5beac4cef242b57579211d89fc7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1978220854}
+    - targetCorrespondingSourceObject: {fileID: 3262369452401342037, guid: 750cf5beac4cef242b57579211d89fc7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 103371101}
+    - targetCorrespondingSourceObject: {fileID: 3262369452401342037, guid: 750cf5beac4cef242b57579211d89fc7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 103371100}
+    - targetCorrespondingSourceObject: {fileID: 3262369452401342037, guid: 750cf5beac4cef242b57579211d89fc7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 103371099}
+    - targetCorrespondingSourceObject: {fileID: 3262369452401342037, guid: 750cf5beac4cef242b57579211d89fc7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 103371098}
     - targetCorrespondingSourceObject: {fileID: 9003990450626090292, guid: 750cf5beac4cef242b57579211d89fc7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1978220853}
