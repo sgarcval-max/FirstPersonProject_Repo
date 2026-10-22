@@ -2894,6 +2894,7 @@ MonoBehaviour:
   inventoryCloseClip: {fileID: 0}
   keyRebindStartClip: {fileID: 0}
   countdownWarningClip: {fileID: 0}
+  footstepClips: []
 --- !u!82 &371033122
 AudioSource:
   m_ObjectHideFlags: 0
@@ -10819,7 +10820,8 @@ MonoBehaviour:
   OnLanded:
     m_PersistentCalls:
       m_Calls: []
-  stepDistance: 2
+  walkStepDistance: 2.5
+  runStepDistance: 2.2
   OnFootstep:
     m_PersistentCalls:
       m_Calls: []

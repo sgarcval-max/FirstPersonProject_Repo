@@ -34,8 +34,12 @@ public class FirstPersonController : MonoBehaviour
     public UnityEvent OnJump;
     public UnityEvent OnLanded;
 
-    [Header("Eventos - Pasos")]
-    [SerializeField] private float stepDistance = 2f;
+    [Header("Eventos - Cadencia de Pasos")]
+    [Tooltip("Metros recorridos entre cada pisada al caminar. Valores más altos = pasos más lentos/espaciados.")]
+    [SerializeField] private float walkStepDistance = 3.5f;
+    [Tooltip("Metros recorridos entre cada pisada al correr.")]
+    [SerializeField] private float runStepDistance = 4.8f;
+
     public UnityEvent OnFootstep;
 
     private CharacterController controller;
@@ -192,15 +196,19 @@ public class FirstPersonController : MonoBehaviour
         if (!runningNow && wasRunningLastFrame) OnStopRunning?.Invoke();
         wasRunningLastFrame = runningNow;
 
-        // CONTROL DE PISADAS Y SONIDO
+        // CONTROL Y CADENCIA DE PISADAS
         if (isMoving && isGrounded)
         {
             distanceSinceLastStep += currentSpeed * Time.deltaTime;
-            if (distanceSinceLastStep >= stepDistance)
+
+            // Seleccionamos la distancia según si el personaje camina o corre
+            float targetStepDistance = isRunning ? runStepDistance : walkStepDistance;
+
+            if (distanceSinceLastStep >= targetStepDistance)
             {
                 distanceSinceLastStep = 0f;
 
-                // Solo reproduce pisadas si NO está agachado
+                // Silencio total si se agacha
                 if (!crouching)
                 {
                     OnFootstep?.Invoke();

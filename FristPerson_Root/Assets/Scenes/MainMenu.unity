@@ -1440,6 +1440,14 @@ MonoBehaviour:
   inventoryCloseClip: {fileID: 8300000, guid: 6573e9c90192f6b4a982d83d28a9f417, type: 3}
   keyRebindStartClip: {fileID: 0}
   countdownWarningClip: {fileID: 8300000, guid: 3d01813c74b9c9249a186735ac89031f, type: 3}
+  footstepClips:
+  - {fileID: 8300000, guid: f6c1ff7631eeb50498a3699201bcc501, type: 3}
+  - {fileID: 8300000, guid: 77b0bdfd231c28b4496e0126512d37b4, type: 3}
+  - {fileID: 8300000, guid: a0c04193f40e982409a39663b01a602c, type: 3}
+  - {fileID: 8300000, guid: f6f505aea7c537847af6e90dce9c4911, type: 3}
+  - {fileID: 8300000, guid: 997590f3b1a2b1e40bd3995c9a1640a9, type: 3}
+  - {fileID: 8300000, guid: 09585f6ed19502143bf4624750c04c7b, type: 3}
+  - {fileID: 8300000, guid: 36aa909f4fedb3c4280c69011b1721f9, type: 3}
 --- !u!82 &371033122
 AudioSource:
   m_ObjectHideFlags: 0
