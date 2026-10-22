@@ -2896,6 +2896,8 @@ MonoBehaviour:
   countdownWarningClip: {fileID: 0}
   matchEndClip: {fileID: 0}
   footstepClips: []
+  jumpClip: {fileID: 0}
+  landClip: {fileID: 0}
   weaponShootClip: {fileID: 0}
 --- !u!82 &371033122
 AudioSource:

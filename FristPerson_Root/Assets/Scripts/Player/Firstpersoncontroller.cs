@@ -149,9 +149,15 @@ public class FirstPersonController : MonoBehaviour
     {
         bool isGrounded = controller.isGrounded;
 
+        // DETECCIÓN DE ATERRIZAJE (IMPACTO CONTRA EL SUELO)
         if (isGrounded && !wasGroundedLastFrame)
         {
             OnLanded?.Invoke();
+
+            if (UIAudioManager.Instance != null)
+            {
+                UIAudioManager.Instance.PlayLand();
+            }
         }
         wasGroundedLastFrame = isGrounded;
 
@@ -174,10 +180,16 @@ public class FirstPersonController : MonoBehaviour
         if (crouching) currentSpeed *= crouch.SpeedMultiplier;
         if (aiming) currentSpeed *= aim.SpeedMultiplier;
 
+        // EJECUCIÓN DE SALTO (DESPEGUE)
         if (controls.Movimiento.Jump.WasPressedThisFrame() && isGrounded && !crouching)
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
             OnJump?.Invoke();
+
+            if (UIAudioManager.Instance != null)
+            {
+                UIAudioManager.Instance.PlayJump();
+            }
         }
 
         velocity.y += gravity * Time.deltaTime;
@@ -196,19 +208,17 @@ public class FirstPersonController : MonoBehaviour
         if (!runningNow && wasRunningLastFrame) OnStopRunning?.Invoke();
         wasRunningLastFrame = runningNow;
 
-        // CONTROL Y CADENCIA DE PISADAS
+        // CONTROL DE PISADAS
         if (isMoving && isGrounded)
         {
             distanceSinceLastStep += currentSpeed * Time.deltaTime;
 
-            // Seleccionamos la distancia según si el personaje camina o corre
             float targetStepDistance = isRunning ? runStepDistance : walkStepDistance;
 
             if (distanceSinceLastStep >= targetStepDistance)
             {
                 distanceSinceLastStep = 0f;
 
-                // Silencio total si se agacha
                 if (!crouching)
                 {
                     OnFootstep?.Invoke();

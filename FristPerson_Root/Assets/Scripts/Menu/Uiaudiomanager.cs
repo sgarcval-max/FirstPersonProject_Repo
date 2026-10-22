@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Gestor central de efectos de sonido para la interfaz de usuario (UI), paneles, inventario, pisadas, armas y fin de partida.
+/// Gestor central de efectos de sonido para la interfaz de usuario (UI), paneles, inventario, pisadas, armas, saltos y fin de partida.
 /// </summary>
 public class UIAudioManager : MonoBehaviour
 {
@@ -35,9 +35,13 @@ public class UIAudioManager : MonoBehaviour
     [Tooltip("Efecto de sonido al terminar la partida (panel de resultados).")]
     [SerializeField] private AudioClip matchEndClip;
 
-    [Header("SFX de Pisadas")]
+    [Header("SFX de Movimiento, Salto y Aterrizaje")]
     [Tooltip("Lista desplegable de efectos de sonido para las pisadas. Se elegirá uno al azar en cada paso.")]
     [SerializeField] private List<AudioClip> footstepClips = new List<AudioClip>();
+    [Tooltip("Efecto de sonido al despegar/saltar.")]
+    [SerializeField] private AudioClip jumpClip;
+    [Tooltip("Efecto de sonido al impactar contra el suelo tras saltar o caer.")]
+    [SerializeField] private AudioClip landClip;
 
     [Header("Armas")]
     [Tooltip("Efecto de sonido al disparar el arma.")]
@@ -129,15 +133,12 @@ public class UIAudioManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Reproduce el efecto de sonido de fin de partida.
-    /// </summary>
     public void PlayMatchEnd()
     {
         PlayClip(matchEndClip);
     }
 
-    // --- MÉTODOS DE PISADAS ---
+    // --- MÉTODOS DE MOVIMIENTO, SALTO Y ATERRIZAJE ---
     public void PlayRandomFootstep()
     {
         if (footstepClips == null || footstepClips.Count == 0) return;
@@ -145,6 +146,22 @@ public class UIAudioManager : MonoBehaviour
         int randomIndex = Random.Range(0, footstepClips.Count);
         AudioClip clip = footstepClips[randomIndex];
         PlayClip(clip);
+    }
+
+    /// <summary>
+    /// Reproduce el efecto de sonido de despegue/salto.
+    /// </summary>
+    public void PlayJump()
+    {
+        PlayClip(jumpClip);
+    }
+
+    /// <summary>
+    /// Reproduce el efecto de sonido al tocar suelo tras caer o saltar.
+    /// </summary>
+    public void PlayLand()
+    {
+        PlayClip(landClip);
     }
 
     // --- MÉTODOS DE ARMAS ---

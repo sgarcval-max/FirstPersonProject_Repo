@@ -1449,6 +1449,8 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 997590f3b1a2b1e40bd3995c9a1640a9, type: 3}
   - {fileID: 8300000, guid: 09585f6ed19502143bf4624750c04c7b, type: 3}
   - {fileID: 8300000, guid: 36aa909f4fedb3c4280c69011b1721f9, type: 3}
+  jumpClip: {fileID: 8300000, guid: 7953df1c0327574418c23749cc97b67d, type: 3}
+  landClip: {fileID: 0}
   weaponShootClip: {fileID: 8300000, guid: afd2484a610f1d441b3c1e47309a2405, type: 3}
 --- !u!82 &371033122
 AudioSource:
