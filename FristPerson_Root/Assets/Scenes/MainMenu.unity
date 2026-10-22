@@ -5208,7 +5208,7 @@ MonoBehaviour:
   gameplayPlaylist:
   - {fileID: 8300000, guid: 548bb2e3ce723e442800770292b359d9, type: 3}
   - {fileID: 8300000, guid: 139066fbf17bd5a48a8de2800a370299, type: 3}
-  musicOutputGroup: {fileID: 0}
+  musicOutputGroup: {fileID: -1654372282959375256, guid: 8a3e6c73505593c419a005317f6c6055, type: 2}
   fadeDuration: 1
 --- !u!4 &2080779661
 Transform:
