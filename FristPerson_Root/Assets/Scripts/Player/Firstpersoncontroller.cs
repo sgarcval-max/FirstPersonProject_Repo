@@ -74,7 +74,6 @@ public class FirstPersonController : MonoBehaviour
         aim = GetComponent<PlayerAim>();
         stamina = GetComponent<PlayerStamina>();
 
-        // Adaptación indispensable de físicas para escala 0.15
         if (controller != null)
         {
             controller.skinWidth = 0.005f;
@@ -103,9 +102,6 @@ public class FirstPersonController : MonoBehaviour
         Cursor.visible = false;
     }
 
-    /// <summary>
-    /// Restablece los parámetros de velocidad y físicas al reaparecer tras un Game Over.
-    /// </summary>
     public void ResetState()
     {
         velocity = Vector3.zero;
@@ -182,7 +178,6 @@ public class FirstPersonController : MonoBehaviour
 
         velocity.y += gravity * Time.deltaTime;
 
-        // Combinación en una única llamada de físicas para evitar bloqueos
         Vector3 finalMovement = (move * currentSpeed) + velocity;
         controller.Move(finalMovement * Time.deltaTime);
 
@@ -197,13 +192,24 @@ public class FirstPersonController : MonoBehaviour
         if (!runningNow && wasRunningLastFrame) OnStopRunning?.Invoke();
         wasRunningLastFrame = runningNow;
 
+        // CONTROL DE PISADAS Y SONIDO
         if (isMoving && isGrounded)
         {
             distanceSinceLastStep += currentSpeed * Time.deltaTime;
             if (distanceSinceLastStep >= stepDistance)
             {
                 distanceSinceLastStep = 0f;
-                OnFootstep?.Invoke();
+
+                // Solo reproduce pisadas si NO está agachado
+                if (!crouching)
+                {
+                    OnFootstep?.Invoke();
+
+                    if (UIAudioManager.Instance != null)
+                    {
+                        UIAudioManager.Instance.PlayRandomFootstep();
+                    }
+                }
             }
         }
     }

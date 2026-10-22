@@ -1,7 +1,9 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Gestor central de efectos de sonido para la interfaz de usuario (UI), paneles e inventario.
+/// Gestor central de efectos de sonido para la interfaz de usuario (UI), paneles, inventario y pisadas del jugador.
 /// </summary>
 public class UIAudioManager : MonoBehaviour
 {
@@ -30,6 +32,10 @@ public class UIAudioManager : MonoBehaviour
     [Header("Cuenta Atrás")]
     [Tooltip("Efecto de sonido cuando quedan 10 segundos en la partida.")]
     [SerializeField] private AudioClip countdownWarningClip;
+
+    [Header("SFX de Pisadas")]
+    [Tooltip("Lista desplegable de efectos de sonido para las pisadas. Se elegirá uno al azar en cada paso.")]
+    [SerializeField] private List<AudioClip> footstepClips = new List<AudioClip>();
 
     private void Awake()
     {
@@ -100,7 +106,6 @@ public class UIAudioManager : MonoBehaviour
     {
         if (uiAudioSource == null || countdownWarningClip == null) return;
 
-        // Si ya está sonando este mismo clip, no lo reiniciamos
         if (uiAudioSource.isPlaying && uiAudioSource.clip == countdownWarningClip) return;
 
         uiAudioSource.clip = countdownWarningClip;
@@ -116,6 +121,19 @@ public class UIAudioManager : MonoBehaviour
             uiAudioSource.clip = null;
             uiAudioSource.loop = false;
         }
+    }
+
+    // --- MÉTODOS DE PISADAS ---
+    /// <summary>
+    /// Reproduce un efecto de pisada aleatorio de la lista asignada en el Inspector.
+    /// </summary>
+    public void PlayRandomFootstep()
+    {
+        if (footstepClips == null || footstepClips.Count == 0) return;
+
+        int randomIndex = Random.Range(0, footstepClips.Count);
+        AudioClip clip = footstepClips[randomIndex];
+        PlayClip(clip);
     }
 
     private void PlayClip(AudioClip clip)
