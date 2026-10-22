@@ -73,14 +73,21 @@ public class MatchManager : MonoBehaviour
         TimeRemaining = Mathf.Max(0f, TimeRemaining - Time.deltaTime);
         RefreshText(false);
 
-        // COMPROBACIÓN DEL EFECTO DE SONIDO (10 SEGUNDOS)
+        // COMPROBACIÓN DEL EFECTO DE SONIDO Y FADE OUT DE MÚSICA (10 SEGUNDOS)
         if (!hasPlayedWarningSound && TimeRemaining <= warningSoundThreshold && TimeRemaining > 0f)
         {
             hasPlayedWarningSound = true;
 
+            // 1. Reproducir sonido de alerta en la UI
             if (UIAudioManager.Instance != null)
             {
                 UIAudioManager.Instance.PlayCountdownWarning(true);
+            }
+
+            // 2. Iniciar Fade Out de la música durante el tiempo restante
+            if (MusicManager.Instance != null)
+            {
+                MusicManager.Instance.FadeOut(TimeRemaining);
             }
         }
 
@@ -98,6 +105,12 @@ public class MatchManager : MonoBehaviour
         if (UIAudioManager.Instance != null)
         {
             UIAudioManager.Instance.StopCountdownWarning();
+        }
+
+        // Asegurar que la música quede completamente detenida
+        if (MusicManager.Instance != null)
+        {
+            MusicManager.Instance.StopMusic();
         }
 
         int finalScore = ScoreManager.Instance != null ? ScoreManager.Instance.Score : 0;

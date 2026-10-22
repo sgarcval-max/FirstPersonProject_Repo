@@ -108,6 +108,13 @@ public class MusicManager : MonoBehaviour
         if (playlistCoroutine != null)
         {
             StopCoroutine(playlistCoroutine);
+            playlistCoroutine = null;
+        }
+
+        if (fadeCoroutine != null)
+        {
+            StopCoroutine(fadeCoroutine);
+            fadeCoroutine = null;
         }
 
         if (currentList != null && currentList.Count > 0)
@@ -170,20 +177,72 @@ public class MusicManager : MonoBehaviour
         audioSource.volume = 1f;
     }
 
-    private IEnumerator FadeOutRoutine(float duration)
+    /// <summary>
+    /// Desvanece progresivamente la música actual hasta silenciarla en la duración especificada.
+    /// </summary>
+    public void FadeOut(float duration)
     {
+        if (playlistCoroutine != null)
+        {
+            StopCoroutine(playlistCoroutine);
+            playlistCoroutine = null;
+        }
+
+        if (fadeCoroutine != null)
+        {
+            StopCoroutine(fadeCoroutine);
+        }
+
+        fadeCoroutine = StartCoroutine(SmoothFadeOutRoutine(duration));
+    }
+
+    private IEnumerator SmoothFadeOutRoutine(float duration)
+    {
+        if (audioSource == null) yield break;
+
         float startVol = audioSource.volume;
         float elapsed = 0f;
 
         while (elapsed < duration)
         {
             elapsed += Time.unscaledDeltaTime;
-            audioSource.volume = Mathf.Lerp(startVol, 0f, elapsed / duration);
+            if (audioSource != null)
+            {
+                audioSource.volume = Mathf.Lerp(startVol, 0f, elapsed / duration);
+            }
             yield return null;
         }
 
-        audioSource.volume = 0f;
-        audioSource.Stop();
+        if (audioSource != null)
+        {
+            audioSource.volume = 0f;
+            audioSource.Stop();
+        }
+
+        CurrentPlaylistType = PlaylistType.None;
+        currentList = null;
+    }
+
+    private IEnumerator FadeOutRoutine(float duration)
+    {
+        float startVol = audioSource != null ? audioSource.volume : 1f;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            if (audioSource != null)
+            {
+                audioSource.volume = Mathf.Lerp(startVol, 0f, elapsed / duration);
+            }
+            yield return null;
+        }
+
+        if (audioSource != null)
+        {
+            audioSource.volume = 0f;
+            audioSource.Stop();
+        }
     }
 
     public void StopMusic()
