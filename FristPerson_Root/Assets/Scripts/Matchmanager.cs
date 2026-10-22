@@ -23,17 +23,23 @@ public class MatchManager : MonoBehaviour
     [SerializeField] private Color normalColor = Color.white;
     [SerializeField] private Color lowTimeColor = new Color(1f, 0.25f, 0.2f, 1f);
 
+    [Header("Aviso Sonoro de Tiempo")]
+    [Tooltip("Segundos restantes para reproducir el efecto de sonido de la cuenta atrás.")]
+    [SerializeField] private float warningSoundThreshold = 10f;
+
     public event Action<int, bool, int> OnMatchEnded;
     public float TimeRemaining { get; private set; }
 
     private FirstPersonController playerController;
     private int lastDisplayedSeconds = -1;
+    private bool hasPlayedWarningSound = false;
 
     private void Awake()
     {
         Instance = this;
         IsMatchOver = false;
         TimeRemaining = matchDuration;
+        hasPlayedWarningSound = false;
     }
 
     private void OnEnable()
@@ -67,6 +73,17 @@ public class MatchManager : MonoBehaviour
         TimeRemaining = Mathf.Max(0f, TimeRemaining - Time.deltaTime);
         RefreshText(false);
 
+        // COMPROBACIÓN DEL EFECTO DE SONIDO (10 SEGUNDOS)
+        if (!hasPlayedWarningSound && TimeRemaining <= warningSoundThreshold && TimeRemaining > 0f)
+        {
+            hasPlayedWarningSound = true;
+
+            if (UIAudioManager.Instance != null)
+            {
+                UIAudioManager.Instance.PlayCountdownWarning(true);
+            }
+        }
+
         if (TimeRemaining <= 0f)
         {
             EndMatch();
@@ -76,6 +93,12 @@ public class MatchManager : MonoBehaviour
     private void EndMatch()
     {
         IsMatchOver = true;
+
+        // Detener el sonido de la cuenta atrás al acabar la partida
+        if (UIAudioManager.Instance != null)
+        {
+            UIAudioManager.Instance.StopCountdownWarning();
+        }
 
         int finalScore = ScoreManager.Instance != null ? ScoreManager.Instance.Score : 0;
         int previousBest = PlayerPrefs.GetInt(BestScoreKey, 0);

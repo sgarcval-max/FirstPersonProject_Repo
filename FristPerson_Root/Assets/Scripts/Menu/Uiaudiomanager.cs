@@ -27,6 +27,10 @@ public class UIAudioManager : MonoBehaviour
     [Header("Ajustes y Reasignación de Teclas")]
     [SerializeField] private AudioClip keyRebindStartClip;
 
+    [Header("Cuenta Atrás")]
+    [Tooltip("Efecto de sonido cuando quedan 10 segundos en la partida.")]
+    [SerializeField] private AudioClip countdownWarningClip;
+
     private void Awake()
     {
         if (Instance == null)
@@ -89,6 +93,29 @@ public class UIAudioManager : MonoBehaviour
     public void PlayKeyRebindStart()
     {
         PlayClip(keyRebindStartClip);
+    }
+
+    // --- MÉTODOS DE CUENTA ATRÁS ---
+    public void PlayCountdownWarning(bool loop = true)
+    {
+        if (uiAudioSource == null || countdownWarningClip == null) return;
+
+        // Si ya está sonando este mismo clip, no lo reiniciamos
+        if (uiAudioSource.isPlaying && uiAudioSource.clip == countdownWarningClip) return;
+
+        uiAudioSource.clip = countdownWarningClip;
+        uiAudioSource.loop = loop;
+        uiAudioSource.Play();
+    }
+
+    public void StopCountdownWarning()
+    {
+        if (uiAudioSource != null && uiAudioSource.clip == countdownWarningClip)
+        {
+            uiAudioSource.Stop();
+            uiAudioSource.clip = null;
+            uiAudioSource.loop = false;
+        }
     }
 
     private void PlayClip(AudioClip clip)

@@ -1439,6 +1439,7 @@ MonoBehaviour:
   inventoryOpenClip: {fileID: 8300000, guid: 2d7c05556d788be469bc6d0a07059a85, type: 3}
   inventoryCloseClip: {fileID: 8300000, guid: 6573e9c90192f6b4a982d83d28a9f417, type: 3}
   keyRebindStartClip: {fileID: 0}
+  countdownWarningClip: {fileID: 8300000, guid: 3d01813c74b9c9249a186735ac89031f, type: 3}
 --- !u!82 &371033122
 AudioSource:
   m_ObjectHideFlags: 0

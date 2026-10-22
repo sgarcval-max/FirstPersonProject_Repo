@@ -2804,6 +2804,7 @@ MonoBehaviour:
   inventoryOpenClip: {fileID: 0}
   inventoryCloseClip: {fileID: 0}
   keyRebindStartClip: {fileID: 0}
+  countdownWarningClip: {fileID: 0}
 --- !u!82 &371033122
 AudioSource:
   m_ObjectHideFlags: 0
@@ -8444,11 +8445,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb7777f966f3e54f9261fe1736a6e49, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MatchManager
-  matchDuration: 300
+  matchDuration: 30
   timerText: {fileID: 1864265867}
   lowTimeThreshold: 30
   normalColor: {r: 1, g: 1, b: 1, a: 1}
   lowTimeColor: {r: 1, g: 0.25, b: 0.2, a: 1}
+  warningSoundThreshold: 10
 --- !u!114 &1228214330
 MonoBehaviour:
   m_ObjectHideFlags: 0
