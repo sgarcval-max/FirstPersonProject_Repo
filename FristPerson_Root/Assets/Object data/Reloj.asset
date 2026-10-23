@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::KeyItemData
   spanishName: Reloj
   englishName: Watch
-  points: 100
+  points: 50
