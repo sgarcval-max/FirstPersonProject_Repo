@@ -62,6 +62,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 1766e1affac1a944686f192fb77efa49, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6471000067514571905}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 1766e1affac1a944686f192fb77efa49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8788075642042260536}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 1766e1affac1a944686f192fb77efa49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3068397659859881501}
     - targetCorrespondingSourceObject: {fileID: 7670203077846687940, guid: 1766e1affac1a944686f192fb77efa49, type: 3}
       insertIndex: -1
       addedObject: {fileID: 86475865876675551}
@@ -168,3 +174,128 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!82 &8788075642042260536
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8561148778891730124}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 5874429579588559407, guid: 8a3e6c73505593c419a005317f6c6055, type: 2}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!114 &3068397659859881501
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8561148778891730124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ba02fe53dc0a63438b1e26c649d7151, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PropImpactAudio
+  propImpactClips:
+  - {fileID: 8300000, guid: e26f39f9c331477429bae81025621f1a, type: 3}
+  environmentImpactClips:
+  - {fileID: 8300000, guid: d8e17dd48fd37d447a257eb1d7b6c0db, type: 3}
+  - {fileID: 8300000, guid: dc4633fad23204642b163af51d7ea46c, type: 3}
+  - {fileID: 8300000, guid: 4f9059d04f3e51c48ae2858b9f465fe8, type: 3}
+  - {fileID: 8300000, guid: 8ad634aee5c94734381245b2f418369b, type: 3}
+  - {fileID: 8300000, guid: 6693fda97479c224cbfb920d61fa4464, type: 3}
+  minPitch: 0.9
+  maxPitch: 1.1
+  minImpactForce: 2.5
+  maxImpactForce: 8
+  minVolume: 0.2
+  maxVolume: 1
+  soundMinDistance: 1
+  soundMaxDistance: 15
