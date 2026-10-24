@@ -4133,7 +4133,7 @@ MonoBehaviour:
     amountToSpawn: 10
   - itemPrefab: {fileID: 1174575586585064286, guid: 0f77388ca0841bd44892dc77bde8b1bd, type: 3}
     amountToSpawn: 5
-  - itemPrefab: {fileID: 3484684588790248984, guid: c103ee364c225b04faede2e433214ea6, type: 3}
+  - itemPrefab: {fileID: 7010318984658032133, guid: f5b94362e1a088144a8b2963c38994e0, type: 3}
     amountToSpawn: 1
   - itemPrefab: {fileID: 4060054629240817150, guid: d1bf43222cef6484b95d375630b5b895, type: 3}
     amountToSpawn: 2
@@ -5322,7 +5322,7 @@ Transform:
   m_GameObject: {fileID: 623721367}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 223.1, y: 1.49, z: -61.94}
+  m_LocalPosition: {x: 223.1, y: 1.96, z: -61.94}
   m_LocalScale: {x: 16.53, y: 1.2858547, z: 16.53}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -11003,8 +11003,8 @@ Transform:
   m_GameObject: {fileID: 1671297787}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 161.2, y: 0.46, z: -50.44}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 161.2, y: 1.36, z: -50.44}
+  m_LocalScale: {x: 1.7, y: 1.7, z: 1.7}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1301251979}
@@ -11086,7 +11086,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInteractionController
   cameraTransform: {fileID: 330585546}
-  interactDistance: 3
+  interactDistance: 3.7
   promptText: {fileID: 388903916}
 --- !u!114 &1671297796
 MonoBehaviour:
