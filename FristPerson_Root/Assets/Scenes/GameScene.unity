@@ -4453,8 +4453,8 @@ Transform:
   m_GameObject: {fileID: 454887679}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 208.4, y: 4.09, z: -73.1}
-  m_LocalScale: {x: 4.8, y: 4.8, z: 4.8}
+  m_LocalPosition: {x: 208.4, y: 2.79, z: -73.1}
+  m_LocalScale: {x: 3.6, y: 3.6, z: 3.6}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 2110958761}
@@ -5652,13 +5652,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 702735131}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0.51246935, y: -0.48716477, z: 0.51336455, w: 0.4863153}
   m_LocalPosition: {x: 0.4, y: -0.3, z: 0.7}
   m_LocalScale: {x: -0.65, y: -0.65, z: -0.65}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 330585546}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 93, y: -90.1, z: 0}
 --- !u!1 &728750057
 GameObject:
   m_ObjectHideFlags: 0
@@ -9657,8 +9657,8 @@ Transform:
   m_GameObject: {fileID: 1435284336}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 220.7, y: 4.09, z: -50.3}
-  m_LocalScale: {x: 4.8, y: 4.8, z: 4.8}
+  m_LocalPosition: {x: 222.19, y: 3.02, z: -49.85}
+  m_LocalScale: {x: 3.6, y: 3.6, z: 3.6}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1656222993}
@@ -11404,7 +11404,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FirstPersonController
   cameraTransform: {fileID: 330585546}
   walkSpeed: 5.5
-  runSpeed: 7.7
+  runSpeed: 7.9
   jumpHeight: 1.4
   gravity: -9.81
   mouseSensitivity: 50
@@ -11430,7 +11430,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   walkStepDistance: 2.5
-  runStepDistance: 2.2
+  runStepDistance: 2.5
   OnFootstep:
     m_PersistentCalls:
       m_Calls: []
