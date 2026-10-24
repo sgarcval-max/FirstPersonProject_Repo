@@ -4133,7 +4133,7 @@ MonoBehaviour:
     amountToSpawn: 10
   - itemPrefab: {fileID: 1174575586585064286, guid: 0f77388ca0841bd44892dc77bde8b1bd, type: 3}
     amountToSpawn: 5
-  - itemPrefab: {fileID: 7010318984658032133, guid: f5b94362e1a088144a8b2963c38994e0, type: 3}
+  - itemPrefab: {fileID: 8097426299482154141, guid: 0bff04b2dd4b9414aa90412f82692dff, type: 3}
     amountToSpawn: 1
   - itemPrefab: {fileID: 4060054629240817150, guid: d1bf43222cef6484b95d375630b5b895, type: 3}
     amountToSpawn: 2
