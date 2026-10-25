@@ -280,12 +280,12 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 022bf8404948deb43a16b93bc1fe9e9c, type: 3}
   minPitch: 0.9
   maxPitch: 1.1
-  minImpactForce: 1.2
-  maxImpactForce: 7
+  minImpactForce: 2.5
+  maxImpactForce: 8
   minVolume: 0.15
   maxVolume: 1
-  soundMinDistance: 0.8
-  soundMaxDistance: 12
+  soundMinDistance: 1
+  soundMaxDistance: 15
 --- !u!114 &8267557445970423913
 MonoBehaviour:
   m_ObjectHideFlags: 0
