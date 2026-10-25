@@ -8,7 +8,8 @@ using UnityEngine.InputSystem;
 /// <summary>
 /// Gestiona la secuencia interactiva del tutorial soportando múltiples Action Maps, reasignaciones dinámicas,
 /// formateo en español, efecto de mecanografiado con audio SFX aleatorio en títulos,
-/// transiciones en fundido (Fade In/Out) y fases dinámicas para interacción e inventario.
+/// transiciones en fundido (Fade In/Out), fases dinámicas para interacción/inventario,
+/// detección automática de cercanía a objetos y 3 barras de progreso secuenciales estrictas.
 /// </summary>
 public class TutorialManager : MonoBehaviour
 {
@@ -24,13 +25,6 @@ public class TutorialManager : MonoBehaviour
         Aim,
         DropWeapon,
         InteractAndInventory
-    }
-
-    public enum PointStepState
-    {
-        SearchingObject,
-        NearObject,
-        ObjectPickedUp
     }
 
     [System.Serializable]
@@ -80,7 +74,23 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI descriptionText;
     [SerializeField] private CanvasGroup bodyCanvasGroup;
 
-    [Header("7. Tiempos de Animación y Escritura")]
+    [Header("7. UI Barra de Progreso de Sub-Pasos (3 Barras)")]
+    [Tooltip("Objeto contenedor donde están alojadas las 3 barras de progreso.")]
+    [SerializeField] private GameObject subStepProgressContainer;
+    [Tooltip("Arrastra aquí las 3 imágenes internas de relleno (Image Type = Filled).")]
+    [SerializeField] private List<Image> subStepProgressFills = new List<Image>();
+    [Tooltip("Velocidad de llenado animado de las barras.")]
+    [SerializeField] private float progressFillSpeed = 8f;
+
+    [Header("8. Detección Automática de Cercanía")]
+    [Tooltip("Si está activado, el tutorial detectará automáticamente cuando el jugador se acerque a un objeto.")]
+    [SerializeField] private bool useAutoProximityDetection = true;
+    [Tooltip("Distancia en metros alrededor del jugador para detectar que está cerca de un objeto.")]
+    [SerializeField] private float proximityRadius = 2.5f;
+    [Tooltip("Capa de objetos que se pueden coger u objetos interactuables.")]
+    [SerializeField] private LayerMask interactableLayer = ~0;
+
+    [Header("9. Tiempos de Animación y Escritura")]
     [Tooltip("Duración general del fade out / fade in.")]
     [SerializeField] private float fadeDuration = 0.25f;
     [Tooltip("Tiempo mínimo entre letras al mecanografiar títulos.")]
@@ -88,14 +98,14 @@ public class TutorialManager : MonoBehaviour
     [Tooltip("Tiempo máximo entre letras al mecanografiar títulos.")]
     [SerializeField] private float maxTypeSpeed = 0.06f;
 
-    [Header("8. Sonido de Mecanografiado (SFX)")]
+    [Header("10. Sonido de Mecanografiado (SFX)")]
     [SerializeField] private AudioSource audioSource;
-    [Tooltip("Arrastra aquí tus 5 efectos de sonido de tecleo.")]
+    [Tooltip("Arrastra aquí tus efectos de sonido de tecleo.")]
     [SerializeField] private AudioClip[] typingSounds;
     [Tooltip("Si está activado, no sonará ningún audio cuando el carácter sea un espacio en blanco.")]
     [SerializeField] private bool ignoreSpaceSound = true;
 
-    [Header("9. Pasos del Tutorial")]
+    [Header("11. Pasos del Tutorial")]
     [SerializeField] private List<TutorialStep> steps = new List<TutorialStep>();
 
     private InputAction moveAction;
@@ -111,15 +121,16 @@ public class TutorialManager : MonoBehaviour
     private int currentStepIndex = 0;
     private bool isTutorialActive = false;
     private bool isTransitioning = false;
+    private float inputCooldown = 0f;
 
-    // Banderas de estado
+    // Fases del sub-paso: 0 = Vacío (0/3), 1 = Cerca (1/3), 2 = Cogido (2/3), 3 = Inventario (3/3)
+    private int currentSubStepPhase = 0;
+    private float[] targetFills = new float[3];
+
     private bool hasMoved = false;
     private bool hasRun = false;
     private bool hasJumped = false;
     private bool hasCrouched = false;
-
-    // Estado del paso dinámico
-    private PointStepState currentPointState = PointStepState.SearchingObject;
 
     private void Awake()
     {
@@ -183,6 +194,7 @@ public class TutorialManager : MonoBehaviour
     private void SetupWelcomeUI()
     {
         if (tutorialPanel != null) tutorialPanel.SetActive(false);
+        if (subStepProgressContainer != null) subStepProgressContainer.SetActive(false);
 
         EnablePlayerControls(false);
         SetCursorState(true);
@@ -206,9 +218,6 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Selecciona y reproduce un audio aleatorio de la lista de SFX al escribir una letra.
-    /// </summary>
     private void PlayRandomTypeSound(char character)
     {
         if (audioSource == null || typingSounds == null || typingSounds.Length == 0) return;
@@ -388,9 +397,31 @@ public class TutorialManager : MonoBehaviour
 
     private void Update()
     {
+        UpdateSubStepProgressUI();
+
+        if (inputCooldown > 0f) inputCooldown -= Time.deltaTime;
+
         if (!isTutorialActive || isTransitioning || currentStepIndex >= steps.Count) return;
 
         CheckCurrentStepCompletion();
+    }
+
+    private void UpdateSubStepProgressUI()
+    {
+        if (subStepProgressFills == null || subStepProgressFills.Count == 0) return;
+
+        for (int i = 0; i < subStepProgressFills.Count; i++)
+        {
+            if (subStepProgressFills[i] != null)
+            {
+                float target = (i < targetFills.Length) ? targetFills[i] : 0f;
+                subStepProgressFills[i].fillAmount = Mathf.MoveTowards(
+                    subStepProgressFills[i].fillAmount,
+                    target,
+                    Time.deltaTime * progressFillSpeed
+                );
+            }
+        }
     }
 
     private void CheckCurrentStepCompletion()
@@ -415,20 +446,14 @@ public class TutorialManager : MonoBehaviour
                 bool actionShootPressed = shootAction != null && shootAction.WasPressedThisFrame();
                 bool mouseLeftClicked = (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame) || Input.GetMouseButtonDown(0);
 
-                if (actionShootPressed || mouseLeftClicked)
-                {
-                    AdvanceStep();
-                }
+                if (actionShootPressed || mouseLeftClicked) AdvanceStep();
                 break;
 
             case ActionType.Aim:
                 bool actionAimPressed = aimAction != null && aimAction.WasPressedThisFrame();
                 bool mouseRightClicked = (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame) || Input.GetMouseButtonDown(1);
 
-                if (actionAimPressed || mouseRightClicked)
-                {
-                    AdvanceStep();
-                }
+                if (actionAimPressed || mouseRightClicked) AdvanceStep();
                 break;
 
             case ActionType.DropWeapon:
@@ -436,25 +461,57 @@ public class TutorialManager : MonoBehaviour
                 break;
 
             case ActionType.InteractAndInventory:
+                // Comprobación automática de proximidad física al objeto
+                CheckProximityAutomatic();
+
+                if (inputCooldown > 0f) return;
+
                 bool isInteractPressed = (interactAction != null && interactAction.WasPressedThisFrame()) || Input.GetKeyDown(KeyCode.E);
 
-                if (currentPointState == PointStepState.SearchingObject || currentPointState == PointStepState.NearObject)
+                // FASE 1: Estás cerca. Al pulsar E, coges el objeto -> FASE 2 (2ª barra)
+                if (currentSubStepPhase == 1)
                 {
                     if (isInteractPressed)
                     {
-                        OnObjectPickedUp();
+                        currentSubStepPhase = 2;
+                        UpdateSubStepStateUI();
+                        inputCooldown = 0.25f;
                     }
                 }
-                else if (currentPointState == PointStepState.ObjectPickedUp)
+                // FASE 2: Objeto en mano. Al pulsar I / TAB, abres inventario -> FASE 3 (3ª barra) y finalizas
+                else if (currentSubStepPhase == 2)
                 {
                     bool isInventoryPressed = (inventoryAction != null && inventoryAction.WasPressedThisFrame()) || Input.GetKeyDown(KeyCode.I) || Input.GetKeyDown(KeyCode.Tab);
                     if (isInventoryPressed)
                     {
-                        AdvanceStep();
+                        StartCoroutine(FinishInventoryStepRoutine());
                     }
                 }
                 break;
         }
+    }
+
+    /// <summary>
+    /// Escanea automáticamente el entorno para ver si el jugador está cerca de un objeto interactuable.
+    /// </summary>
+    private void CheckProximityAutomatic()
+    {
+        if (!useAutoProximityDetection || currentSubStepPhase >= 2 || playerMovementScript == null) return;
+
+        Collider[] hits = Physics.OverlapSphere(playerMovementScript.transform.position, proximityRadius, interactableLayer);
+        bool isNearObject = false;
+
+        foreach (var hit in hits)
+        {
+            // Ignorar al propio jugador y sus hijos
+            if (hit.gameObject != playerMovementScript.gameObject && !hit.transform.IsChildOf(playerMovementScript.transform))
+            {
+                isNearObject = true;
+                break;
+            }
+        }
+
+        SetNearInteractable(isNearObject);
     }
 
     public void SetNearInteractable(bool isNear)
@@ -464,15 +521,18 @@ public class TutorialManager : MonoBehaviour
         TutorialStep current = steps[currentStepIndex];
         if (current.requiredAction != ActionType.InteractAndInventory) return;
 
-        if (isNear && currentPointState == PointStepState.SearchingObject)
+        if (currentSubStepPhase < 2)
         {
-            currentPointState = PointStepState.NearObject;
-            UpdateStepDescriptionText();
-        }
-        else if (!isNear && currentPointState == PointStepState.NearObject)
-        {
-            currentPointState = PointStepState.SearchingObject;
-            UpdateStepDescriptionText();
+            if (isNear && currentSubStepPhase == 0)
+            {
+                currentSubStepPhase = 1;
+                UpdateSubStepStateUI();
+            }
+            else if (!isNear && currentSubStepPhase == 1)
+            {
+                currentSubStepPhase = 0;
+                UpdateSubStepStateUI();
+            }
         }
     }
 
@@ -483,36 +543,82 @@ public class TutorialManager : MonoBehaviour
         TutorialStep current = steps[currentStepIndex];
         if (current.requiredAction != ActionType.InteractAndInventory) return;
 
-        if (currentPointState != PointStepState.ObjectPickedUp)
+        if (currentSubStepPhase < 2)
         {
-            currentPointState = PointStepState.ObjectPickedUp;
-            UpdateStepDescriptionText();
+            currentSubStepPhase = 2;
+            UpdateSubStepStateUI();
         }
     }
 
-    private void UpdateStepDescriptionText()
+    private void UpdateSubStepStateUI()
     {
         if (descriptionText == null) return;
 
-        switch (currentPointState)
+        switch (currentSubStepPhase)
         {
-            case PointStepState.SearchingObject:
-                descriptionText.text = FormatDescription("Ve a un objeto para equiparlo.");
+            case 0: // 0 de 3 barras (Lejos)
+                descriptionText.text = FormatDescription("Localiza y acércate a un objeto.");
+                SetTargetFills(0f, 0f, 0f);
                 break;
-            case PointStepState.NearObject:
+
+            case 1: // 1 de 3 barras (Cerca)
                 descriptionText.text = FormatDescription("Pulsa la tecla {INTERACT} para coger el objeto.");
+                SetTargetFills(1f, 0f, 0f);
                 break;
-            case PointStepState.ObjectPickedUp:
+
+            case 2: // 2 de 3 barras (Objeto recogido)
                 descriptionText.text = FormatDescription("Pulsa {INVENTORY} para ver tu inventario.");
+                SetTargetFills(1f, 1f, 0f);
                 break;
+
+            case 3: // 3 de 3 barras (Inventario abierto)
+                SetTargetFills(1f, 1f, 1f);
+                break;
+        }
+    }
+
+    private IEnumerator FinishInventoryStepRoutine()
+    {
+        isTransitioning = true;
+        currentSubStepPhase = 3;
+        UpdateSubStepStateUI();
+
+        yield return new WaitForSeconds(0.35f);
+
+        AdvanceStep();
+    }
+
+    private void SetTargetFills(float fill1, float fill2, float fill3)
+    {
+        if (targetFills.Length >= 3)
+        {
+            targetFills[0] = fill1;
+            targetFills[1] = fill2;
+            targetFills[2] = fill3;
+        }
+    }
+
+    private void ResetSubStepFills()
+    {
+        currentSubStepPhase = 0;
+        SetTargetFills(0f, 0f, 0f);
+
+        if (subStepProgressFills != null)
+        {
+            foreach (var img in subStepProgressFills)
+            {
+                if (img != null)
+                {
+                    img.fillAmount = 0f;
+                }
+            }
         }
     }
 
     private void AdvanceStep()
     {
-        if (isTransitioning) return;
+        if (isTransitioning && currentSubStepPhase != 3) return;
 
-        // Evaluamos si el paso recién completado correspondía al uso del inventario
         bool isInventoryStep = false;
         if (currentStepIndex >= 0 && currentStepIndex < steps.Count)
         {
@@ -526,7 +632,6 @@ public class TutorialManager : MonoBehaviour
         }
         else
         {
-            // Si el paso final abría el inventario, no forzamos el bloqueo del ratón
             CompleteTutorial(leaveCursorUnlocked: isInventoryStep);
         }
     }
@@ -534,12 +639,12 @@ public class TutorialManager : MonoBehaviour
     private IEnumerator TransitionToStepRoutine(int nextIndex)
     {
         isTransitioning = true;
+        inputCooldown = 0.3f;
 
         hasMoved = false;
         hasRun = false;
         hasJumped = false;
         hasCrouched = false;
-        currentPointState = PointStepState.SearchingObject;
 
         if (bodyCanvasGroup != null && bodyCanvasGroup.alpha > 0f)
         {
@@ -552,18 +657,24 @@ public class TutorialManager : MonoBehaviour
             }
             bodyCanvasGroup.alpha = 0f;
         }
-        else if (bodyCanvasGroup != null)
-        {
-            bodyCanvasGroup.alpha = 0f;
-        }
 
         TutorialStep current = steps[nextIndex];
+
+        bool hasSubSteps = (current.requiredAction == ActionType.InteractAndInventory);
+        if (subStepProgressContainer != null)
+        {
+            subStepProgressContainer.SetActive(hasSubSteps);
+            if (hasSubSteps)
+            {
+                ResetSubStepFills();
+            }
+        }
 
         if (stepCountText != null) stepCountText.text = $"{nextIndex + 1}/{steps.Count}";
 
         if (current.requiredAction == ActionType.InteractAndInventory)
         {
-            UpdateStepDescriptionText();
+            UpdateSubStepStateUI();
         }
         else if (descriptionText != null)
         {
@@ -665,6 +776,7 @@ public class TutorialManager : MonoBehaviour
     {
         if (welcomePanel != null) welcomePanel.SetActive(false);
         if (tutorialPanel != null) tutorialPanel.SetActive(false);
+        if (subStepProgressContainer != null) subStepProgressContainer.SetActive(false);
     }
 
     private void SetCursorState(bool isUnlockedForUI)
