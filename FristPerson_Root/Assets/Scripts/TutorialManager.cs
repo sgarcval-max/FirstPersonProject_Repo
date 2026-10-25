@@ -7,8 +7,8 @@ using UnityEngine.InputSystem;
 
 /// <summary>
 /// Gestiona la secuencia interactiva del tutorial soportando múltiples Action Maps, reasignaciones dinámicas,
-/// formateo en español, efecto de mecanografiado en títulos, transiciones en fundido (Fade In/Out)
-/// y fases dinámicas a prueba de fallos para interacción e inventario.
+/// formateo en español, efecto de mecanografiado con audio SFX aleatorio en títulos,
+/// transiciones en fundido (Fade In/Out) y fases dinámicas para interacción e inventario.
 /// </summary>
 public class TutorialManager : MonoBehaviour
 {
@@ -88,7 +88,14 @@ public class TutorialManager : MonoBehaviour
     [Tooltip("Tiempo máximo entre letras al mecanografiar títulos.")]
     [SerializeField] private float maxTypeSpeed = 0.06f;
 
-    [Header("8. Pasos del Tutorial")]
+    [Header("8. Sonido de Mecanografiado (SFX)")]
+    [SerializeField] private AudioSource audioSource;
+    [Tooltip("Arrastra aquí tus 5 efectos de sonido de tecleo.")]
+    [SerializeField] private AudioClip[] typingSounds;
+    [Tooltip("Si está activado, no sonará ningún audio cuando el carácter sea un espacio en blanco.")]
+    [SerializeField] private bool ignoreSpaceSound = true;
+
+    [Header("9. Pasos del Tutorial")]
     [SerializeField] private List<TutorialStep> steps = new List<TutorialStep>();
 
     private InputAction moveAction;
@@ -199,6 +206,23 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Selecciona y reproduce un audio aleatorio de la lista de SFX al escribir una letra.
+    /// </summary>
+    private void PlayRandomTypeSound(char character)
+    {
+        if (audioSource == null || typingSounds == null || typingSounds.Length == 0) return;
+        if (ignoreSpaceSound && character == ' ') return;
+
+        int randomIndex = Random.Range(0, typingSounds.Length);
+        AudioClip clip = typingSounds[randomIndex];
+
+        if (clip != null)
+        {
+            audioSource.PlayOneShot(clip);
+        }
+    }
+
     private IEnumerator ShowWelcomeRoutine()
     {
         isTransitioning = true;
@@ -214,6 +238,7 @@ public class TutorialManager : MonoBehaviour
             foreach (char character in originalWelcomeTitle)
             {
                 welcomeTitleText.text += character;
+                PlayRandomTypeSound(character);
 
                 float delay = Random.Range(minTypeSpeed, maxTypeSpeed);
                 if (character == ' ' || character == ',' || character == '.')
@@ -413,7 +438,6 @@ public class TutorialManager : MonoBehaviour
             case ActionType.InteractAndInventory:
                 bool isInteractPressed = (interactAction != null && interactAction.WasPressedThisFrame()) || Input.GetKeyDown(KeyCode.E);
 
-                // Si está buscando u objeto cercano y pulsa interactuar, pasa a objeto cogido
                 if (currentPointState == PointStepState.SearchingObject || currentPointState == PointStepState.NearObject)
                 {
                     if (isInteractPressed)
@@ -421,7 +445,6 @@ public class TutorialManager : MonoBehaviour
                         OnObjectPickedUp();
                     }
                 }
-                // Si ya cogió el objeto y pulsa la tecla de inventario, finaliza
                 else if (currentPointState == PointStepState.ObjectPickedUp)
                 {
                     bool isInventoryPressed = (inventoryAction != null && inventoryAction.WasPressedThisFrame()) || Input.GetKeyDown(KeyCode.I) || Input.GetKeyDown(KeyCode.Tab);
@@ -434,9 +457,6 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Cambia la frase cuando el jugador entra o sale del rango del objeto.
-    /// </summary>
     public void SetNearInteractable(bool isNear)
     {
         if (!isTutorialActive || currentStepIndex >= steps.Count) return;
@@ -456,9 +476,6 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Pasa directamente a la frase de abrir el inventario.
-    /// </summary>
     public void OnObjectPickedUp()
     {
         if (!isTutorialActive || currentStepIndex >= steps.Count) return;
@@ -553,6 +570,7 @@ public class TutorialManager : MonoBehaviour
             foreach (char character in fullTitle)
             {
                 titleText.text += character;
+                PlayRandomTypeSound(character);
 
                 float delay = Random.Range(minTypeSpeed, maxTypeSpeed);
                 if (character == ' ' || character == ',' || character == '.')
