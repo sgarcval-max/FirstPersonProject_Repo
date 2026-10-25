@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 /// <summary>
 /// Controlador de personaje en primera persona usando el New Input System.
 /// Adaptado para personajes de escala reducida (mono 0.15).
+/// Incluye corrección de pisadas al chocar contra paredes.
 /// </summary>
 [RequireComponent(typeof(CharacterController))]
 public class FirstPersonController : MonoBehaviour
@@ -197,7 +198,13 @@ public class FirstPersonController : MonoBehaviour
         Vector3 finalMovement = (move * currentSpeed) + velocity;
         controller.Move(finalMovement * Time.deltaTime);
 
-        bool isMoving = move.sqrMagnitude > 0.001f;
+        // --- CORRECCIÓN DE DETECCIÓN REAL DE MOVIMIENTO Y PISADAS ---
+        // Calculamos la velocidad horizontal física real lograda en el mundo (ignorando eje Y)
+        Vector3 horizontalVelocity = new Vector3(controller.velocity.x, 0f, controller.velocity.z);
+        float actualHorizontalSpeed = horizontalVelocity.magnitude;
+
+        // Solo se considera en movimiento si hay Input Y el personaje se desplaza físicamente a más de 0.1 m/s
+        bool isMoving = move.sqrMagnitude > 0.001f && actualHorizontalSpeed > 0.1f;
 
         if (isMoving && !wasMovingLastFrame) OnStartMoving?.Invoke();
         if (!isMoving && wasMovingLastFrame) OnStopMoving?.Invoke();
@@ -211,7 +218,8 @@ public class FirstPersonController : MonoBehaviour
         // CONTROL DE PISADAS
         if (isMoving && isGrounded)
         {
-            distanceSinceLastStep += currentSpeed * Time.deltaTime;
+            // Sumamos la distancia REAL que recorre el personaje en lugar de la velocidad teórica
+            distanceSinceLastStep += actualHorizontalSpeed * Time.deltaTime;
 
             float targetStepDistance = isRunning ? runStepDistance : walkStepDistance;
 
@@ -229,6 +237,11 @@ public class FirstPersonController : MonoBehaviour
                     }
                 }
             }
+        }
+        else
+        {
+            // Si choca contra una pared, se detiene o está en el aire, resetea la distancia del paso
+            distanceSinceLastStep = 0f;
         }
     }
 }
