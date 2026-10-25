@@ -6,9 +6,9 @@ using UnityEngine.UI;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Gestiona la secuencia interactiva del tutorial soportando múltiples Action Maps (Movimiento y Combate),
-/// reasignación dinámica de teclas (RebindActionUI), formateo limpio en español (Clic Derecho, Clic Izquierdo, CTRL, etc.)
-/// y control automático del cursor y scripts del jugador.
+/// Gestiona la secuencia interactiva del tutorial soportando múltiples Action Maps, reasignaciones dinámicas,
+/// formateo limpio en español, efecto de mecanografiado en títulos y transiciones en fundido (Fade In/Out)
+/// tanto para el Panel de Bienvenida como para los Pasos del Tutorial.
 /// </summary>
 public class TutorialManager : MonoBehaviour
 {
@@ -28,15 +28,13 @@ public class TutorialManager : MonoBehaviour
     {
         public string stepTitle;
         [TextArea(2, 4)]
-        [Tooltip("Usa las etiquetas {MOVE}, {JUMP}, {CROUCH}, {SHOOT}, {AIM}, {DROP}. ¡No escribas las teclas a mano!")]
+        [Tooltip("Usa las etiquetas {MOVE}, {JUMP}, {CROUCH}, {SHOOT}, {AIM}, {DROP}.")]
         public string stepDescription;
         public ActionType requiredAction;
     }
 
     [Header("1. Nombres de los Action Maps")]
-    [Tooltip("Nombre del mapa donde están Move, Jump, Crouch...")]
     [SerializeField] private string movementMapName = "Movimiento";
-    [Tooltip("Nombre del mapa donde están Aim, Drop, Throw...")]
     [SerializeField] private string combatMapName = "Combate";
 
     [Header("2. Nombres de Acciones en 'Movimiento'")]
@@ -45,30 +43,41 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private string crouchActionName = "Crouch";
 
     [Header("3. Nombres de Acciones en 'Combate'")]
-    [SerializeField] private string shootActionName = "Throw";
+    [SerializeField] private string shootActionName = "Throw"; 
     [SerializeField] private string aimActionName = "Aim";
     [SerializeField] private string dropActionName = "Drop";
 
     [Header("4. Control de Jugador y Armas")]
-    [Tooltip("Asigna el script de movimiento del jugador para pausarlo en la pantalla de bienvenida.")]
     [SerializeField] private MonoBehaviour playerMovementScript;
-    [Tooltip("Asigna el script de disparos/armas para evitar disparar al pulsar 'Aceptar'.")]
     [SerializeField] private MonoBehaviour weaponScript;
 
-    [Header("5. UI del Tutorial")]
+    [Header("5. UI de Bienvenida (Welcome Panel)")]
     [SerializeField] private GameObject welcomePanel;
+    [SerializeField] private CanvasGroup welcomePanelCanvasGroup;
+    [SerializeField] private TextMeshProUGUI welcomeTitleText;
+    [SerializeField] private CanvasGroup welcomeBodyCanvasGroup;
     [SerializeField] private Button acceptButton;
     [SerializeField] private Button cancelButton;
 
+    [Header("6. UI del Tutorial")]
     [SerializeField] private GameObject tutorialPanel;
+    [SerializeField] private CanvasGroup tutorialPanelCanvasGroup;
     [SerializeField] private TextMeshProUGUI stepCountText;
     [SerializeField] private TextMeshProUGUI titleText;
     [SerializeField] private TextMeshProUGUI descriptionText;
+    [SerializeField] private CanvasGroup bodyCanvasGroup;
 
-    [Header("6. Pasos del Tutorial")]
+    [Header("7. Tiempos de Animación y Escritura")]
+    [Tooltip("Duración general del fade out / fade in.")]
+    [SerializeField] private float fadeDuration = 0.25f;
+    [Tooltip("Tiempo mínimo entre letras al mecanografiar títulos.")]
+    [SerializeField] private float minTypeSpeed = 0.02f;
+    [Tooltip("Tiempo máximo entre letras al mecanografiar títulos.")]
+    [SerializeField] private float maxTypeSpeed = 0.06f;
+
+    [Header("8. Pasos del Tutorial")]
     [SerializeField] private List<TutorialStep> steps = new List<TutorialStep>();
 
-    // Referencias a las InputActions resueltas desde InputManager.Controls
     private InputAction moveAction;
     private InputAction jumpAction;
     private InputAction crouchAction;
@@ -78,6 +87,7 @@ public class TutorialManager : MonoBehaviour
 
     private int currentStepIndex = 0;
     private bool isTutorialActive = false;
+    private bool isTransitioning = false;
     private bool hasJumped = false;
     private bool hasCrouched = false;
 
@@ -108,11 +118,8 @@ public class TutorialManager : MonoBehaviour
         }
 
         InputActionAsset asset = InputManager.Controls.asset;
-
-        // Cargar las reasignaciones guardadas de PlayerPrefs
         RebindActionUI.LoadSavedRebinds(asset);
 
-        // 1. Mapa Movimiento
         InputActionMap moveMap = asset.FindActionMap(movementMapName);
         if (moveMap != null)
         {
@@ -120,22 +127,13 @@ public class TutorialManager : MonoBehaviour
             jumpAction = moveMap.FindAction(jumpActionName);
             crouchAction = moveMap.FindAction(crouchActionName);
         }
-        else
-        {
-            Debug.LogError($"TutorialManager: No se encontró el ActionMap '{movementMapName}'.");
-        }
 
-        // 2. Mapa Combate
         InputActionMap combatMap = asset.FindActionMap(combatMapName);
         if (combatMap != null)
         {
             shootAction = combatMap.FindAction(shootActionName);
             aimAction = combatMap.FindAction(aimActionName);
             dropAction = combatMap.FindAction(dropActionName);
-        }
-        else
-        {
-            Debug.LogError($"TutorialManager: No se encontró el ActionMap '{combatMapName}'.");
         }
     }
 
@@ -146,32 +144,102 @@ public class TutorialManager : MonoBehaviour
         EnablePlayerControls(false);
         SetCursorState(true);
 
+        if (acceptButton != null)
+        {
+            acceptButton.onClick.RemoveAllListeners();
+            acceptButton.onClick.AddListener(OnAcceptTutorial);
+        }
+
+        if (cancelButton != null)
+        {
+            cancelButton.onClick.RemoveAllListeners();
+            cancelButton.onClick.AddListener(OnSkipTutorial);
+        }
+
         if (welcomePanel != null)
         {
             welcomePanel.SetActive(true);
+            StartCoroutine(ShowWelcomeRoutine());
+        }
+    }
 
-            if (acceptButton != null)
-            {
-                acceptButton.onClick.RemoveAllListeners();
-                acceptButton.onClick.AddListener(OnAcceptTutorial);
-            }
+    /// <summary>
+    /// Corrutina de entrada de la Bienvenida:
+    /// 1. Mecanografía el título de bienvenida.
+    /// 2. Hace Fade In del texto explicativo y botones.
+    /// </summary>
+    private IEnumerator ShowWelcomeRoutine()
+    {
+        isTransitioning = true;
 
-            if (cancelButton != null)
+        if (welcomePanelCanvasGroup != null) welcomePanelCanvasGroup.alpha = 1f;
+        if (welcomeBodyCanvasGroup != null) welcomeBodyCanvasGroup.alpha = 0f;
+
+        // Escribir el título de bienvenida
+        if (welcomeTitleText != null)
+        {
+            string originalWelcomeTitle = welcomeTitleText.text;
+            welcomeTitleText.text = "";
+
+            foreach (char character in originalWelcomeTitle)
             {
-                cancelButton.onClick.RemoveAllListeners();
-                cancelButton.onClick.AddListener(OnSkipTutorial);
+                welcomeTitleText.text += character;
+
+                float delay = Random.Range(minTypeSpeed, maxTypeSpeed);
+                if (character == ' ' || character == ',' || character == '.')
+                {
+                    delay *= 1.8f;
+                }
+
+                yield return new WaitForSeconds(delay);
             }
         }
+
+        // Fade In del cuerpo (texto + botones)
+        if (welcomeBodyCanvasGroup != null)
+        {
+            float timer = 0f;
+            while (timer < fadeDuration)
+            {
+                timer += Time.deltaTime;
+                welcomeBodyCanvasGroup.alpha = Mathf.Lerp(0f, 1f, timer / fadeDuration);
+                yield return null;
+            }
+            welcomeBodyCanvasGroup.alpha = 1f;
+        }
+
+        isTransitioning = false;
     }
 
     public void OnAcceptTutorial()
     {
+        if (isTransitioning) return;
+        StartCoroutine(AcceptTutorialRoutine());
+    }
+
+    private IEnumerator AcceptTutorialRoutine()
+    {
+        isTransitioning = true;
+
+        // 1. Fade Out completo del panel de Bienvenida
+        if (welcomePanelCanvasGroup != null)
+        {
+            float timer = 0f;
+            while (timer < fadeDuration)
+            {
+                timer += Time.deltaTime;
+                welcomePanelCanvasGroup.alpha = Mathf.Lerp(1f, 0f, timer / fadeDuration);
+                yield return null;
+            }
+            welcomePanelCanvasGroup.alpha = 0f;
+        }
+
         if (welcomePanel != null) welcomePanel.SetActive(false);
 
         if (steps == null || steps.Count == 0)
         {
             CompleteTutorial();
-            return;
+            yield break;
         }
 
         isTutorialActive = true;
@@ -180,36 +248,36 @@ public class TutorialManager : MonoBehaviour
         EnablePlayerControls(true);
         SetCursorState(false);
 
+        if (tutorialPanelCanvasGroup != null) tutorialPanelCanvasGroup.alpha = 1f;
         if (tutorialPanel != null) tutorialPanel.SetActive(true);
 
-        ShowCurrentStep();
+        yield return StartCoroutine(TransitionToStepRoutine(0));
     }
 
     public void OnSkipTutorial()
     {
-        CompleteTutorial();
+        if (isTransitioning) return;
+        StartCoroutine(SkipTutorialRoutine());
     }
 
-    private void ShowCurrentStep()
+    private IEnumerator SkipTutorialRoutine()
     {
-        if (currentStepIndex >= steps.Count)
+        isTransitioning = true;
+
+        // Fade Out completo de la bienvenida
+        if (welcomePanelCanvasGroup != null)
         {
-            CompleteTutorial();
-            return;
+            float timer = 0f;
+            while (timer < fadeDuration)
+            {
+                timer += Time.deltaTime;
+                welcomePanelCanvasGroup.alpha = Mathf.Lerp(1f, 0f, timer / fadeDuration);
+                yield return null;
+            }
+            welcomePanelCanvasGroup.alpha = 0f;
         }
 
-        hasJumped = false;
-        hasCrouched = false;
-
-        TutorialStep current = steps[currentStepIndex];
-
-        if (stepCountText != null) stepCountText.text = $"{currentStepIndex + 1}/{steps.Count}";
-        if (titleText != null) titleText.text = current.stepTitle;
-
-        if (descriptionText != null)
-        {
-            descriptionText.text = FormatDescription(current.stepDescription);
-        }
+        CompleteTutorial();
     }
 
     private string FormatDescription(string rawText)
@@ -220,7 +288,6 @@ public class TutorialManager : MonoBehaviour
         formatted = formatted.Replace("{JUMP}", GetDisplayString(jumpAction, "ESPACIO"));
         formatted = formatted.Replace("{CROUCH}", GetDisplayString(crouchAction, "CTRL"));
 
-        // Formateo del botón de disparo / uso
         string shootText = GetDisplayString(shootAction, "Clic Izquierdo");
         if (string.IsNullOrEmpty(shootText) || shootText.Equals("E", System.StringComparison.OrdinalIgnoreCase))
         {
@@ -228,7 +295,6 @@ public class TutorialManager : MonoBehaviour
         }
         formatted = formatted.Replace("{SHOOT}", shootText);
 
-        // Formateo del botón de apuntar
         string aimText = GetDisplayString(aimAction, "Clic Derecho");
         formatted = formatted.Replace("{AIM}", aimText);
 
@@ -237,15 +303,10 @@ public class TutorialManager : MonoBehaviour
         return formatted;
     }
 
-    /// <summary>
-    /// Obtiene el nombre del binding actual y traduce términos en inglés / siglas (RMB, LMB, Left Control...)
-    /// a nombres limpios en español.
-    /// </summary>
     private string GetDisplayString(InputAction action, string fallback)
     {
         if (action == null) return fallback;
 
-        // Cargar la última configuración activa
         if (InputManager.Controls != null)
         {
             RebindActionUI.LoadSavedRebinds(InputManager.Controls.asset);
@@ -255,7 +316,6 @@ public class TutorialManager : MonoBehaviour
 
         if (string.IsNullOrEmpty(display)) return fallback;
 
-        // TRADUCCIÓN Y FORMATEO DE TECLAS Y BOTONES DE RATÓN
         display = display.Replace("RMB", "Clic Derecho")
                          .Replace("LMB", "Clic Izquierdo")
                          .Replace("MMB", "Clic Central")
@@ -277,7 +337,7 @@ public class TutorialManager : MonoBehaviour
 
     private void Update()
     {
-        if (!isTutorialActive || currentStepIndex >= steps.Count) return;
+        if (!isTutorialActive || isTransitioning || currentStepIndex >= steps.Count) return;
 
         CheckCurrentStepCompletion();
     }
@@ -326,10 +386,12 @@ public class TutorialManager : MonoBehaviour
 
     private void AdvanceStep()
     {
+        if (isTransitioning) return;
+
         currentStepIndex++;
         if (currentStepIndex < steps.Count)
         {
-            ShowCurrentStep();
+            StartCoroutine(TransitionToStepRoutine(currentStepIndex));
         }
         else
         {
@@ -337,9 +399,106 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
-    private void CompleteTutorial()
+    private IEnumerator TransitionToStepRoutine(int nextIndex)
+    {
+        isTransitioning = true;
+        hasJumped = false;
+        hasCrouched = false;
+
+        // 1. Fade Out del cuerpo del texto previo
+        if (bodyCanvasGroup != null && bodyCanvasGroup.alpha > 0f)
+        {
+            float timer = 0f;
+            while (timer < fadeDuration)
+            {
+                timer += Time.deltaTime;
+                bodyCanvasGroup.alpha = Mathf.Lerp(1f, 0f, timer / fadeDuration);
+                yield return null;
+            }
+            bodyCanvasGroup.alpha = 0f;
+        }
+        else if (bodyCanvasGroup != null)
+        {
+            bodyCanvasGroup.alpha = 0f;
+        }
+
+        TutorialStep current = steps[nextIndex];
+
+        if (stepCountText != null) stepCountText.text = $"{nextIndex + 1}/{steps.Count}";
+        if (descriptionText != null) descriptionText.text = FormatDescription(current.stepDescription);
+
+        // 2. Efecto Mecanografiado Irregular del Título del paso
+        if (titleText != null)
+        {
+            titleText.text = "";
+            string fullTitle = current.stepTitle;
+
+            foreach (char character in fullTitle)
+            {
+                titleText.text += character;
+
+                float delay = Random.Range(minTypeSpeed, maxTypeSpeed);
+                if (character == ' ' || character == ',' || character == '.')
+                {
+                    delay *= 1.8f;
+                }
+
+                yield return new WaitForSeconds(delay);
+            }
+        }
+
+        // 3. Fade In de la descripción y contador
+        if (bodyCanvasGroup != null)
+        {
+            float timer = 0f;
+            while (timer < fadeDuration)
+            {
+                timer += Time.deltaTime;
+                bodyCanvasGroup.alpha = Mathf.Lerp(0f, 1f, timer / fadeDuration);
+                yield return null;
+            }
+            bodyCanvasGroup.alpha = 1f;
+        }
+
+        isTransitioning = false;
+    }
+
+    public void CompleteTutorial()
+    {
+        if (!isTutorialActive && welcomePanel != null && !welcomePanel.activeSelf)
+        {
+            FinishCompletion();
+            return;
+        }
+
+        StartCoroutine(CompleteTutorialRoutine());
+    }
+
+    private IEnumerator CompleteTutorialRoutine()
+    {
+        isTransitioning = true;
+        isTutorialActive = false;
+
+        // Fade Out completo de todo el panel del tutorial
+        if (tutorialPanelCanvasGroup != null)
+        {
+            float timer = 0f;
+            while (timer < fadeDuration)
+            {
+                timer += Time.deltaTime;
+                tutorialPanelCanvasGroup.alpha = Mathf.Lerp(1f, 0f, timer / fadeDuration);
+                yield return null;
+            }
+            tutorialPanelCanvasGroup.alpha = 0f;
+        }
+
+        FinishCompletion();
+    }
+
+    private void FinishCompletion()
     {
         isTutorialActive = false;
+        isTransitioning = false;
 
         PlayerPrefs.SetInt(TUTORIAL_KEY, 1);
         PlayerPrefs.Save();
@@ -348,6 +507,10 @@ public class TutorialManager : MonoBehaviour
         SetCursorState(false);
 
         DisableAllPanels();
+
+        // Restablecer alphas a 1 por si se resetea o reinicia el tutorial
+        if (welcomePanelCanvasGroup != null) welcomePanelCanvasGroup.alpha = 1f;
+        if (tutorialPanelCanvasGroup != null) tutorialPanelCanvasGroup.alpha = 1f;
     }
 
     private void DisableAllPanels()
