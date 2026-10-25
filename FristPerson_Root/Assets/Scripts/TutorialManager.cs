@@ -512,6 +512,13 @@ public class TutorialManager : MonoBehaviour
     {
         if (isTransitioning) return;
 
+        // Evaluamos si el paso recién completado correspondía al uso del inventario
+        bool isInventoryStep = false;
+        if (currentStepIndex >= 0 && currentStepIndex < steps.Count)
+        {
+            isInventoryStep = steps[currentStepIndex].requiredAction == ActionType.InteractAndInventory;
+        }
+
         currentStepIndex++;
         if (currentStepIndex < steps.Count)
         {
@@ -519,7 +526,8 @@ public class TutorialManager : MonoBehaviour
         }
         else
         {
-            CompleteTutorial();
+            // Si el paso final abría el inventario, no forzamos el bloqueo del ratón
+            CompleteTutorial(leaveCursorUnlocked: isInventoryStep);
         }
     }
 
@@ -597,18 +605,18 @@ public class TutorialManager : MonoBehaviour
         isTransitioning = false;
     }
 
-    public void CompleteTutorial()
+    public void CompleteTutorial(bool leaveCursorUnlocked = false)
     {
         if (!isTutorialActive && welcomePanel != null && !welcomePanel.activeSelf)
         {
-            FinishCompletion();
+            FinishCompletion(leaveCursorUnlocked);
             return;
         }
 
-        StartCoroutine(CompleteTutorialRoutine());
+        StartCoroutine(CompleteTutorialRoutine(leaveCursorUnlocked));
     }
 
-    private IEnumerator CompleteTutorialRoutine()
+    private IEnumerator CompleteTutorialRoutine(bool leaveCursorUnlocked = false)
     {
         isTransitioning = true;
         isTutorialActive = false;
@@ -625,10 +633,10 @@ public class TutorialManager : MonoBehaviour
             tutorialPanelCanvasGroup.alpha = 0f;
         }
 
-        FinishCompletion();
+        FinishCompletion(leaveCursorUnlocked);
     }
 
-    private void FinishCompletion()
+    private void FinishCompletion(bool leaveCursorUnlocked = false)
     {
         isTutorialActive = false;
         isTransitioning = false;
@@ -637,7 +645,15 @@ public class TutorialManager : MonoBehaviour
         PlayerPrefs.Save();
 
         EnablePlayerControls(true);
-        SetCursorState(false);
+
+        if (leaveCursorUnlocked)
+        {
+            SetCursorState(true);
+        }
+        else
+        {
+            SetCursorState(false);
+        }
 
         DisableAllPanels();
 
