@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 5032256315546257543}
   - component: {fileID: 6455557703688125508}
   - component: {fileID: 4552289101260619843}
+  - component: {fileID: 5629586056568863589}
   m_Layer: 0
   m_Name: Libro_Mundo
   m_TagString: Untagged
@@ -154,3 +155,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KeyItemPickup
   item: {fileID: 11400000, guid: 818162507b5facd4a97f7787e721fe8f, type: 2}
+--- !u!114 &5629586056568863589
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7793814782954826435}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85f7fa9329d50ad48901a302797dd2ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TutorialTrigger
+  playerTag: Player

@@ -84,6 +84,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 50997d2f5f5198f4a9a310cf9758061d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7894363328886338934}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 50997d2f5f5198f4a9a310cf9758061d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4239833513041895137}
     - targetCorrespondingSourceObject: {fileID: -7106952358281173966, guid: 50997d2f5f5198f4a9a310cf9758061d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 27121094179901368}
@@ -1087,6 +1090,19 @@ MonoBehaviour:
   maxVolume: 1
   soundMinDistance: 0.8
   soundMaxDistance: 12
+--- !u!114 &4239833513041895137
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4488800072966777587}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85f7fa9329d50ad48901a302797dd2ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TutorialTrigger
+  playerTag: Player
 --- !u!1 &4773870121275507435 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8127365269134366025, guid: 50997d2f5f5198f4a9a310cf9758061d, type: 3}

@@ -66,6 +66,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: ad42d313823f8f44a941bf490d662541, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3200852288843000882}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: ad42d313823f8f44a941bf490d662541, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6043077936408353786}
     - targetCorrespondingSourceObject: {fileID: -1688617927700330159, guid: ad42d313823f8f44a941bf490d662541, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6619524028283982774}
@@ -172,3 +175,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KeyItemPickup
   item: {fileID: 11400000, guid: 0dcd7fff5a6c6da469a10e4eaba820a1, type: 2}
+--- !u!114 &6043077936408353786
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8097426299482154141}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85f7fa9329d50ad48901a302797dd2ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TutorialTrigger
+  playerTag: Player

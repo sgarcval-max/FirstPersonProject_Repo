@@ -7,11 +7,13 @@ using UnityEngine.InputSystem;
 
 /// <summary>
 /// Gestiona la secuencia interactiva del tutorial soportando múltiples Action Maps, reasignaciones dinámicas,
-/// formateo limpio en español, efecto de mecanografiado en títulos y transiciones en fundido (Fade In/Out)
-/// tanto para el Panel de Bienvenida como para los Pasos del Tutorial.
+/// formateo en español, efecto de mecanografiado en títulos, transiciones en fundido (Fade In/Out)
+/// y fases dinámicas a prueba de fallos para interacción e inventario.
 /// </summary>
 public class TutorialManager : MonoBehaviour
 {
+    public static TutorialManager Instance { get; private set; }
+
     private const string TUTORIAL_KEY = "TutorialCompleted";
 
     public enum ActionType
@@ -20,7 +22,15 @@ public class TutorialManager : MonoBehaviour
         JumpAndCrouch,
         Shoot,
         Aim,
-        DropWeapon
+        DropWeapon,
+        InteractAndInventory
+    }
+
+    public enum PointStepState
+    {
+        SearchingObject,
+        NearObject,
+        ObjectPickedUp
     }
 
     [System.Serializable]
@@ -28,7 +38,7 @@ public class TutorialManager : MonoBehaviour
     {
         public string stepTitle;
         [TextArea(2, 4)]
-        [Tooltip("Usa las etiquetas {MOVE}, {JUMP}, {CROUCH}, {SHOOT}, {AIM}, {DROP}.")]
+        [Tooltip("Usa las etiquetas {MOVE}, {RUN}, {JUMP}, {CROUCH}, {SHOOT}, {AIM}, {DROP}, {INTERACT}, {INVENTORY}.")]
         public string stepDescription;
         public ActionType requiredAction;
     }
@@ -39,13 +49,16 @@ public class TutorialManager : MonoBehaviour
 
     [Header("2. Nombres de Acciones en 'Movimiento'")]
     [SerializeField] private string moveActionName = "Move";
+    [SerializeField] private string runActionName = "Run";
     [SerializeField] private string jumpActionName = "Jump";
     [SerializeField] private string crouchActionName = "Crouch";
 
-    [Header("3. Nombres de Acciones en 'Combate'")]
-    [SerializeField] private string shootActionName = "Throw"; 
+    [Header("3. Nombres de Acciones en 'Combate / Interacción'")]
+    [SerializeField] private string shootActionName = "Throw";
     [SerializeField] private string aimActionName = "Aim";
     [SerializeField] private string dropActionName = "Drop";
+    [SerializeField] private string interactActionName = "Interact";
+    [SerializeField] private string inventoryActionName = "Inventory";
 
     [Header("4. Control de Jugador y Armas")]
     [SerializeField] private MonoBehaviour playerMovementScript;
@@ -79,20 +92,40 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private List<TutorialStep> steps = new List<TutorialStep>();
 
     private InputAction moveAction;
+    private InputAction runAction;
     private InputAction jumpAction;
     private InputAction crouchAction;
     private InputAction shootAction;
     private InputAction aimAction;
     private InputAction dropAction;
+    private InputAction interactAction;
+    private InputAction inventoryAction;
 
     private int currentStepIndex = 0;
     private bool isTutorialActive = false;
     private bool isTransitioning = false;
+
+    // Banderas de estado
+    private bool hasMoved = false;
+    private bool hasRun = false;
     private bool hasJumped = false;
     private bool hasCrouched = false;
 
+    // Estado del paso dinámico
+    private PointStepState currentPointState = PointStepState.SearchingObject;
+
     private void Awake()
     {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         InitializeInputActions();
     }
 
@@ -124,6 +157,7 @@ public class TutorialManager : MonoBehaviour
         if (moveMap != null)
         {
             moveAction = moveMap.FindAction(moveActionName);
+            runAction = moveMap.FindAction(runActionName);
             jumpAction = moveMap.FindAction(jumpActionName);
             crouchAction = moveMap.FindAction(crouchActionName);
         }
@@ -134,6 +168,8 @@ public class TutorialManager : MonoBehaviour
             shootAction = combatMap.FindAction(shootActionName);
             aimAction = combatMap.FindAction(aimActionName);
             dropAction = combatMap.FindAction(dropActionName);
+            interactAction = combatMap.FindAction(interactActionName);
+            inventoryAction = combatMap.FindAction(inventoryActionName);
         }
     }
 
@@ -163,11 +199,6 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Corrutina de entrada de la Bienvenida:
-    /// 1. Mecanografía el título de bienvenida.
-    /// 2. Hace Fade In del texto explicativo y botones.
-    /// </summary>
     private IEnumerator ShowWelcomeRoutine()
     {
         isTransitioning = true;
@@ -175,7 +206,6 @@ public class TutorialManager : MonoBehaviour
         if (welcomePanelCanvasGroup != null) welcomePanelCanvasGroup.alpha = 1f;
         if (welcomeBodyCanvasGroup != null) welcomeBodyCanvasGroup.alpha = 0f;
 
-        // Escribir el título de bienvenida
         if (welcomeTitleText != null)
         {
             string originalWelcomeTitle = welcomeTitleText.text;
@@ -195,7 +225,6 @@ public class TutorialManager : MonoBehaviour
             }
         }
 
-        // Fade In del cuerpo (texto + botones)
         if (welcomeBodyCanvasGroup != null)
         {
             float timer = 0f;
@@ -221,7 +250,6 @@ public class TutorialManager : MonoBehaviour
     {
         isTransitioning = true;
 
-        // 1. Fade Out completo del panel de Bienvenida
         if (welcomePanelCanvasGroup != null)
         {
             float timer = 0f;
@@ -264,7 +292,6 @@ public class TutorialManager : MonoBehaviour
     {
         isTransitioning = true;
 
-        // Fade Out completo de la bienvenida
         if (welcomePanelCanvasGroup != null)
         {
             float timer = 0f;
@@ -285,6 +312,7 @@ public class TutorialManager : MonoBehaviour
         string formatted = rawText;
 
         formatted = formatted.Replace("{MOVE}", GetDisplayString(moveAction, "WASD"));
+        formatted = formatted.Replace("{RUN}", GetDisplayString(runAction, "SHIFT"));
         formatted = formatted.Replace("{JUMP}", GetDisplayString(jumpAction, "ESPACIO"));
         formatted = formatted.Replace("{CROUCH}", GetDisplayString(crouchAction, "CTRL"));
 
@@ -299,6 +327,8 @@ public class TutorialManager : MonoBehaviour
         formatted = formatted.Replace("{AIM}", aimText);
 
         formatted = formatted.Replace("{DROP}", GetDisplayString(dropAction, "G"));
+        formatted = formatted.Replace("{INTERACT}", GetDisplayString(interactAction, "E"));
+        formatted = formatted.Replace("{INVENTORY}", GetDisplayString(inventoryAction, "I / TAB"));
 
         return formatted;
     }
@@ -306,11 +336,6 @@ public class TutorialManager : MonoBehaviour
     private string GetDisplayString(InputAction action, string fallback)
     {
         if (action == null) return fallback;
-
-        if (InputManager.Controls != null)
-        {
-            RebindActionUI.LoadSavedRebinds(InputManager.Controls.asset);
-        }
 
         string display = action.GetBindingDisplayString(InputBinding.DisplayStringOptions.DontIncludeInteractions);
 
@@ -330,7 +355,8 @@ public class TutorialManager : MonoBehaviour
                          .Replace("Right Shift", "SHIFT")
                          .Replace("Left Alt", "ALT")
                          .Replace("Right Alt", "ALT")
-                         .Replace("Space", "ESPACIO");
+                         .Replace("Space", "ESPACIO")
+                         .Replace("Tab", "TAB");
 
         return display;
     }
@@ -349,7 +375,9 @@ public class TutorialManager : MonoBehaviour
         switch (current.requiredAction)
         {
             case ActionType.Movement:
-                if (moveAction != null && moveAction.IsPressed()) AdvanceStep();
+                if (moveAction != null && moveAction.IsPressed()) hasMoved = true;
+                if (runAction != null && runAction.IsPressed()) hasRun = true;
+                if (hasMoved && hasRun) AdvanceStep();
                 break;
 
             case ActionType.JumpAndCrouch:
@@ -381,6 +409,85 @@ public class TutorialManager : MonoBehaviour
             case ActionType.DropWeapon:
                 if (dropAction != null && dropAction.WasPressedThisFrame()) AdvanceStep();
                 break;
+
+            case ActionType.InteractAndInventory:
+                bool isInteractPressed = (interactAction != null && interactAction.WasPressedThisFrame()) || Input.GetKeyDown(KeyCode.E);
+
+                // Si está buscando u objeto cercano y pulsa interactuar, pasa a objeto cogido
+                if (currentPointState == PointStepState.SearchingObject || currentPointState == PointStepState.NearObject)
+                {
+                    if (isInteractPressed)
+                    {
+                        OnObjectPickedUp();
+                    }
+                }
+                // Si ya cogió el objeto y pulsa la tecla de inventario, finaliza
+                else if (currentPointState == PointStepState.ObjectPickedUp)
+                {
+                    bool isInventoryPressed = (inventoryAction != null && inventoryAction.WasPressedThisFrame()) || Input.GetKeyDown(KeyCode.I) || Input.GetKeyDown(KeyCode.Tab);
+                    if (isInventoryPressed)
+                    {
+                        AdvanceStep();
+                    }
+                }
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Cambia la frase cuando el jugador entra o sale del rango del objeto.
+    /// </summary>
+    public void SetNearInteractable(bool isNear)
+    {
+        if (!isTutorialActive || currentStepIndex >= steps.Count) return;
+
+        TutorialStep current = steps[currentStepIndex];
+        if (current.requiredAction != ActionType.InteractAndInventory) return;
+
+        if (isNear && currentPointState == PointStepState.SearchingObject)
+        {
+            currentPointState = PointStepState.NearObject;
+            UpdateStepDescriptionText();
+        }
+        else if (!isNear && currentPointState == PointStepState.NearObject)
+        {
+            currentPointState = PointStepState.SearchingObject;
+            UpdateStepDescriptionText();
+        }
+    }
+
+    /// <summary>
+    /// Pasa directamente a la frase de abrir el inventario.
+    /// </summary>
+    public void OnObjectPickedUp()
+    {
+        if (!isTutorialActive || currentStepIndex >= steps.Count) return;
+
+        TutorialStep current = steps[currentStepIndex];
+        if (current.requiredAction != ActionType.InteractAndInventory) return;
+
+        if (currentPointState != PointStepState.ObjectPickedUp)
+        {
+            currentPointState = PointStepState.ObjectPickedUp;
+            UpdateStepDescriptionText();
+        }
+    }
+
+    private void UpdateStepDescriptionText()
+    {
+        if (descriptionText == null) return;
+
+        switch (currentPointState)
+        {
+            case PointStepState.SearchingObject:
+                descriptionText.text = FormatDescription("Ve a un objeto para equiparlo.");
+                break;
+            case PointStepState.NearObject:
+                descriptionText.text = FormatDescription("Pulsa la tecla {INTERACT} para coger el objeto.");
+                break;
+            case PointStepState.ObjectPickedUp:
+                descriptionText.text = FormatDescription("Pulsa {INVENTORY} para ver tu inventario.");
+                break;
         }
     }
 
@@ -402,10 +509,13 @@ public class TutorialManager : MonoBehaviour
     private IEnumerator TransitionToStepRoutine(int nextIndex)
     {
         isTransitioning = true;
+
+        hasMoved = false;
+        hasRun = false;
         hasJumped = false;
         hasCrouched = false;
+        currentPointState = PointStepState.SearchingObject;
 
-        // 1. Fade Out del cuerpo del texto previo
         if (bodyCanvasGroup != null && bodyCanvasGroup.alpha > 0f)
         {
             float timer = 0f;
@@ -425,9 +535,16 @@ public class TutorialManager : MonoBehaviour
         TutorialStep current = steps[nextIndex];
 
         if (stepCountText != null) stepCountText.text = $"{nextIndex + 1}/{steps.Count}";
-        if (descriptionText != null) descriptionText.text = FormatDescription(current.stepDescription);
 
-        // 2. Efecto Mecanografiado Irregular del Título del paso
+        if (current.requiredAction == ActionType.InteractAndInventory)
+        {
+            UpdateStepDescriptionText();
+        }
+        else if (descriptionText != null)
+        {
+            descriptionText.text = FormatDescription(current.stepDescription);
+        }
+
         if (titleText != null)
         {
             titleText.text = "";
@@ -447,7 +564,6 @@ public class TutorialManager : MonoBehaviour
             }
         }
 
-        // 3. Fade In de la descripción y contador
         if (bodyCanvasGroup != null)
         {
             float timer = 0f;
@@ -479,7 +595,6 @@ public class TutorialManager : MonoBehaviour
         isTransitioning = true;
         isTutorialActive = false;
 
-        // Fade Out completo de todo el panel del tutorial
         if (tutorialPanelCanvasGroup != null)
         {
             float timer = 0f;
@@ -508,7 +623,6 @@ public class TutorialManager : MonoBehaviour
 
         DisableAllPanels();
 
-        // Restablecer alphas a 1 por si se resetea o reinicia el tutorial
         if (welcomePanelCanvasGroup != null) welcomePanelCanvasGroup.alpha = 1f;
         if (tutorialPanelCanvasGroup != null) tutorialPanelCanvasGroup.alpha = 1f;
     }

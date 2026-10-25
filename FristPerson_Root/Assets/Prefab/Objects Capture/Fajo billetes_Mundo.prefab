@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 14824512867708055}
   - component: {fileID: 6563993038903327708}
   - component: {fileID: 738439541519770909}
+  - component: {fileID: 2006817916107745277}
   m_Layer: 0
   m_Name: Fajo billetes_Mundo
   m_TagString: Untagged
@@ -154,3 +155,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KeyItemPickup
   item: {fileID: 11400000, guid: 8173147064070384c835cb043f9cb5af, type: 2}
+--- !u!114 &2006817916107745277
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1998054018732691239}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85f7fa9329d50ad48901a302797dd2ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TutorialTrigger
+  playerTag: Player

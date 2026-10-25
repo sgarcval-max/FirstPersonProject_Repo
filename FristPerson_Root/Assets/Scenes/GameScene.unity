@@ -11974,11 +11974,14 @@ MonoBehaviour:
   movementMapName: Movimiento
   combatMapName: Combate
   moveActionName: Move
+  runActionName: Run
   jumpActionName: Jump
   crouchActionName: Crouch
   shootActionName: Throw
   aimActionName: Aim
   dropActionName: Drop
+  interactActionName: Interact
+  inventoryActionName: Inventory
   playerMovementScript: {fileID: 1671297793}
   weaponScript: {fileID: 0}
   welcomePanel: {fileID: 1339213393}
@@ -11998,7 +12001,7 @@ MonoBehaviour:
   maxTypeSpeed: 0.06
   steps:
   - stepTitle: Movimiento
-    stepDescription: Usa las teclas {MOVE} para moverte por el escenario.
+    stepDescription: Usa las teclas {MOVE} para moverte y {RUN} para correr.
     requiredAction: 0
   - stepTitle: Salto y Agacharse
     stepDescription: Pulsa {JUMP} para saltar y {CROUCH} para agacharte.
@@ -12012,6 +12015,9 @@ MonoBehaviour:
   - stepTitle: Soltar Arma
     stepDescription: Pulsa la tecla {DROP} para soltar tu arma al suelo.
     requiredAction: 4
+  - stepTitle: Consigue puntos
+    stepDescription: Ve a un objeto para equiparlo
+    requiredAction: 5
 --- !u!4 &1572668831
 Transform:
   m_ObjectHideFlags: 0
@@ -12990,7 +12996,7 @@ GameObject:
   - component: {fileID: 1671297804}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
