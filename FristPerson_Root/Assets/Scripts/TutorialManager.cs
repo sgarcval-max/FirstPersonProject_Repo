@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
-#if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
-#endif
 
 /// <summary>
-/// Gestiona el tutorial interactivo controlando el estado del cursor y los scripts del jugador
-/// para permitir interactuar con la UI de bienvenida y disparar/apuntar normalmente durante los pasos.
+/// Gestiona la secuencia interactiva del tutorial soportando múltiples Action Maps (Movimiento y Combate),
+/// reasignación dinámica de teclas (RebindActionUI), formateo limpio en español (Clic Derecho, Clic Izquierdo, CTRL, etc.)
+/// y control automático del cursor y scripts del jugador.
 /// </summary>
 public class TutorialManager : MonoBehaviour
 {
@@ -29,48 +28,70 @@ public class TutorialManager : MonoBehaviour
     {
         public string stepTitle;
         [TextArea(2, 4)]
+        [Tooltip("Usa las etiquetas {MOVE}, {JUMP}, {CROUCH}, {SHOOT}, {AIM}, {DROP}. ¡No escribas las teclas a mano!")]
         public string stepDescription;
         public ActionType requiredAction;
     }
 
-    [Header("1. Control de Jugador y Armas")]
-    [Tooltip("Asigna aquí el script de movimiento del jugador para desactivarlo mientras la bienvenida está en pantalla.")]
+    [Header("1. Nombres de los Action Maps")]
+    [Tooltip("Nombre del mapa donde están Move, Jump, Crouch...")]
+    [SerializeField] private string movementMapName = "Movimiento";
+    [Tooltip("Nombre del mapa donde están Aim, Drop, Throw...")]
+    [SerializeField] private string combatMapName = "Combate";
+
+    [Header("2. Nombres de Acciones en 'Movimiento'")]
+    [SerializeField] private string moveActionName = "Move";
+    [SerializeField] private string jumpActionName = "Jump";
+    [SerializeField] private string crouchActionName = "Crouch";
+
+    [Header("3. Nombres de Acciones en 'Combate'")]
+    [SerializeField] private string shootActionName = "Throw";
+    [SerializeField] private string aimActionName = "Aim";
+    [SerializeField] private string dropActionName = "Drop";
+
+    [Header("4. Control de Jugador y Armas")]
+    [Tooltip("Asigna el script de movimiento del jugador para pausarlo en la pantalla de bienvenida.")]
     [SerializeField] private MonoBehaviour playerMovementScript;
-    [Tooltip("Asigna aquí el script de disparo/arma para evitar que dispare al hacer clic en 'Aceptar'.")]
+    [Tooltip("Asigna el script de disparos/armas para evitar disparar al pulsar 'Aceptar'.")]
     [SerializeField] private MonoBehaviour weaponScript;
 
-    [Header("2. Panel de Bienvenida")]
+    [Header("5. UI del Tutorial")]
     [SerializeField] private GameObject welcomePanel;
     [SerializeField] private Button acceptButton;
     [SerializeField] private Button cancelButton;
 
-    [Header("3. Panel del Tutorial")]
     [SerializeField] private GameObject tutorialPanel;
     [SerializeField] private TextMeshProUGUI stepCountText;
     [SerializeField] private TextMeshProUGUI titleText;
     [SerializeField] private TextMeshProUGUI descriptionText;
 
-    [Header("4. Lista de Pasos del Tutorial")]
+    [Header("6. Pasos del Tutorial")]
     [SerializeField] private List<TutorialStep> steps = new List<TutorialStep>();
 
-    [Header("5. Teclas de Control")]
-    [SerializeField] private KeyCode jumpKey = KeyCode.Space;
-    [SerializeField] private KeyCode crouchKey = KeyCode.C;
-    [SerializeField] private KeyCode dropKey = KeyCode.G;
+    // Referencias a las InputActions resueltas desde InputManager.Controls
+    private InputAction moveAction;
+    private InputAction jumpAction;
+    private InputAction crouchAction;
+    private InputAction shootAction;
+    private InputAction aimAction;
+    private InputAction dropAction;
 
     private int currentStepIndex = 0;
     private bool isTutorialActive = false;
-
     private bool hasJumped = false;
     private bool hasCrouched = false;
 
+    private void Awake()
+    {
+        InitializeInputActions();
+    }
+
     private void Start()
     {
-        // Si ya completó el tutorial previamente
         if (PlayerPrefs.GetInt(TUTORIAL_KEY, 0) == 1)
         {
             EnablePlayerControls(true);
-            SetCursorState(false); // Bloquear cursor para jugar normalmente
+            SetCursorState(false);
             DisableAllPanels();
             return;
         }
@@ -78,11 +99,50 @@ public class TutorialManager : MonoBehaviour
         SetupWelcomeUI();
     }
 
+    private void InitializeInputActions()
+    {
+        if (InputManager.Controls == null)
+        {
+            Debug.LogError("TutorialManager: InputManager.Controls no está inicializado.");
+            return;
+        }
+
+        InputActionAsset asset = InputManager.Controls.asset;
+
+        // Cargar las reasignaciones guardadas de PlayerPrefs
+        RebindActionUI.LoadSavedRebinds(asset);
+
+        // 1. Mapa Movimiento
+        InputActionMap moveMap = asset.FindActionMap(movementMapName);
+        if (moveMap != null)
+        {
+            moveAction = moveMap.FindAction(moveActionName);
+            jumpAction = moveMap.FindAction(jumpActionName);
+            crouchAction = moveMap.FindAction(crouchActionName);
+        }
+        else
+        {
+            Debug.LogError($"TutorialManager: No se encontró el ActionMap '{movementMapName}'.");
+        }
+
+        // 2. Mapa Combate
+        InputActionMap combatMap = asset.FindActionMap(combatMapName);
+        if (combatMap != null)
+        {
+            shootAction = combatMap.FindAction(shootActionName);
+            aimAction = combatMap.FindAction(aimActionName);
+            dropAction = combatMap.FindAction(dropActionName);
+        }
+        else
+        {
+            Debug.LogError($"TutorialManager: No se encontró el ActionMap '{combatMapName}'.");
+        }
+    }
+
     private void SetupWelcomeUI()
     {
         if (tutorialPanel != null) tutorialPanel.SetActive(false);
 
-        // Desactivar controles y liberar cursor para poder pulsar los botones de la UI
         EnablePlayerControls(false);
         SetCursorState(true);
 
@@ -117,7 +177,6 @@ public class TutorialManager : MonoBehaviour
         isTutorialActive = true;
         currentStepIndex = 0;
 
-        // Activar controles del jugador y bloquear cursor para poder moverse/disparar en el juego
         EnablePlayerControls(true);
         SetCursorState(false);
 
@@ -146,7 +205,74 @@ public class TutorialManager : MonoBehaviour
 
         if (stepCountText != null) stepCountText.text = $"{currentStepIndex + 1}/{steps.Count}";
         if (titleText != null) titleText.text = current.stepTitle;
-        if (descriptionText != null) descriptionText.text = current.stepDescription;
+
+        if (descriptionText != null)
+        {
+            descriptionText.text = FormatDescription(current.stepDescription);
+        }
+    }
+
+    private string FormatDescription(string rawText)
+    {
+        string formatted = rawText;
+
+        formatted = formatted.Replace("{MOVE}", GetDisplayString(moveAction, "WASD"));
+        formatted = formatted.Replace("{JUMP}", GetDisplayString(jumpAction, "ESPACIO"));
+        formatted = formatted.Replace("{CROUCH}", GetDisplayString(crouchAction, "CTRL"));
+
+        // Formateo del botón de disparo / uso
+        string shootText = GetDisplayString(shootAction, "Clic Izquierdo");
+        if (string.IsNullOrEmpty(shootText) || shootText.Equals("E", System.StringComparison.OrdinalIgnoreCase))
+        {
+            shootText = "Clic Izquierdo / E";
+        }
+        formatted = formatted.Replace("{SHOOT}", shootText);
+
+        // Formateo del botón de apuntar
+        string aimText = GetDisplayString(aimAction, "Clic Derecho");
+        formatted = formatted.Replace("{AIM}", aimText);
+
+        formatted = formatted.Replace("{DROP}", GetDisplayString(dropAction, "G"));
+
+        return formatted;
+    }
+
+    /// <summary>
+    /// Obtiene el nombre del binding actual y traduce términos en inglés / siglas (RMB, LMB, Left Control...)
+    /// a nombres limpios en español.
+    /// </summary>
+    private string GetDisplayString(InputAction action, string fallback)
+    {
+        if (action == null) return fallback;
+
+        // Cargar la última configuración activa
+        if (InputManager.Controls != null)
+        {
+            RebindActionUI.LoadSavedRebinds(InputManager.Controls.asset);
+        }
+
+        string display = action.GetBindingDisplayString(InputBinding.DisplayStringOptions.DontIncludeInteractions);
+
+        if (string.IsNullOrEmpty(display)) return fallback;
+
+        // TRADUCCIÓN Y FORMATEO DE TECLAS Y BOTONES DE RATÓN
+        display = display.Replace("RMB", "Clic Derecho")
+                         .Replace("LMB", "Clic Izquierdo")
+                         .Replace("MMB", "Clic Central")
+                         .Replace("Right Button", "Clic Derecho")
+                         .Replace("Left Button", "Clic Izquierdo")
+                         .Replace("Middle Button", "Clic Central")
+                         .Replace("Right Mouse", "Clic Derecho")
+                         .Replace("Left Mouse", "Clic Izquierdo")
+                         .Replace("Left Control", "CTRL")
+                         .Replace("Right Control", "CTRL")
+                         .Replace("Left Shift", "SHIFT")
+                         .Replace("Right Shift", "SHIFT")
+                         .Replace("Left Alt", "ALT")
+                         .Replace("Right Alt", "ALT")
+                         .Replace("Space", "ESPACIO");
+
+        return display;
     }
 
     private void Update()
@@ -163,24 +289,37 @@ public class TutorialManager : MonoBehaviour
         switch (current.requiredAction)
         {
             case ActionType.Movement:
-                if (CheckMovementInput()) AdvanceStep();
+                if (moveAction != null && moveAction.IsPressed()) AdvanceStep();
                 break;
 
             case ActionType.JumpAndCrouch:
-                CheckJumpAndCrouchInput();
+                if (jumpAction != null && jumpAction.WasPressedThisFrame()) hasJumped = true;
+                if (crouchAction != null && crouchAction.WasPressedThisFrame()) hasCrouched = true;
                 if (hasJumped && hasCrouched) AdvanceStep();
                 break;
 
             case ActionType.Shoot:
-                if (CheckShootInput()) AdvanceStep();
+                bool actionShootPressed = shootAction != null && shootAction.WasPressedThisFrame();
+                bool mouseLeftClicked = (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame) || Input.GetMouseButtonDown(0);
+
+                if (actionShootPressed || mouseLeftClicked)
+                {
+                    AdvanceStep();
+                }
                 break;
 
             case ActionType.Aim:
-                if (CheckAimInput()) AdvanceStep();
+                bool actionAimPressed = aimAction != null && aimAction.WasPressedThisFrame();
+                bool mouseRightClicked = (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame) || Input.GetMouseButtonDown(1);
+
+                if (actionAimPressed || mouseRightClicked)
+                {
+                    AdvanceStep();
+                }
                 break;
 
             case ActionType.DropWeapon:
-                if (CheckDropInput()) AdvanceStep();
+                if (dropAction != null && dropAction.WasPressedThisFrame()) AdvanceStep();
                 break;
         }
     }
@@ -205,7 +344,6 @@ public class TutorialManager : MonoBehaviour
         PlayerPrefs.SetInt(TUTORIAL_KEY, 1);
         PlayerPrefs.Save();
 
-        // Asegurar que al terminar el jugador tenga el control total y el cursor bloqueado
         EnablePlayerControls(true);
         SetCursorState(false);
 
@@ -218,9 +356,6 @@ public class TutorialManager : MonoBehaviour
         if (tutorialPanel != null) tutorialPanel.SetActive(false);
     }
 
-    /// <summary>
-    /// Cambia el estado del ratón entre libre (UI) y bloqueado (Juego FPS).
-    /// </summary>
     private void SetCursorState(bool isUnlockedForUI)
     {
         if (isUnlockedForUI)
@@ -235,65 +370,10 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Activa o desactiva los scripts de movimiento y armas del jugador.
-    /// </summary>
     private void EnablePlayerControls(bool state)
     {
         if (playerMovementScript != null) playerMovementScript.enabled = state;
         if (weaponScript != null) weaponScript.enabled = state;
-    }
-
-    // --- DETECCIÓN DE INPUTS ---
-
-    private bool CheckMovementInput()
-    {
-#if ENABLE_INPUT_SYSTEM
-        if (Keyboard.current != null)
-        {
-            return Keyboard.current.wKey.isPressed || Keyboard.current.aKey.isPressed ||
-                   Keyboard.current.sKey.isPressed || Keyboard.current.dKey.isPressed;
-        }
-#endif
-        return Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0;
-    }
-
-    private void CheckJumpAndCrouchInput()
-    {
-#if ENABLE_INPUT_SYSTEM
-        if (Keyboard.current != null)
-        {
-            if (Keyboard.current.spaceKey.wasPressedThisFrame) hasJumped = true;
-            if (Keyboard.current.cKey.wasPressedThisFrame) hasCrouched = true;
-            return;
-        }
-#endif
-        if (Input.GetKeyDown(jumpKey)) hasJumped = true;
-        if (Input.GetKeyDown(crouchKey)) hasCrouched = true;
-    }
-
-    private bool CheckShootInput()
-    {
-#if ENABLE_INPUT_SYSTEM
-        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame) return true;
-#endif
-        return Input.GetMouseButtonDown(0);
-    }
-
-    private bool CheckAimInput()
-    {
-#if ENABLE_INPUT_SYSTEM
-        if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame) return true;
-#endif
-        return Input.GetMouseButtonDown(1);
-    }
-
-    private bool CheckDropInput()
-    {
-#if ENABLE_INPUT_SYSTEM
-        if (Keyboard.current != null && Keyboard.current.gKey.wasPressedThisFrame) return true;
-#endif
-        return Input.GetKeyDown(dropKey);
     }
 
     [ContextMenu("Reset Tutorial Progress")]

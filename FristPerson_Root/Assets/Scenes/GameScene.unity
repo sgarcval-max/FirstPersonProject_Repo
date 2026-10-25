@@ -12172,6 +12172,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6bc78b9149f22c4d811c7fd7de13a57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TutorialManager
+  movementMapName: Movimiento
+  combatMapName: Combate
+  moveActionName: Move
+  jumpActionName: Jump
+  crouchActionName: Crouch
+  shootActionName: Throw
+  aimActionName: Aim
+  dropActionName: Drop
   playerMovementScript: {fileID: 1671297793}
   weaponScript: {fileID: 0}
   welcomePanel: {fileID: 1339213393}
@@ -12183,23 +12191,20 @@ MonoBehaviour:
   descriptionText: {fileID: 598351761}
   steps:
   - stepTitle: Movimiento
-    stepDescription: Para moverte utiliza las teclas WASD.
+    stepDescription: Usa las teclas {MOVE} para moverte por el escenario.
     requiredAction: 0
   - stepTitle: Salto y Agacharse
-    stepDescription: Pulsa ESPACIO para saltar y C para agacharte.
+    stepDescription: Pulsa {JUMP} para saltar y {CROUCH} para agacharte.
     requiredAction: 1
   - stepTitle: Usar Arma
-    stepDescription: "Haz clic con el Bot\xF3n Izquierdo del Rat\xF3n para disparar."
+    stepDescription: Presiona {SHOOT} para disparar o usar tu arma.
     requiredAction: 2
   - stepTitle: Apuntar
-    stepDescription: "Mant\xE9n pulsado el Bot\xF3n Derecho del Rat\xF3n para apuntar."
+    stepDescription: "Mant\xE9n pulsado {AIM} para apuntar con precisi\xF3n."
     requiredAction: 3
   - stepTitle: Soltar Arma
-    stepDescription: Pulsa la tecla G para soltar el arma actual.
+    stepDescription: Pulsa la tecla {DROP} para soltar tu arma al suelo.
     requiredAction: 4
-  jumpKey: 32
-  crouchKey: 99
-  dropKey: 103
 --- !u!4 &1572668831
 Transform:
   m_ObjectHideFlags: 0
