@@ -15,7 +15,7 @@ public class PlayerAim : MonoBehaviour
     [SerializeField] private Camera playerCamera;
     [Tooltip("El HandPoint (donde se ve el arma en la mano). Se mueve al centro al apuntar.")]
     [SerializeField] private Transform handPoint;
-    [Tooltip("Opcional: la mira de la pantalla (un objeto del HUD). Solo se ve mientras apuntas.")]
+    [Tooltip("La mira de la pantalla (objeto del HUD). Se muestra desde la cadera y se oculta al apuntar.")]
     [SerializeField] private GameObject crosshair;
 
     [Header("Cómo se siente")]
@@ -66,7 +66,8 @@ public class PlayerAim : MonoBehaviour
             CurrentBaseHandPosition = hipHandLocalPosition;
         }
 
-        if (crosshair != null) crosshair.SetActive(false);
+        // Muestra la mira del HUD por defecto (disparo desde la cadera)
+        if (crosshair != null) crosshair.SetActive(true);
     }
 
     private void Update()
@@ -128,9 +129,11 @@ public class PlayerAim : MonoBehaviour
             }
         }
 
-        if (crosshair != null && crosshair.activeSelf != IsAiming)
+        // Inversión: Se desactiva si IsAiming == true, y se activa si IsAiming == false
+        bool shouldShowCrosshair = !IsAiming;
+        if (crosshair != null && crosshair.activeSelf != shouldShowCrosshair)
         {
-            crosshair.SetActive(IsAiming);
+            crosshair.SetActive(shouldShowCrosshair);
         }
     }
 }

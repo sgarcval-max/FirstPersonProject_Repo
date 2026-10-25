@@ -12192,6 +12192,11 @@ MonoBehaviour:
   - {fileID: 417767291}
   - {fileID: 1854257686}
   progressFillSpeed: 6
+  useAutoProximityDetection: 1
+  proximityRadius: 2.5
+  interactableLayer:
+    serializedVersion: 2
+    m_Bits: 4294967295
   fadeDuration: 0.25
   minTypeSpeed: 0.02
   maxTypeSpeed: 0.06
@@ -13611,7 +13616,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAim
   playerCamera: {fileID: 0}
   handPoint: {fileID: 702735132}
-  crosshair: {fileID: 0}
+  crosshair: {fileID: 2013251443}
   aimFieldOfView: 40
   aimHandLocalPosition: {x: 0, y: -0.2, z: 0.7}
   transitionSpeed: 12
