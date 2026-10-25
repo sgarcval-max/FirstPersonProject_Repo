@@ -12016,7 +12016,7 @@ MonoBehaviour:
     stepDescription: Pulsa {JUMP} para saltar y {CROUCH} para agacharte.
     requiredAction: 1
   - stepTitle: Usar Arma
-    stepDescription: Presiona {SHOOT} para disparar o usar tu arma.
+    stepDescription: Presiona {SHOOT} para disparar y usar tu arma.
     requiredAction: 2
   - stepTitle: Apuntar
     stepDescription: "Mant\xE9n pulsado {AIM} para apuntar con precisi\xF3n."
