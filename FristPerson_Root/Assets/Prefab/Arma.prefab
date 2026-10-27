@@ -64,9 +64,29 @@ PrefabInstance:
       propertyPath: m_ConstrainProportionsScale
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: -4841752424989072191, guid: 15aed73fd592d3547b8e7cd9b38b9bca, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -4841327252261037126, guid: 15aed73fd592d3547b8e7cd9b38b9bca, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 15aed73fd592d3547b8e7cd9b38b9bca, type: 3}
       propertyPath: m_Name
       value: Arma
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 15aed73fd592d3547b8e7cd9b38b9bca, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1624116471467056523, guid: 15aed73fd592d3547b8e7cd9b38b9bca, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6619225641134156614, guid: 15aed73fd592d3547b8e7cd9b38b9bca, type: 3}
+      propertyPath: m_Layer
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
