@@ -3,6 +3,7 @@ using UnityEngine;
 /// <summary>
 /// Control de bamboleo (Bobbing), balanceo (Sway) e impactos de salto/caída.
 /// Adapta automáticamente el movimiento si el jugador camina, corre, va agachado, apunta o salta.
+/// Corregido el temblor al agacharse respetando la altura dinámica de la cámara.
 /// </summary>
 public class PlayerBobAndSway : MonoBehaviour
 {
@@ -55,7 +56,6 @@ public class PlayerBobAndSway : MonoBehaviour
     private PlayerAim playerAim;
     private PlayerCrouch playerCrouch;
 
-    private Vector3 initialCamLocalPos;
     private Vector3 initialWeaponLocalPos;
 
     private float bobTimer = 0f;
@@ -64,6 +64,8 @@ public class PlayerBobAndSway : MonoBehaviour
 
     private Vector3 currentCamImpactOffset = Vector3.zero;
     private Vector3 currentWeaponImpactOffset = Vector3.zero;
+
+    private Vector3 currentCamBobOffset = Vector3.zero;
 
     public void SetAiming(bool aiming)
     {
@@ -81,9 +83,6 @@ public class PlayerBobAndSway : MonoBehaviour
         if (characterController == null)
             characterController = GetComponentInParent<CharacterController>();
 
-        if (playerCamera != null)
-            initialCamLocalPos = playerCamera.localPosition;
-
         if (weaponHolder != null)
             initialWeaponLocalPos = weaponHolder.localPosition;
     }
@@ -96,8 +95,11 @@ public class PlayerBobAndSway : MonoBehaviour
         bool isCrouching = playerCrouch != null && playerCrouch.IsCrouching;
         bool isSprinting = speed > 5.5f && !isCrouching;
 
-        // 1. Detectar salto y aterrizaje
-        HandleJumpAndLand(isGrounded);
+        // 1. Detectar salto y aterrizaje (se omite agachado para evitar micro-impactos continuos)
+        if (!isCrouching)
+        {
+            HandleJumpAndLand(isGrounded);
+        }
 
         // 2. Determinar multiplicadores de bamboleo según el estado
         float freqMult = 1f;
@@ -132,7 +134,7 @@ public class PlayerBobAndSway : MonoBehaviour
             if (enableCameraBob && playerCamera != null)
             {
                 float camAimMult = isAiming ? aimingCameraBobMultiplier : 1f;
-                ApplyCameraBob(ampMult * camAimMult);
+                CalculateCameraBobOffset(ampMult * camAimMult);
             }
 
             if (enableWeaponBob && weaponHolder != null)
@@ -144,19 +146,14 @@ public class PlayerBobAndSway : MonoBehaviour
         else
         {
             bobTimer = 0f;
-            ResetCameraPos();
+            currentCamBobOffset = Vector3.Lerp(currentCamBobOffset, Vector3.zero, Time.deltaTime * 6f);
         }
 
         // 5. Recuperar suavemente la posición tras sacudidas de salto/aterrizaje
         currentCamImpactOffset = Vector3.Lerp(currentCamImpactOffset, Vector3.zero, Time.deltaTime * impactRecoverySpeed);
         currentWeaponImpactOffset = Vector3.Lerp(currentWeaponImpactOffset, Vector3.zero, Time.deltaTime * impactRecoverySpeed);
 
-        // 6. Aplicar posición final a la cámara e interfaz de arma
-        if (playerCamera != null)
-        {
-            playerCamera.localPosition += currentCamImpactOffset * Time.deltaTime;
-        }
-
+        // 6. Aplicar posición final al contenedor del arma
         if (weaponHolder != null)
         {
             Vector3 targetWeaponPos = currentBasePos + weaponBobOffset + weaponSwayOffset + currentWeaponImpactOffset;
@@ -191,13 +188,13 @@ public class PlayerBobAndSway : MonoBehaviour
         return horizontalVelocity.magnitude;
     }
 
-    private void ApplyCameraBob(float intensity)
+    private void CalculateCameraBobOffset(float intensity)
     {
         float xOffset = Mathf.Cos(bobTimer * 0.5f) * camBobHorizontalAmount * intensity;
         float yOffset = Mathf.Sin(bobTimer) * camBobVerticalAmount * intensity;
 
-        Vector3 targetPos = initialCamLocalPos + new Vector3(xOffset, yOffset, 0f);
-        playerCamera.localPosition = Vector3.Lerp(playerCamera.localPosition, targetPos, Time.deltaTime * 10f);
+        Vector3 targetBob = new Vector3(xOffset, yOffset, 0f);
+        currentCamBobOffset = Vector3.Lerp(currentCamBobOffset, targetBob, Time.deltaTime * 10f);
     }
 
     private Vector3 CalculateWeaponBobOffset(float intensity)
@@ -219,13 +216,5 @@ public class PlayerBobAndSway : MonoBehaviour
         mouseY = Mathf.Clamp(mouseY, -maxSwayAmount, maxSwayAmount);
 
         return new Vector3(mouseX, mouseY, 0f);
-    }
-
-    private void ResetCameraPos()
-    {
-        if (playerCamera != null)
-        {
-            playerCamera.localPosition = Vector3.Lerp(playerCamera.localPosition, initialCamLocalPos, Time.deltaTime * 6f);
-        }
     }
 }
