@@ -48,9 +48,29 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -1392960233227943502, guid: 80a0afef0df9f9645b5745dec3492d3a, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 332955489170592941, guid: 80a0afef0df9f9645b5745dec3492d3a, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 80a0afef0df9f9645b5745dec3492d3a, type: 3}
       propertyPath: m_Name
       value: SM_Prop01_Plato_Santiago_Garcia
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 80a0afef0df9f9645b5745dec3492d3a, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 7732057114445664181, guid: 80a0afef0df9f9645b5745dec3492d3a, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 8057619480569093591, guid: 80a0afef0df9f9645b5745dec3492d3a, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

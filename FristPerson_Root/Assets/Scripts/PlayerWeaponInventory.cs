@@ -12,7 +12,7 @@ public class WeaponChangedEvent : UnityEvent<WeaponData> { }
 /// <summary>
 /// Gestiona las armas del jugador: tiene 3 "huecos" en total. Las manos (siempre disponibles,
 /// no se pueden perder) y hasta 2 armas. Permite cambiar de hueco, recoger armas y soltarlas,
-/// y muestra el arma equipada delante de la cámara.
+/// gestiona capas dinámicas para doble cámara (WeaponOverlay / Default) y muestra el arma equipada delante de la cámara.
 /// </summary>
 public class PlayerWeaponInventory : MonoBehaviour
 {
@@ -31,6 +31,10 @@ public class PlayerWeaponInventory : MonoBehaviour
     [Tooltip("Punto delante del jugador donde aparece el arma al soltarla (un objeto vacío hijo de la cámara).")]
     [SerializeField] private Transform dropPoint;
     [SerializeField] private float dropForce = 3f;
+
+    [Header("Capa de Cámara de Armas")]
+    [Tooltip("Nombre exacto de la capa asignada exclusivamente a la cámara secundaria del arma.")]
+    [SerializeField] private string weaponOverlayLayerName = "WeaponOverlay";
 
     [Header("Eventos")]
     [Tooltip("Se dispara cada vez que cambia lo que lleva el jugador en la mano (null = manos vacías).")]
@@ -148,6 +152,17 @@ public class PlayerWeaponInventory : MonoBehaviour
         heldInstance.transform.localPosition = weapon.heldLocalPosition;
         heldInstance.transform.localEulerAngles = weapon.heldLocalEuler;
 
+        // Asignar la capa de renderizado exclusivo en primera persona a todo el modelo y sus partes
+        int overlayLayer = LayerMask.NameToLayer(weaponOverlayLayerName);
+        if (overlayLayer != -1)
+        {
+            SetLayerRecursively(heldInstance, overlayLayer);
+        }
+        else
+        {
+            Debug.LogWarning($"PlayerWeaponInventory: La capa '{weaponOverlayLayerName}' no existe en Unity (Edit > Project Settings > Tags and Layers).");
+        }
+
         // El modelo de la mano es solo visual: sin colisiones, sin física y sin poder recogerse.
         foreach (Collider col in heldInstance.GetComponentsInChildren<Collider>())
         {
@@ -195,6 +210,10 @@ public class PlayerWeaponInventory : MonoBehaviour
 
         GameObject dropped = Instantiate(weapon.worldPrefab, position, rotation);
 
+        // Restaurar la capa por defecto para que la Cámara Principal la dibuje correctamente tras el escenario
+        int defaultLayer = LayerMask.NameToLayer("Default");
+        SetLayerRecursively(dropped, defaultLayer != -1 ? defaultLayer : 0);
+
         Rigidbody rb = dropped.GetComponent<Rigidbody>();
         if (rb != null)
         {
@@ -214,6 +233,10 @@ public class PlayerWeaponInventory : MonoBehaviour
 
         GameObject dropped = Instantiate(weapon.worldPrefab, dropPoint.position, dropPoint.rotation);
 
+        // Restaurar la capa por defecto para que la Cámara Principal la dibuje correctamente tras el escenario
+        int defaultLayer = LayerMask.NameToLayer("Default");
+        SetLayerRecursively(dropped, defaultLayer != -1 ? defaultLayer : 0);
+
         // Un arma soltada hace ruido al chocar contra el suelo.
         if (dropped.GetComponent<NoiseOnImpact>() == null)
         {
@@ -227,6 +250,19 @@ public class PlayerWeaponInventory : MonoBehaviour
             // al caer rápido, que es lo que pasa con la detección normal (Discrete).
             rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
             rb.AddForce(dropPoint.forward * dropForce, ForceMode.VelocityChange);
+        }
+    }
+
+    /// <summary>
+    /// Cambia la capa de un GameObject y de todos sus objetos hijos en la jerarquía.
+    /// </summary>
+    private void SetLayerRecursively(GameObject obj, int newLayer)
+    {
+        if (obj == null) return;
+        obj.layer = newLayer;
+        foreach (Transform child in obj.transform)
+        {
+            SetLayerRecursively(child.gameObject, newLayer);
         }
     }
 }

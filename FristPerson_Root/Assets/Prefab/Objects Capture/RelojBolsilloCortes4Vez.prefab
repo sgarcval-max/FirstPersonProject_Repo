@@ -8,6 +8,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -8961359253771211100, guid: ad42d313823f8f44a941bf490d662541, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ad42d313823f8f44a941bf490d662541, type: 3}
       propertyPath: m_LocalPosition.x
       value: 198.17229
@@ -48,14 +52,42 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -8380157826906577798, guid: ad42d313823f8f44a941bf490d662541, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: -6733177361254619370, guid: ad42d313823f8f44a941bf490d662541, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: -1688617927700330159, guid: ad42d313823f8f44a941bf490d662541, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ad42d313823f8f44a941bf490d662541, type: 3}
       propertyPath: m_Name
       value: RelojBolsilloCortes4Vez
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ad42d313823f8f44a941bf490d662541, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 1248708231428878588, guid: ad42d313823f8f44a941bf490d662541, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2800250516343163423, guid: ad42d313823f8f44a941bf490d662541, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 4139461568946084667, guid: ad42d313823f8f44a941bf490d662541, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: c06864ca277f17147b517e98a6275d50, type: 2}
+    - target: {fileID: 8700725330082129686, guid: ad42d313823f8f44a941bf490d662541, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
