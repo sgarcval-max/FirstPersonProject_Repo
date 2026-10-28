@@ -4,7 +4,8 @@ using UnityEngine.Events;
 
 /// <summary>
 /// Proporciona visión a un humano adaptado a cualquier escala.
-/// Respeta la postura del jugador (agachado/de pie) y escala el tiempo de sospecha.
+/// Respeta la postura del jugador (agachado/de pie), escala el tiempo de sospecha
+/// e ignora al jugador durante el tutorial (TutorialManager.IsPlayerProtected).
 /// </summary>
 public class HumanVision : MonoBehaviour
 {
@@ -133,6 +134,8 @@ public class HumanVision : MonoBehaviour
         if (player == null) return;
 
         bool isCrouched = playerCrouch != null && playerCrouch.IsCrouching;
+
+        // Llamada directa: garantiza que 'distance' siempre reciba un valor
         bool seen = CanSeePlayer(isCrouched, out float distance);
         CanSeePlayerNow = seen;
 
@@ -171,6 +174,9 @@ public class HumanVision : MonoBehaviour
 
     private bool CanSeePlayer(bool isCrouched, out float distance)
     {
+        distance = 0f;
+        if (TutorialManager.IsPlayerProtected) return false;
+
         Vector3 eye = eyeTransform != null ? eyeTransform.position : transform.TransformPoint(eyeOffset);
         Vector3 target = playerCollider != null ? playerCollider.bounds.center : player.position + targetOffset;
 

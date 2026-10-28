@@ -4,18 +4,33 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using UnityEngine.Events;
 
 /// <summary>
 /// Gestiona la secuencia interactiva del tutorial soportando múltiples Action Maps, reasignaciones dinámicas,
 /// formateo en español, efecto de mecanografiado con audio SFX aleatorio en títulos,
 /// transiciones en fundido (Fade In/Out), fases dinámicas para interacción/inventario,
-/// detección automática de cercanía a objetos y 3 barras de progreso secuenciales estrictas.
+/// detección automática de cercanía a objetos, 3 barras de progreso secuenciales estrictas,
+/// y pantalla final de confirmación con protección contra enemigos.
 /// </summary>
 public class TutorialManager : MonoBehaviour
 {
     public static TutorialManager Instance { get; private set; }
 
     private const string TUTORIAL_KEY = "TutorialCompleted";
+
+    /// <summary>
+    /// Propiedad estática accesible desde cualquier script de Enemigos o Salud.
+    /// Devuelve true mientras el tutorial o el panel de bienvenida estén activos.
+    /// </summary>
+    public static bool IsPlayerProtected
+    {
+        get
+        {
+            if (Instance == null) return false;
+            return Instance.isTutorialActive || Instance.isWelcomeActive;
+        }
+    }
 
     public enum ActionType
     {
@@ -24,7 +39,8 @@ public class TutorialManager : MonoBehaviour
         Shoot,
         Aim,
         DropWeapon,
-        InteractAndInventory
+        InteractAndInventory,
+        FinalCompletion // Nuevo paso final de confirmación
     }
 
     [System.Serializable]
@@ -74,7 +90,11 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI descriptionText;
     [SerializeField] private CanvasGroup bodyCanvasGroup;
 
-    [Header("7. UI Barra de Progreso de Sub-Pasos (3 Barras)")]
+    [Header("7. UI Botón Final de Empezar a Jugar")]
+    [Tooltip("Botón 'EMPEZAR A JUGAR' que aparece en el último paso para finalizar el tutorial.")]
+    [SerializeField] private Button startPlayingButton;
+
+    [Header("8. UI Barra de Progreso de Sub-Pasos (3 Barras)")]
     [Tooltip("Objeto contenedor donde están alojadas las 3 barras de progreso.")]
     [SerializeField] private GameObject subStepProgressContainer;
     [Tooltip("Arrastra aquí las 3 imágenes internas de relleno (Image Type = Filled).")]
@@ -82,7 +102,7 @@ public class TutorialManager : MonoBehaviour
     [Tooltip("Velocidad de llenado animado de las barras.")]
     [SerializeField] private float progressFillSpeed = 8f;
 
-    [Header("8. Detección Automática de Cercanía")]
+    [Header("9. Detección Automática de Cercanía")]
     [Tooltip("Si está activado, el tutorial detectará automáticamente cuando el jugador se acerque a un objeto.")]
     [SerializeField] private bool useAutoProximityDetection = true;
     [Tooltip("Distancia en metros alrededor del jugador para detectar que está cerca de un objeto.")]
@@ -90,7 +110,7 @@ public class TutorialManager : MonoBehaviour
     [Tooltip("Capa de objetos que se pueden coger u objetos interactuables.")]
     [SerializeField] private LayerMask interactableLayer = ~0;
 
-    [Header("9. Tiempos de Animación y Escritura")]
+    [Header("10. Tiempos de Animación y Escritura")]
     [Tooltip("Duración general del fade out / fade in.")]
     [SerializeField] private float fadeDuration = 0.25f;
     [Tooltip("Tiempo mínimo entre letras al mecanografiar títulos.")]
@@ -98,14 +118,18 @@ public class TutorialManager : MonoBehaviour
     [Tooltip("Tiempo máximo entre letras al mecanografiar títulos.")]
     [SerializeField] private float maxTypeSpeed = 0.06f;
 
-    [Header("10. Sonido de Mecanografiado (SFX)")]
+    [Header("11. Sonido de Mecanografiado (SFX)")]
     [SerializeField] private AudioSource audioSource;
     [Tooltip("Arrastra aquí tus efectos de sonido de tecleo.")]
     [SerializeField] private AudioClip[] typingSounds;
     [Tooltip("Si está activado, no sonará ningún audio cuando el carácter sea un espacio en blanco.")]
     [SerializeField] private bool ignoreSpaceSound = true;
 
-    [Header("11. Pasos del Tutorial")]
+    [Header("12. Eventos de Protección de Enemigos")]
+    [Tooltip("Evento disparado cuando el tutorial finaliza para avisar a los enemigos.")]
+    public UnityEvent OnTutorialFinished;
+
+    [Header("13. Pasos del Tutorial")]
     [SerializeField] private List<TutorialStep> steps = new List<TutorialStep>();
 
     private InputAction moveAction;
@@ -119,6 +143,7 @@ public class TutorialManager : MonoBehaviour
     private InputAction inventoryAction;
 
     private int currentStepIndex = 0;
+    private bool isWelcomeActive = false;
     private bool isTutorialActive = false;
     private bool isTransitioning = false;
     private float inputCooldown = 0f;
@@ -149,8 +174,17 @@ public class TutorialManager : MonoBehaviour
 
     private void Start()
     {
+        if (startPlayingButton != null)
+        {
+            startPlayingButton.onClick.RemoveAllListeners();
+            startPlayingButton.onClick.AddListener(OnStartPlayingClicked);
+            startPlayingButton.gameObject.SetActive(false);
+        }
+
         if (PlayerPrefs.GetInt(TUTORIAL_KEY, 0) == 1)
         {
+            isWelcomeActive = false;
+            isTutorialActive = false;
             EnablePlayerControls(true);
             SetCursorState(false);
             DisableAllPanels();
@@ -193,6 +227,9 @@ public class TutorialManager : MonoBehaviour
 
     private void SetupWelcomeUI()
     {
+        isWelcomeActive = true;
+        isTutorialActive = false;
+
         if (tutorialPanel != null) tutorialPanel.SetActive(false);
         if (subStepProgressContainer != null) subStepProgressContainer.SetActive(false);
 
@@ -304,6 +341,7 @@ public class TutorialManager : MonoBehaviour
             yield break;
         }
 
+        isWelcomeActive = false;
         isTutorialActive = true;
         currentStepIndex = 0;
 
@@ -461,14 +499,12 @@ public class TutorialManager : MonoBehaviour
                 break;
 
             case ActionType.InteractAndInventory:
-                // Comprobación automática de proximidad física al objeto
                 CheckProximityAutomatic();
 
                 if (inputCooldown > 0f) return;
 
                 bool isInteractPressed = (interactAction != null && interactAction.WasPressedThisFrame()) || Input.GetKeyDown(KeyCode.E);
 
-                // FASE 1: Estás cerca. Al pulsar E, coges el objeto -> FASE 2 (2ª barra)
                 if (currentSubStepPhase == 1)
                 {
                     if (isInteractPressed)
@@ -478,7 +514,6 @@ public class TutorialManager : MonoBehaviour
                         inputCooldown = 0.25f;
                     }
                 }
-                // FASE 2: Objeto en mano. Al pulsar I / TAB, abres inventario -> FASE 3 (3ª barra) y finalizas
                 else if (currentSubStepPhase == 2)
                 {
                     bool isInventoryPressed = (inventoryAction != null && inventoryAction.WasPressedThisFrame()) || Input.GetKeyDown(KeyCode.I) || Input.GetKeyDown(KeyCode.Tab);
@@ -488,12 +523,13 @@ public class TutorialManager : MonoBehaviour
                     }
                 }
                 break;
+
+            case ActionType.FinalCompletion:
+                // El paso final aguarda la pulsación del botón "EMPEZAR A JUGAR"
+                break;
         }
     }
 
-    /// <summary>
-    /// Escanea automáticamente el entorno para ver si el jugador está cerca de un objeto interactuable.
-    /// </summary>
     private void CheckProximityAutomatic()
     {
         if (!useAutoProximityDetection || currentSubStepPhase >= 2 || playerMovementScript == null) return;
@@ -503,7 +539,6 @@ public class TutorialManager : MonoBehaviour
 
         foreach (var hit in hits)
         {
-            // Ignorar al propio jugador y sus hijos
             if (hit.gameObject != playerMovementScript.gameObject && !hit.transform.IsChildOf(playerMovementScript.transform))
             {
                 isNearObject = true;
@@ -556,22 +591,22 @@ public class TutorialManager : MonoBehaviour
 
         switch (currentSubStepPhase)
         {
-            case 0: // 0 de 3 barras (Lejos)
+            case 0:
                 descriptionText.text = FormatDescription("Localiza y acércate a un objeto.");
                 SetTargetFills(0f, 0f, 0f);
                 break;
 
-            case 1: // 1 de 3 barras (Cerca)
+            case 1:
                 descriptionText.text = FormatDescription("Pulsa la tecla {INTERACT} para coger el objeto.");
                 SetTargetFills(1f, 0f, 0f);
                 break;
 
-            case 2: // 2 de 3 barras (Objeto recogido)
+            case 2:
                 descriptionText.text = FormatDescription("Pulsa {INVENTORY} para ver tu inventario.");
                 SetTargetFills(1f, 1f, 0f);
                 break;
 
-            case 3: // 3 de 3 barras (Inventario abierto)
+            case 3:
                 SetTargetFills(1f, 1f, 1f);
                 break;
         }
@@ -619,12 +654,6 @@ public class TutorialManager : MonoBehaviour
     {
         if (isTransitioning && currentSubStepPhase != 3) return;
 
-        bool isInventoryStep = false;
-        if (currentStepIndex >= 0 && currentStepIndex < steps.Count)
-        {
-            isInventoryStep = steps[currentStepIndex].requiredAction == ActionType.InteractAndInventory;
-        }
-
         currentStepIndex++;
         if (currentStepIndex < steps.Count)
         {
@@ -632,7 +661,7 @@ public class TutorialManager : MonoBehaviour
         }
         else
         {
-            CompleteTutorial(leaveCursorUnlocked: isInventoryStep);
+            CompleteTutorial();
         }
     }
 
@@ -659,6 +688,19 @@ public class TutorialManager : MonoBehaviour
         }
 
         TutorialStep current = steps[nextIndex];
+
+        bool isFinalStep = (current.requiredAction == ActionType.FinalCompletion);
+
+        // Si es el paso final, activamos el botón "EMPEZAR A JUGAR" y liberamos el cursor
+        if (startPlayingButton != null)
+        {
+            startPlayingButton.gameObject.SetActive(isFinalStep);
+        }
+
+        if (isFinalStep)
+        {
+            SetCursorState(true);
+        }
 
         bool hasSubSteps = (current.requiredAction == ActionType.InteractAndInventory);
         if (subStepProgressContainer != null)
@@ -716,9 +758,15 @@ public class TutorialManager : MonoBehaviour
         isTransitioning = false;
     }
 
+    public void OnStartPlayingClicked()
+    {
+        if (isTransitioning) return;
+        CompleteTutorial();
+    }
+
     public void CompleteTutorial(bool leaveCursorUnlocked = false)
     {
-        if (!isTutorialActive && welcomePanel != null && !welcomePanel.activeSelf)
+        if (!isTutorialActive && !isWelcomeActive && welcomePanel != null && !welcomePanel.activeSelf)
         {
             FinishCompletion(leaveCursorUnlocked);
             return;
@@ -730,7 +778,6 @@ public class TutorialManager : MonoBehaviour
     private IEnumerator CompleteTutorialRoutine(bool leaveCursorUnlocked = false)
     {
         isTransitioning = true;
-        isTutorialActive = false;
 
         if (tutorialPanelCanvasGroup != null)
         {
@@ -749,6 +796,7 @@ public class TutorialManager : MonoBehaviour
 
     private void FinishCompletion(bool leaveCursorUnlocked = false)
     {
+        isWelcomeActive = false;
         isTutorialActive = false;
         isTransitioning = false;
 
@@ -770,6 +818,9 @@ public class TutorialManager : MonoBehaviour
 
         if (welcomePanelCanvasGroup != null) welcomePanelCanvasGroup.alpha = 1f;
         if (tutorialPanelCanvasGroup != null) tutorialPanelCanvasGroup.alpha = 1f;
+
+        // Disparar evento para restaurar detección y ataques de enemigos
+        OnTutorialFinished?.Invoke();
     }
 
     private void DisableAllPanels()
@@ -777,6 +828,7 @@ public class TutorialManager : MonoBehaviour
         if (welcomePanel != null) welcomePanel.SetActive(false);
         if (tutorialPanel != null) tutorialPanel.SetActive(false);
         if (subStepProgressContainer != null) subStepProgressContainer.SetActive(false);
+        if (startPlayingButton != null) startPlayingButton.gameObject.SetActive(false);
     }
 
     private void SetCursorState(bool isUnlockedForUI)
