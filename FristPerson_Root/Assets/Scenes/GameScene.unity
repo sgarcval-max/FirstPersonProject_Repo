@@ -15146,63 +15146,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2078263497}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &4046544507936732397
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 7118723247882396952, guid: 744f4ae7c0aeece488e2e1ede1f411ec, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 162.53322
-      objectReference: {fileID: 0}
-    - target: {fileID: 7118723247882396952, guid: 744f4ae7c0aeece488e2e1ede1f411ec, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -0.47088355
-      objectReference: {fileID: 0}
-    - target: {fileID: 7118723247882396952, guid: 744f4ae7c0aeece488e2e1ede1f411ec, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -30.288622
-      objectReference: {fileID: 0}
-    - target: {fileID: 7118723247882396952, guid: 744f4ae7c0aeece488e2e1ede1f411ec, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7118723247882396952, guid: 744f4ae7c0aeece488e2e1ede1f411ec, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7118723247882396952, guid: 744f4ae7c0aeece488e2e1ede1f411ec, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7118723247882396952, guid: 744f4ae7c0aeece488e2e1ede1f411ec, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7118723247882396952, guid: 744f4ae7c0aeece488e2e1ede1f411ec, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7118723247882396952, guid: 744f4ae7c0aeece488e2e1ede1f411ec, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7118723247882396952, guid: 744f4ae7c0aeece488e2e1ede1f411ec, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7602385955565617058, guid: 744f4ae7c0aeece488e2e1ede1f411ec, type: 3}
-      propertyPath: m_Name
-      value: SM_Prop02_Vaso_Santiago_Garcia
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 744f4ae7c0aeece488e2e1ede1f411ec, type: 3}
 --- !u!1001 &5693805508975165080
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -15326,4 +15269,3 @@ SceneRoots:
   - {fileID: 391477292}
   - {fileID: 1199898414}
   - {fileID: 1461884550}
-  - {fileID: 4046544507936732397}
