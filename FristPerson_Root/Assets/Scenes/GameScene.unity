@@ -12410,7 +12410,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerWeaponInventory
   startingWeapon: {fileID: 11400000, guid: 787b4fcc117d8c944bd78943d5c9b20e, type: 2}
   handPoint: {fileID: 702735132}
-  equipDuration: 0.9
+  equipDuration: 0.7
   holsterOffset: {x: 3, y: 0, z: -3}
   dropPoint: {fileID: 1612419206}
   dropForce: 3
