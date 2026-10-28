@@ -260,7 +260,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PropImpactAudio
   propImpactClips: []
-  environmentImpactClips: []
+  environmentImpactClips:
+  - {fileID: 8300000, guid: 21c14b018cf7da54d80817f90ae2f0f2, type: 3}
+  - {fileID: 8300000, guid: 5d8f01a93da87cd4f9f0054d7114052a, type: 3}
+  - {fileID: 8300000, guid: 111c172b05c478c4aa78c9c3c005b784, type: 3}
   minPitch: 0.9
   maxPitch: 1.1
   minImpactForce: 2.5
