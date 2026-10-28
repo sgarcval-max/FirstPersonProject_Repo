@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -10,9 +11,9 @@ using UnityEngine.Events;
 public class WeaponChangedEvent : UnityEvent<WeaponData> { }
 
 /// <summary>
-/// Gestiona las armas del jugador: tiene 3 "huecos" en total. Las manos (siempre disponibles,
-/// no se pueden perder) y hasta 2 armas. Permite cambiar de hueco, recoger armas y soltarlas,
-/// gestiona capas dinámicas para doble cámara (WeaponOverlay / Default) y muestra el arma equipada delante de la cámara.
+/// Gestiona las armas del jugador: tiene 3 "huecos" en total (manos vacías y 2 armas).
+/// Permite cambiar de hueco con animación procedural de guardado/sacado (Holster/Draw),
+/// recoge y suelta armas, y gestiona capas dinámicas (WeaponOverlay / Default).
 /// </summary>
 public class PlayerWeaponInventory : MonoBehaviour
 {
@@ -26,6 +27,13 @@ public class PlayerWeaponInventory : MonoBehaviour
     [Header("Arma en la mano")]
     [Tooltip("Punto de la cámara donde aparece el arma equipada (un objeto vacío hijo de la cámara, abajo a la derecha).")]
     [SerializeField] private Transform handPoint;
+
+    [Header("Animación de Guardar / Sacar Arma")]
+    [Tooltip("Tiempo en segundos que tarda el arma en bajarse o subirse.")]
+    [SerializeField] private float equipDuration = 0.2f;
+
+    [Tooltip("Desplazamiento hacia abajo para ocultar el arma fuera de la vista de la cámara.")]
+    [SerializeField] private Vector3 holsterOffset = new Vector3(0f, -0.6f, -0.1f);
 
     [Header("Soltar armas")]
     [Tooltip("Punto delante del jugador donde aparece el arma al soltarla (un objeto vacío hijo de la cámara).")]
@@ -44,6 +52,9 @@ public class PlayerWeaponInventory : MonoBehaviour
     private int equippedIndex = HANDS;
     private GameObject heldInstance;
 
+    private Coroutine switchCoroutine;
+    private bool isTransitioning = false;
+
     /// <summary>El arma que lleva en la mano ahora mismo, o null si tiene las manos vacías.</summary>
     public WeaponData EquippedWeapon
     {
@@ -58,13 +69,17 @@ public class PlayerWeaponInventory : MonoBehaviour
             equippedIndex = 0;
         }
 
-        RefreshHeldModel();
+        // Carga inicial instantánea sin animación al arrancar la escena
+        InstantRefreshHeldModel();
         if (OnEquippedChanged != null) OnEquippedChanged.Invoke(EquippedWeapon);
     }
 
     /// <summary>Pasa a lo siguiente: manos, arma 1, arma 2, manos... saltándose los huecos vacíos.</summary>
     public void CycleEquipped()
     {
+        // Evitar múltiples pulsaciones seguidas mientras se está guardando/sacando un arma
+        if (isTransitioning) return;
+
         int total = SLOT_COUNT + 1;
         int position = equippedIndex + 1; // manos = 0, hueco 0 = 1, hueco 1 = 2
 
@@ -81,9 +96,6 @@ public class PlayerWeaponInventory : MonoBehaviour
 
     /// <summary>
     /// Intenta guardar un arma recogida del suelo. Devuelve true si lo consigue.
-    /// Si hay un hueco libre, la guarda y la equipa. Si los 2 huecos están llenos, se
-    /// intercambia por el arma que lleves en la mano (que cae al suelo). Si los huecos están
-    /// llenos y tienes las manos vacías, no se puede recoger.
     /// </summary>
     public bool TryPickup(WeaponData weapon)
     {
@@ -115,10 +127,16 @@ public class PlayerWeaponInventory : MonoBehaviour
     {
         if (equippedIndex == HANDS) return false;
 
+        if (switchCoroutine != null) StopCoroutine(switchCoroutine);
+        isTransitioning = false;
+
         WeaponData weapon = slots[equippedIndex];
         slots[equippedIndex] = null;
         SpawnDroppedWeapon(weapon);
-        SetEquipped(HANDS, false);
+
+        equippedIndex = HANDS;
+        InstantRefreshHeldModel();
+        if (OnEquippedChanged != null) OnEquippedChanged.Invoke(null);
         return true;
     }
 
@@ -126,18 +144,96 @@ public class PlayerWeaponInventory : MonoBehaviour
     {
         if (index == equippedIndex && !forceNotify) return;
 
-        equippedIndex = index;
-        RefreshHeldModel();
-        if (OnEquippedChanged != null) OnEquippedChanged.Invoke(EquippedWeapon);
-
-        if (UIAudioManager.Instance != null)
+        if (switchCoroutine != null)
         {
-            UIAudioManager.Instance.PlayButtonClick();
+            StopCoroutine(switchCoroutine);
         }
+
+        switchCoroutine = StartCoroutine(SwitchWeaponRoutine(index));
     }
 
-    /// <summary>Quita el modelo anterior de la mano y pone el del arma equipada (si hay).</summary>
-    private void RefreshHeldModel()
+    /// <summary>
+    /// Corrutina que anima el descenso del arma actual y el ascenso de la nueva.
+    /// </summary>
+    private IEnumerator SwitchWeaponRoutine(int targetIndex)
+    {
+        isTransitioning = true;
+
+        // --- 1. ANIMACIÓN DE GUARDAR (BAJAR ARMA ACTUAL) ---
+        if (heldInstance != null && EquippedWeapon != null)
+        {
+            Vector3 startPos = heldInstance.transform.localPosition;
+            Vector3 targetPos = startPos + holsterOffset;
+            float elapsed = 0f;
+
+            while (elapsed < equipDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / equipDuration;
+                t = Mathf.SmoothStep(0f, 1f, t); // Suavizado de entrada y salida
+
+                if (heldInstance != null)
+                {
+                    heldInstance.transform.localPosition = Vector3.Lerp(startPos, targetPos, t);
+                }
+                yield return null;
+            }
+        }
+
+        // Destruir el modelo viejo al quedar oculto
+        if (heldInstance != null)
+        {
+            Destroy(heldInstance);
+            heldInstance = null;
+        }
+
+        // Cambiar inventario
+        equippedIndex = targetIndex;
+        WeaponData newWeapon = EquippedWeapon;
+
+        // Notificar cambios de UI y Audio al cambiar de ítem
+        if (OnEquippedChanged != null) OnEquippedChanged.Invoke(newWeapon);
+        if (UIAudioManager.Instance != null) UIAudioManager.Instance.PlayButtonClick();
+
+        // --- 2. ANIMACIÓN DE SACAR (SUBIR NUEVA ARMA) ---
+        if (newWeapon != null && newWeapon.worldPrefab != null && handPoint != null)
+        {
+            heldInstance = Instantiate(newWeapon.worldPrefab, handPoint);
+            ConfigureHeldInstance(newWeapon);
+
+            Vector3 finalPos = newWeapon.heldLocalPosition;
+            Vector3 startPos = finalPos + holsterOffset;
+
+            heldInstance.transform.localPosition = startPos;
+            heldInstance.transform.localEulerAngles = newWeapon.heldLocalEuler;
+
+            float elapsed = 0f;
+            while (elapsed < equipDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / equipDuration;
+                t = Mathf.SmoothStep(0f, 1f, t);
+
+                if (heldInstance != null)
+                {
+                    heldInstance.transform.localPosition = Vector3.Lerp(startPos, finalPos, t);
+                }
+                yield return null;
+            }
+
+            if (heldInstance != null)
+            {
+                heldInstance.transform.localPosition = finalPos;
+            }
+        }
+
+        isTransitioning = false;
+    }
+
+    /// <summary>
+    /// Cambia el modelo de forma instantánea sin animación (usado al iniciar o al soltar arma al suelo).
+    /// </summary>
+    private void InstantRefreshHeldModel()
     {
         if (heldInstance != null)
         {
@@ -152,7 +248,16 @@ public class PlayerWeaponInventory : MonoBehaviour
         heldInstance.transform.localPosition = weapon.heldLocalPosition;
         heldInstance.transform.localEulerAngles = weapon.heldLocalEuler;
 
-        // Asignar la capa de renderizado exclusivo en primera persona a todo el modelo y sus partes
+        ConfigureHeldInstance(weapon);
+    }
+
+    /// <summary>
+    /// Aplica capas de renderizado exclusivo y desactiva componentes físicos del modelo visual de la mano.
+    /// </summary>
+    private void ConfigureHeldInstance(WeaponData weapon)
+    {
+        if (heldInstance == null) return;
+
         int overlayLayer = LayerMask.NameToLayer(weaponOverlayLayerName);
         if (overlayLayer != -1)
         {
@@ -163,7 +268,6 @@ public class PlayerWeaponInventory : MonoBehaviour
             Debug.LogWarning($"PlayerWeaponInventory: La capa '{weaponOverlayLayerName}' no existe en Unity (Edit > Project Settings > Tags and Layers).");
         }
 
-        // El modelo de la mano es solo visual: sin colisiones, sin física y sin poder recogerse.
         foreach (Collider col in heldInstance.GetComponentsInChildren<Collider>())
         {
             col.enabled = false;
@@ -179,11 +283,13 @@ public class PlayerWeaponInventory : MonoBehaviour
     }
 
     /// <summary>
-    /// Suelta TODAS las armas (la equipada y la guardada) al suelo, repartidas alrededor de un
-    /// punto, y deja al jugador con las manos vacías. Se usa cuando te atrapa un guardia.
+    /// Suelta TODAS las armas al suelo y deja al jugador con las manos vacías.
     /// </summary>
     public void DropAllAt(Vector3 center, float radius)
     {
+        if (switchCoroutine != null) StopCoroutine(switchCoroutine);
+        isTransitioning = false;
+
         for (int i = 0; i < SLOT_COUNT; i++)
         {
             if (slots[i] == null) continue;
@@ -193,7 +299,7 @@ public class PlayerWeaponInventory : MonoBehaviour
         }
 
         equippedIndex = HANDS;
-        RefreshHeldModel();
+        InstantRefreshHeldModel();
         if (OnEquippedChanged != null) OnEquippedChanged.Invoke(null);
     }
 
@@ -210,7 +316,6 @@ public class PlayerWeaponInventory : MonoBehaviour
 
         GameObject dropped = Instantiate(weapon.worldPrefab, position, rotation);
 
-        // Restaurar la capa por defecto para que la Cámara Principal la dibuje correctamente tras el escenario
         int defaultLayer = LayerMask.NameToLayer("Default");
         SetLayerRecursively(dropped, defaultLayer != -1 ? defaultLayer : 0);
 
@@ -233,11 +338,9 @@ public class PlayerWeaponInventory : MonoBehaviour
 
         GameObject dropped = Instantiate(weapon.worldPrefab, dropPoint.position, dropPoint.rotation);
 
-        // Restaurar la capa por defecto para que la Cámara Principal la dibuje correctamente tras el escenario
         int defaultLayer = LayerMask.NameToLayer("Default");
         SetLayerRecursively(dropped, defaultLayer != -1 ? defaultLayer : 0);
 
-        // Un arma soltada hace ruido al chocar contra el suelo.
         if (dropped.GetComponent<NoiseOnImpact>() == null)
         {
             dropped.AddComponent<NoiseOnImpact>();
@@ -246,16 +349,11 @@ public class PlayerWeaponInventory : MonoBehaviour
         Rigidbody rb = dropped.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            // Detección continua: evita que un objeto fino (como el cuchillo) atraviese el suelo
-            // al caer rápido, que es lo que pasa con la detección normal (Discrete).
             rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
             rb.AddForce(dropPoint.forward * dropForce, ForceMode.VelocityChange);
         }
     }
 
-    /// <summary>
-    /// Cambia la capa de un GameObject y de todos sus objetos hijos en la jerarquía.
-    /// </summary>
     private void SetLayerRecursively(GameObject obj, int newLayer)
     {
         if (obj == null) return;
