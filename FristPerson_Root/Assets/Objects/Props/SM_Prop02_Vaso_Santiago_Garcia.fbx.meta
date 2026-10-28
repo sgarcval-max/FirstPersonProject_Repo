@@ -3,12 +3,22 @@ guid: 1766e1affac1a944686f192fb77efa49
 ModelImporter:
   serializedVersion: 24300
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cristal azul claro.001
+    second: {fileID: 2100000, guid: f695c522b54953e40be44296e77f05f1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cristal en el grosor.001
+    second: {fileID: 2100000, guid: 9f7b8dcaa6c8cf34b8799bcf0c866257, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
     materialSearch: 1
-    materialLocation: 0
+    materialLocation: 1
     searchTexturesGlobally: 0
   animations:
     legacyGenerateAnimations: 4
