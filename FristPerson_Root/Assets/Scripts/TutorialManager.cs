@@ -9,9 +9,10 @@ using UnityEngine.Events;
 /// <summary>
 /// Gestiona la secuencia interactiva del tutorial soportando múltiples Action Maps, reasignaciones dinámicas,
 /// formateo en español, efecto de mecanografiado con audio SFX aleatorio en títulos,
-/// transiciones en fundido (Fade In/Out), fases dinámicas para interacción/inventario,
+/// transiciones en fundido (Fade In/Out), fases dinámicas para interacción/inventario con ocultación visual del panel,
 /// detección automática de cercanía a objetos, 3 barras de progreso secuenciales estrictas,
-/// y pantalla final de confirmación con protección contra enemigos.
+/// y pantalla final de confirmación con protección contra enemigos y control del cursor.
+/// Corregida la sincronización de audio/pantalla tras cerrar el inventario.
 /// </summary>
 public class TutorialManager : MonoBehaviour
 {
@@ -19,10 +20,6 @@ public class TutorialManager : MonoBehaviour
 
     private const string TUTORIAL_KEY = "TutorialCompleted";
 
-    /// <summary>
-    /// Propiedad estática accesible desde cualquier script de Enemigos o Salud.
-    /// Devuelve true mientras el tutorial o el panel de bienvenida estén activos.
-    /// </summary>
     public static bool IsPlayerProtected
     {
         get
@@ -40,7 +37,7 @@ public class TutorialManager : MonoBehaviour
         Aim,
         DropWeapon,
         InteractAndInventory,
-        FinalCompletion // Nuevo paso final de confirmación
+        FinalCompletion
     }
 
     [System.Serializable]
@@ -148,7 +145,7 @@ public class TutorialManager : MonoBehaviour
     private bool isTransitioning = false;
     private float inputCooldown = 0f;
 
-    // Fases del sub-paso: 0 = Vacío (0/3), 1 = Cerca (1/3), 2 = Cogido (2/3), 3 = Inventario (3/3)
+    // Fases del sub-paso: 0 = Vacío (0/3), 1 = Cerca (1/3), 2 = Cogido (2/3), 3 = Inventario Abierto (3/3)
     private int currentSubStepPhase = 0;
     private float[] targetFills = new float[3];
 
@@ -505,6 +502,7 @@ public class TutorialManager : MonoBehaviour
 
                 bool isInteractPressed = (interactAction != null && interactAction.WasPressedThisFrame()) || Input.GetKeyDown(KeyCode.E);
 
+                // FASE 1: Cerca del objeto -> Pulsar E para cogerlo
                 if (currentSubStepPhase == 1)
                 {
                     if (isInteractPressed)
@@ -514,10 +512,23 @@ public class TutorialManager : MonoBehaviour
                         inputCooldown = 0.25f;
                     }
                 }
+                // FASE 2: Objeto cogido -> Pulsar I/TAB para abrir el inventario
                 else if (currentSubStepPhase == 2)
                 {
                     bool isInventoryPressed = (inventoryAction != null && inventoryAction.WasPressedThisFrame()) || Input.GetKeyDown(KeyCode.I) || Input.GetKeyDown(KeyCode.Tab);
                     if (isInventoryPressed)
+                    {
+                        currentSubStepPhase = 3;
+                        UpdateSubStepStateUI();
+                        inputCooldown = 0.35f;
+                        StartCoroutine(HidePanelForInventoryRoutine());
+                    }
+                }
+                // FASE 3: Inventario Abierto -> Pulsar I/TAB/ESC para cerrarlo
+                else if (currentSubStepPhase == 3)
+                {
+                    bool isClosePressed = (inventoryAction != null && inventoryAction.WasPressedThisFrame()) || Input.GetKeyDown(KeyCode.I) || Input.GetKeyDown(KeyCode.Tab) || Input.GetKeyDown(KeyCode.Escape);
+                    if (isClosePressed)
                     {
                         StartCoroutine(FinishInventoryStepRoutine());
                     }
@@ -525,8 +536,50 @@ public class TutorialManager : MonoBehaviour
                 break;
 
             case ActionType.FinalCompletion:
-                // El paso final aguarda la pulsación del botón "EMPEZAR A JUGAR"
                 break;
+        }
+    }
+
+    private IEnumerator HidePanelForInventoryRoutine()
+    {
+        if (tutorialPanelCanvasGroup != null)
+        {
+            float timer = 0f;
+            while (timer < fadeDuration)
+            {
+                timer += Time.deltaTime;
+                tutorialPanelCanvasGroup.alpha = Mathf.Lerp(1f, 0f, timer / fadeDuration);
+                yield return null;
+            }
+            tutorialPanelCanvasGroup.alpha = 0f;
+        }
+
+        if (tutorialPanel != null) tutorialPanel.SetActive(false);
+    }
+
+    public void OnInventoryOpened()
+    {
+        if (isTutorialActive && currentStepIndex < steps.Count)
+        {
+            TutorialStep current = steps[currentStepIndex];
+            if (current.requiredAction == ActionType.InteractAndInventory && currentSubStepPhase == 2 && !isTransitioning)
+            {
+                currentSubStepPhase = 3;
+                UpdateSubStepStateUI();
+                StartCoroutine(HidePanelForInventoryRoutine());
+            }
+        }
+    }
+
+    public void OnInventoryClosed()
+    {
+        if (isTutorialActive && currentStepIndex < steps.Count)
+        {
+            TutorialStep current = steps[currentStepIndex];
+            if (current.requiredAction == ActionType.InteractAndInventory && currentSubStepPhase == 3 && !isTransitioning)
+            {
+                StartCoroutine(FinishInventoryStepRoutine());
+            }
         }
     }
 
@@ -607,6 +660,7 @@ public class TutorialManager : MonoBehaviour
                 break;
 
             case 3:
+                descriptionText.text = FormatDescription("Cierra el inventario para continuar.");
                 SetTargetFills(1f, 1f, 1f);
                 break;
         }
@@ -615,10 +669,9 @@ public class TutorialManager : MonoBehaviour
     private IEnumerator FinishInventoryStepRoutine()
     {
         isTransitioning = true;
-        currentSubStepPhase = 3;
-        UpdateSubStepStateUI();
+        inputCooldown = 0.2f;
 
-        yield return new WaitForSeconds(0.35f);
+        yield return new WaitForSeconds(0.05f);
 
         AdvanceStep();
     }
@@ -675,6 +728,28 @@ public class TutorialManager : MonoBehaviour
         hasJumped = false;
         hasCrouched = false;
 
+        // 1. Activar el GameObject del panel si venía de estar desactivado
+        if (tutorialPanel != null && !tutorialPanel.activeSelf)
+        {
+            tutorialPanel.SetActive(true);
+        }
+
+        // 2. Si venimos de estar invisibles (cerrar el inventario), hacemos un FADE IN ULTRA-RÁPIDO
+        // del panel ANTES de empezar a teclear las letras con sonido
+        if (tutorialPanelCanvasGroup != null && tutorialPanelCanvasGroup.alpha < 1f)
+        {
+            float fastTimer = 0f;
+            float fastFadeDuration = 0.05f; // Transición casi instantánea para sincronizarse con el audio
+            while (fastTimer < fastFadeDuration)
+            {
+                fastTimer += Time.deltaTime;
+                tutorialPanelCanvasGroup.alpha = Mathf.Lerp(0f, 1f, fastTimer / fastFadeDuration);
+                yield return null;
+            }
+            tutorialPanelCanvasGroup.alpha = 1f;
+        }
+
+        // 3. Ocultar el texto previo del cuerpo para animar el nuevo
         if (bodyCanvasGroup != null && bodyCanvasGroup.alpha > 0f)
         {
             float timer = 0f;
@@ -691,15 +766,9 @@ public class TutorialManager : MonoBehaviour
 
         bool isFinalStep = (current.requiredAction == ActionType.FinalCompletion);
 
-        // Si es el paso final, activamos el botón "EMPEZAR A JUGAR" y liberamos el cursor
         if (startPlayingButton != null)
         {
             startPlayingButton.gameObject.SetActive(isFinalStep);
-        }
-
-        if (isFinalStep)
-        {
-            SetCursorState(true);
         }
 
         bool hasSubSteps = (current.requiredAction == ActionType.InteractAndInventory);
@@ -723,6 +792,7 @@ public class TutorialManager : MonoBehaviour
             descriptionText.text = FormatDescription(current.stepDescription);
         }
 
+        // 4. Mecanografiado del título (ahora el panel YA ES VISIBLE mientras suena el SFX)
         if (titleText != null)
         {
             titleText.text = "";
@@ -743,6 +813,7 @@ public class TutorialManager : MonoBehaviour
             }
         }
 
+        // 5. Fade In progresivo del texto de descripción
         if (bodyCanvasGroup != null)
         {
             float timer = 0f;
@@ -753,6 +824,13 @@ public class TutorialManager : MonoBehaviour
                 yield return null;
             }
             bodyCanvasGroup.alpha = 1f;
+        }
+
+        // 6. Si es el paso final, desbloquear ratón
+        if (isFinalStep)
+        {
+            yield return null;
+            SetCursorState(true);
         }
 
         isTransitioning = false;
@@ -819,7 +897,6 @@ public class TutorialManager : MonoBehaviour
         if (welcomePanelCanvasGroup != null) welcomePanelCanvasGroup.alpha = 1f;
         if (tutorialPanelCanvasGroup != null) tutorialPanelCanvasGroup.alpha = 1f;
 
-        // Disparar evento para restaurar detección y ataques de enemigos
         OnTutorialFinished?.Invoke();
     }
 
