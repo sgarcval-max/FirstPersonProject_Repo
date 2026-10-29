@@ -9270,7 +9270,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a9fe11a1c3fea7145b2335194dff5dc1, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.79
+      value: 2.72
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a9fe11a1c3fea7145b2335194dff5dc1, type: 3}
       propertyPath: m_LocalPosition.z
@@ -11676,7 +11676,7 @@ MonoBehaviour:
     stepDescription: Ve a un objeto para equiparlo
     requiredAction: 5
   - stepTitle: "!TUTORIAL COMPLETADO\xA1"
-    stepDescription: Ahora cuidado con lo enemigos ya que te pueden pillar
+    stepDescription: Ahora cuidado con los enemigos ya que te pueden pillar
     requiredAction: 6
 --- !u!4 &1572668831
 Transform:
