@@ -12,7 +12,8 @@ using UnityEngine.Events;
 ///  - Catch: su barra de detección ha llegado al máximo. Se para, se gira hacia el jugador y lo
 ///    atrapa (PlayerCapture se encarga del Game Over).
 ///
-/// No hay persecución: en cuanto te detecta del todo, pierdes, estés lejos o cerca.
+/// Durante el tutorial (TutorialManager.IsPlayerProtected = true), el enemigo es forzado a mantenerse
+/// en patrulla continua ignorando cualquier evento.
 /// </summary>
 [RequireComponent(typeof(NavMeshAgent))]
 public class HumanAI : MonoBehaviour
@@ -61,13 +62,11 @@ public class HumanAI : MonoBehaviour
             Debug.LogWarning("HumanAI: este guardia necesita también los componentes Human Patrol y Human Vision.");
         }
 
-        // La barra flotante encima de la cabeza se la añadimos automáticamente a cada guardia.
         if (vision != null && GetComponent<DetectionBar>() == null)
         {
             gameObject.AddComponent<DetectionBar>();
         }
 
-        // Y la capacidad de ser aturdido (con la pistola, por ejemplo).
         if (GetComponent<HumanStun>() == null)
         {
             gameObject.AddComponent<HumanStun>();
@@ -97,6 +96,16 @@ public class HumanAI : MonoBehaviour
         if (vision == null || patrol == null) return;
         if (!agent.isOnNavMesh) return;
 
+        // Si el tutorial está activo, forzar al guardia a estar en modo patrulla sin alterar su ruta
+        if (TutorialManager.IsPlayerProtected)
+        {
+            if (CurrentState != State.Patrol)
+            {
+                EnterPatrol();
+            }
+            return;
+        }
+
         // Si otro guardia ya ha atrapado al jugador, este se queda como estaba.
         if (PlayerCapture.IsCaught && CurrentState != State.Catch) return;
 
@@ -108,13 +117,8 @@ public class HumanAI : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Devuelve al guardia a su sitio inicial, tranquilo y patrullando desde cero. Se usa cuando
-    /// el jugador reaparece tras un Game Over.
-    /// </summary>
     public void ResetToStart()
     {
-        // Si estaba aturdido, lo recuperamos primero para que todos sus componentes vuelvan a estar activos.
         HumanStun stun = GetComponent<HumanStun>();
         if (stun != null) stun.RecoverImmediately();
 
@@ -134,30 +138,21 @@ public class HumanAI : MonoBehaviour
         if (vision != null) vision.ResetSuspicion();
         if (hearing != null) hearing.HasHeardNoise = false;
 
-        // Desactivar y volver a activar la patrulla hace que empiece su ruta de nuevo.
         patrol.enabled = false;
         EnterPatrol();
     }
 
-    /// <summary>
-    /// Tras reaparecer el jugador: el guardia se calma y retoma su patrulla.
-    /// Si el guardia está demasiado cerca del punto de reaparición del jugador,
-    /// se teletransporta a su origen para evitar bucles de captura.
-    /// </summary>
     public void ResetForRespawn(Vector3 playerSpawnPoint, float safeDistance = 5f)
     {
-        // 1. Si el guardia está dentro del radio de seguridad del respawn, vuelve a su inicio
         if (Vector3.Distance(transform.position, playerSpawnPoint) < safeDistance)
         {
             ResetToStart();
             return;
         }
 
-        // 2. Si estaba aturdido, dejamos que siga aturdido
         HumanStun stun = GetComponent<HumanStun>();
         if (stun != null && stun.IsStunned) return;
 
-        // 3. Limpiar sospecha y reanudar patrulla desde donde está
         if (vision != null) vision.ResetSuspicion();
         if (hearing != null) hearing.HasHeardNoise = false;
 
@@ -170,7 +165,6 @@ public class HumanAI : MonoBehaviour
         EnterPatrol();
     }
 
-    /// <summary>Retoma la patrulla desde donde esté (se usa al recuperarse de un aturdimiento).</summary>
     public void ResumePatrol()
     {
         if (agent.isOnNavMesh)
@@ -180,22 +174,21 @@ public class HumanAI : MonoBehaviour
         EnterPatrol();
     }
 
-    // ------------------------------------------------------------------ Cambios de estado
-
     private void SetState(State newState)
     {
         CurrentState = newState;
-        Debug.Log("[" + name + "] Estado: " + newState);
     }
 
     private void EnterPatrol()
     {
         SetState(State.Patrol);
-        patrol.enabled = true; // HumanPatrol recupera su velocidad y retoma la ruta al activarse
+        patrol.enabled = true;
     }
 
     private void EnterInvestigate(Vector3 noisePosition)
     {
+        if (TutorialManager.IsPlayerProtected) return;
+
         SetState(State.Investigate);
         patrol.enabled = false;
 
@@ -208,7 +201,7 @@ public class HumanAI : MonoBehaviour
 
     private void BeginCatch()
     {
-        if (PlayerCapture.Instance == null || PlayerCapture.IsCaught) return;
+        if (TutorialManager.IsPlayerProtected || PlayerCapture.Instance == null || PlayerCapture.IsCaught) return;
 
         SetState(State.Catch);
         patrol.enabled = false;
@@ -219,11 +212,9 @@ public class HumanAI : MonoBehaviour
         if (OnCaughtPlayer != null) OnCaughtPlayer.Invoke();
     }
 
-    // ------------------------------------------------------------------ Lo que hace en cada estado
-
     private void UpdatePatrol()
     {
-        if (vision.HasDetectedPlayer)
+        if (!TutorialManager.IsPlayerProtected && vision.HasDetectedPlayer)
         {
             BeginCatch();
         }
@@ -231,7 +222,7 @@ public class HumanAI : MonoBehaviour
 
     private void UpdateInvestigate()
     {
-        if (vision.HasDetectedPlayer)
+        if (!TutorialManager.IsPlayerProtected && vision.HasDetectedPlayer)
         {
             BeginCatch();
             return;
@@ -261,19 +252,15 @@ public class HumanAI : MonoBehaviour
     {
         if (PlayerCapture.Instance == null) return;
 
-        // Se da la vuelta hacia el jugador mientras la cámara de este gira hacia él.
         Vector3 toPlayer = PlayerCapture.Instance.transform.position - transform.position;
         toPlayer.y = 0f;
         FaceTowards(toPlayer);
     }
 
-    // ------------------------------------------------------------------ Auxiliares
-
     private void HandleNoiseHeard(Vector3 position)
     {
-        if (PlayerCapture.IsCaught) return;
+        if (TutorialManager.IsPlayerProtected || PlayerCapture.IsCaught) return;
 
-        // Solo reacciona a un ruido si está tranquilo; si ya está capturando, no le afecta.
         if (CurrentState == State.Patrol || CurrentState == State.Investigate)
         {
             EnterInvestigate(position);

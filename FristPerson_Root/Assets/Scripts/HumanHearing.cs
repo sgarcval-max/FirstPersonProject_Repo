@@ -8,10 +8,8 @@ using UnityEngine.Events;
 public class NoiseHeardEvent : UnityEvent<Vector3> { }
 
 /// <summary>
-/// Da oído a un humano: se registra en el NoiseSystem y reacciona a los ruidos que ocurren
-/// dentro de su radio de audición. Al oír uno, sube un poco su sospecha (sin llegar nunca al
-/// máximo solo por ruido: para estar seguro tiene que verte), guarda dónde fue el ruido y
-/// avisa con un evento, para que más adelante la IA pueda ir a investigar.
+/// Da oído a un humano. Durante el tutorial (TutorialManager.IsPlayerProtected = true),
+/// ignora cualquier ruido o pisada generada en el juego.
 /// </summary>
 public class HumanHearing : MonoBehaviour
 {
@@ -32,10 +30,7 @@ public class HumanHearing : MonoBehaviour
     [Tooltip("Se dispara cada vez que oye un ruido, con la posición de donde vino.")]
     public NoiseHeardEvent OnNoiseHeard;
 
-    /// <summary>Dónde fue el último ruido que oyó.</summary>
     public Vector3 LastNoisePosition { get; private set; }
-
-    /// <summary>True si ha oído algún ruido desde la última vez que se reseteó.</summary>
     public bool HasHeardNoise { get; set; }
 
     private void Awake()
@@ -56,9 +51,11 @@ public class HumanHearing : MonoBehaviour
         NoiseSystem.Unregister(this);
     }
 
-    /// <summary>Lo llama NoiseSystem cuando hay un ruido. Comprueba si está lo bastante cerca.</summary>
     public void Hear(Vector3 position, float radius)
     {
+        // Ignorar todo ruido mientras el jugador está protegido por el tutorial
+        if (TutorialManager.IsPlayerProtected) return;
+
         float effectiveRadius = radius * hearingSensitivity;
         float distance = Vector3.Distance(transform.position, position);
 
@@ -74,8 +71,6 @@ public class HumanHearing : MonoBehaviour
             float amount = suspicionPerNoise * Mathf.Lerp(0.4f, 1f, closeness);
             vision.AddSuspicion(amount, maxSuspicionFromNoise);
         }
-
-        Debug.Log("[" + name + "] Ha oído un ruido a " + distance.ToString("0.0") + " metros.");
 
         if (OnNoiseHeard != null) OnNoiseHeard.Invoke(position);
     }
