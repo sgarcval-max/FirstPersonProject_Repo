@@ -10,9 +10,9 @@ using UnityEngine.Events;
 /// Gestiona la secuencia interactiva del tutorial soportando múltiples Action Maps, reasignaciones dinámicas,
 /// formateo en español, efecto de mecanografiado con audio SFX aleatorio en títulos,
 /// transiciones en fundido (Fade In/Out), fases dinámicas para interacción/inventario con ocultación visual del panel,
-/// detección automática de cercanía a objetos, 3 barras de progreso secuenciales estrictas,
-/// y pantalla final de confirmación con protección contra enemigos y control del cursor.
-/// Corregida la sincronización de audio/pantalla tras cerrar el inventario.
+/// detección automática de cercanía a objetos, 3 barras de progreso secuenciales strictly,
+/// pantalla final de confirmación con protección contra enemigos y control del cursor,
+/// y congelamiento del tutorial al salir de la zona límite.
 /// </summary>
 public class TutorialManager : MonoBehaviour
 {
@@ -144,6 +144,9 @@ public class TutorialManager : MonoBehaviour
     private bool isTutorialActive = false;
     private bool isTransitioning = false;
     private float inputCooldown = 0f;
+
+    // Control de límite de área
+    public bool IsOutsideBoundary { get; private set; }
 
     // Fases del sub-paso: 0 = Vacío (0/3), 1 = Cerca (1/3), 2 = Cogido (2/3), 3 = Inventario Abierto (3/3)
     private int currentSubStepPhase = 0;
@@ -376,6 +379,29 @@ public class TutorialManager : MonoBehaviour
         CompleteTutorial();
     }
 
+    /// <summary>
+    /// Pausa o reanuda el progreso del tutorial y muestra u oculta su panel al salir/entrar de la zona permitida.
+    /// </summary>
+    public void SetOutsideBoundary(bool isOutside)
+    {
+        IsOutsideBoundary = isOutside;
+
+        if (tutorialPanel != null && isTutorialActive)
+        {
+            tutorialPanel.SetActive(!isOutside);
+        }
+    }
+
+    public void SetTutorialUIVisible(bool visible)
+    {
+        if (!isTutorialActive) return;
+
+        if (tutorialPanel != null)
+        {
+            tutorialPanel.SetActive(visible);
+        }
+    }
+
     private string FormatDescription(string rawText)
     {
         string formatted = rawText;
@@ -436,7 +462,8 @@ public class TutorialManager : MonoBehaviour
 
         if (inputCooldown > 0f) inputCooldown -= Time.deltaTime;
 
-        if (!isTutorialActive || isTransitioning || currentStepIndex >= steps.Count) return;
+        // Si estás fuera del límite (IsOutsideBoundary), NO se comprueba ningún paso del tutorial
+        if (!isTutorialActive || isTransitioning || IsOutsideBoundary || currentStepIndex >= steps.Count) return;
 
         CheckCurrentStepCompletion();
     }
@@ -728,18 +755,16 @@ public class TutorialManager : MonoBehaviour
         hasJumped = false;
         hasCrouched = false;
 
-        // 1. Activar el GameObject del panel si venía de estar desactivado
-        if (tutorialPanel != null && !tutorialPanel.activeSelf)
+        // Activar el GameObject del panel solo si NO estamos fuera del límite
+        if (tutorialPanel != null)
         {
-            tutorialPanel.SetActive(true);
+            tutorialPanel.SetActive(!IsOutsideBoundary);
         }
 
-        // 2. Si venimos de estar invisibles (cerrar el inventario), hacemos un FADE IN ULTRA-RÁPIDO
-        // del panel ANTES de empezar a teclear las letras con sonido
         if (tutorialPanelCanvasGroup != null && tutorialPanelCanvasGroup.alpha < 1f)
         {
             float fastTimer = 0f;
-            float fastFadeDuration = 0.05f; // Transición casi instantánea para sincronizarse con el audio
+            float fastFadeDuration = 0.05f;
             while (fastTimer < fastFadeDuration)
             {
                 fastTimer += Time.deltaTime;
@@ -749,7 +774,6 @@ public class TutorialManager : MonoBehaviour
             tutorialPanelCanvasGroup.alpha = 1f;
         }
 
-        // 3. Ocultar el texto previo del cuerpo para animar el nuevo
         if (bodyCanvasGroup != null && bodyCanvasGroup.alpha > 0f)
         {
             float timer = 0f;
@@ -792,7 +816,6 @@ public class TutorialManager : MonoBehaviour
             descriptionText.text = FormatDescription(current.stepDescription);
         }
 
-        // 4. Mecanografiado del título (ahora el panel YA ES VISIBLE mientras suena el SFX)
         if (titleText != null)
         {
             titleText.text = "";
@@ -813,7 +836,6 @@ public class TutorialManager : MonoBehaviour
             }
         }
 
-        // 5. Fade In progresivo del texto de descripción
         if (bodyCanvasGroup != null)
         {
             float timer = 0f;
@@ -826,7 +848,6 @@ public class TutorialManager : MonoBehaviour
             bodyCanvasGroup.alpha = 1f;
         }
 
-        // 6. Si es el paso final, desbloquear ratón
         if (isFinalStep)
         {
             yield return null;
