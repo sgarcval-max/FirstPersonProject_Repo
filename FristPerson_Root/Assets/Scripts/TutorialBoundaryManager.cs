@@ -7,7 +7,7 @@ using UnityEngine.Rendering.Universal;
 
 /// <summary>
 /// Limita la zona de juego durante el tutorial usando un Box Collider Trigger.
-/// Forzado de Canvas sortingOrder = 999 para garantizar la visibilidad del Fade a negro.
+/// Mantiene el filtro a blanco y negro hasta que la pantalla esté totalmente negra antes de hacer respawn.
 /// </summary>
 public class TutorialBoundaryManager : MonoBehaviour
 {
@@ -29,26 +29,54 @@ public class TutorialBoundaryManager : MonoBehaviour
     [SerializeField] private GameObject warningPanel;
     [SerializeField] private TextMeshProUGUI countdownText;
 
-    [Header("4. Transición de Fundido a Negro (Fade Out)")]
-    [Tooltip("CanvasGroup del objeto de pantalla negra a pantalla completa.")]
+    [Header("4. Animación Pop-Up del Contador")]
+    [Tooltip("Multiplicador de escala al cambiar de número (1.4 = 40% más grande en el impacto).")]
+    [SerializeField] private float popScaleMultiplier = 1.4f;
+
+    [Tooltip("Duración total del rebote en segundos.")]
+    [SerializeField] private float popDuration = 0.15f;
+
+    [Header("5. Sonido de Cuenta Atrás (SFX)")]
+    [SerializeField] private AudioSource countdownAudioSource;
+    [SerializeField] private AudioClip countdownTickSound;
+
+    [Header("6. Efecto de Audio Opaco (Low Pass Filter)")]
+    [Tooltip("Frecuencia de corte cuando estás DENTRO (22000 = Sonido normal sin opacar).")]
+    [SerializeField] private float normalAudioCutoff = 22000f;
+
+    [Tooltip("Frecuencia de corte cuando estás FUERA (500 = Sonido grave y opaco/amortiguado).")]
+    [SerializeField] private float muffledAudioCutoff = 500f;
+
+    [Tooltip("Velocidad de transición del filtro de audio.")]
+    [SerializeField] private float audioTransitionSpeed = 6f;
+
+    [Header("7. Transición de Fundido a Negro (Fade Out)")]
     [SerializeField] private CanvasGroup fadeToBlackCanvasGroup;
     [SerializeField] private float fadeDuration = 0.5f;
 
-    [Header("5. Efecto Blanco y Negro (URP)")]
+    [Header("8. Efecto Blanco y Negro (URP)")]
     [SerializeField] private Volume urpVolume;
 
-    [Header("6. Tiempos")]
+    [Header("9. Tiempos")]
     [SerializeField] private float countdownTime = 5f;
 
     private ColorAdjustments colorAdjustments;
+    private AudioLowPassFilter audioLowPassFilter;
     private float currentTimer;
+    private int lastDisplayedSecond = -1;
     private bool isCountingDown = false;
     private bool isRespawning = false;
     private Vector3 initialSpawnPosition;
     private Quaternion initialSpawnRotation;
+    private Vector3 originalTextScale = Vector3.one;
+    private Coroutine popCoroutine;
+
+    private float targetAudioCutoff = 22000f;
 
     private void Start()
     {
+        if (fadeDuration <= 0f) fadeDuration = 0.5f;
+
         if (PlayerPrefs.GetInt("TutorialCompleted", 0) == 1)
         {
             DisableBoundarySystem();
@@ -75,6 +103,30 @@ public class TutorialBoundaryManager : MonoBehaviour
             }
         }
 
+        AudioListener listener = FindObjectOfType<AudioListener>();
+        if (listener != null)
+        {
+            audioLowPassFilter = listener.GetComponent<AudioLowPassFilter>();
+            if (audioLowPassFilter == null)
+            {
+                audioLowPassFilter = listener.gameObject.AddComponent<AudioLowPassFilter>();
+            }
+            audioLowPassFilter.cutoffFrequency = normalAudioCutoff;
+        }
+
+        if (countdownAudioSource != null)
+        {
+            countdownAudioSource.bypassListenerEffects = true;
+            countdownAudioSource.bypassEffects = true;
+            countdownAudioSource.bypassReverbZones = true;
+            countdownAudioSource.spatialBlend = 0f;
+        }
+
+        if (countdownText != null)
+        {
+            originalTextScale = countdownText.transform.localScale;
+        }
+
         if (urpVolume != null && urpVolume.profile != null)
         {
             urpVolume.profile.TryGet(out colorAdjustments);
@@ -82,12 +134,7 @@ public class TutorialBoundaryManager : MonoBehaviour
 
         if (warningPanel != null) warningPanel.SetActive(false);
 
-        // Validar e inicializar el CanvasGroup de la pantalla negra
-        if (fadeToBlackCanvasGroup == null)
-        {
-            Debug.LogError("<color=red>[TutorialBoundaryManager]</color> ¡ATENCIÓN! No has asignado el 'Fade To Black Canvas Group' en el Inspector.");
-        }
-        else
+        if (fadeToBlackCanvasGroup != null)
         {
             fadeToBlackCanvasGroup.alpha = 0f;
             fadeToBlackCanvasGroup.blocksRaycasts = false;
@@ -95,14 +142,21 @@ public class TutorialBoundaryManager : MonoBehaviour
         }
 
         currentTimer = countdownTime;
+        targetAudioCutoff = normalAudioCutoff;
     }
 
     private void Update()
     {
-        if (!TutorialManager.IsPlayerProtected || isRespawning)
+        UpdateAudioFilter();
+
+        // Durante el respawn no interrumpimos el blanco y negro ni el audio
+        if (isRespawning) return;
+
+        if (!TutorialManager.IsPlayerProtected)
         {
             if (warningPanel != null && warningPanel.activeSelf) warningPanel.SetActive(false);
             SetGrayscaleAmount(0f);
+            targetAudioCutoff = normalAudioCutoff;
             return;
         }
 
@@ -110,6 +164,7 @@ public class TutorialBoundaryManager : MonoBehaviour
 
         float marginDistance = GetDistanceToBoundaryEdge(playerTransform.position);
 
+        // JUGADOR DENTRO DEL LÍMITE
         if (marginDistance > 0f)
         {
             if (isCountingDown)
@@ -119,10 +174,13 @@ public class TutorialBoundaryManager : MonoBehaviour
 
             float desaturationFactor = Mathf.Clamp01(1f - (marginDistance / Mathf.Max(0.1f, warningDistance)));
             SetGrayscaleAmount(desaturationFactor);
+            targetAudioCutoff = normalAudioCutoff;
         }
+        // JUGADOR FUERA DEL LÍMITE
         else
         {
             SetGrayscaleAmount(1f);
+            targetAudioCutoff = muffledAudioCutoff;
 
             if (!isCountingDown)
             {
@@ -130,6 +188,18 @@ public class TutorialBoundaryManager : MonoBehaviour
             }
 
             ProcessCountdown();
+        }
+    }
+
+    private void UpdateAudioFilter()
+    {
+        if (audioLowPassFilter != null)
+        {
+            audioLowPassFilter.cutoffFrequency = Mathf.Lerp(
+                audioLowPassFilter.cutoffFrequency,
+                targetAudioCutoff,
+                Time.deltaTime * audioTransitionSpeed
+            );
         }
     }
 
@@ -157,6 +227,7 @@ public class TutorialBoundaryManager : MonoBehaviour
     {
         isCountingDown = true;
         currentTimer = countdownTime;
+        lastDisplayedSecond = -1;
 
         if (TutorialManager.Instance != null)
         {
@@ -170,6 +241,7 @@ public class TutorialBoundaryManager : MonoBehaviour
     {
         isCountingDown = false;
         currentTimer = countdownTime;
+        lastDisplayedSecond = -1;
 
         if (warningPanel != null) warningPanel.SetActive(false);
 
@@ -183,9 +255,21 @@ public class TutorialBoundaryManager : MonoBehaviour
     {
         currentTimer -= Time.deltaTime;
 
-        if (countdownText != null)
+        int currentSecond = Mathf.Max(0, Mathf.CeilToInt(currentTimer));
+
+        if (currentSecond != lastDisplayedSecond)
         {
-            countdownText.text = Mathf.Max(0, Mathf.CeilToInt(currentTimer)).ToString();
+            lastDisplayedSecond = currentSecond;
+
+            if (countdownText != null)
+            {
+                countdownText.text = currentSecond.ToString();
+
+                if (popCoroutine != null) StopCoroutine(popCoroutine);
+                popCoroutine = StartCoroutine(PopTextRoutine());
+            }
+
+            PlayCountdownSFX();
         }
 
         if (currentTimer <= 0f && !isRespawning)
@@ -194,18 +278,66 @@ public class TutorialBoundaryManager : MonoBehaviour
         }
     }
 
+    private void PlayCountdownSFX()
+    {
+        if (countdownAudioSource != null && countdownTickSound != null)
+        {
+            countdownAudioSource.bypassListenerEffects = true;
+            countdownAudioSource.bypassEffects = true;
+            countdownAudioSource.spatialBlend = 0f;
+
+            countdownAudioSource.PlayOneShot(countdownTickSound);
+        }
+    }
+
+    private IEnumerator PopTextRoutine()
+    {
+        if (countdownText == null) yield break;
+
+        Transform textTransform = countdownText.transform;
+        Vector3 peakScale = originalTextScale * popScaleMultiplier;
+        float halfDuration = popDuration * 0.5f;
+
+        float timer = 0f;
+        while (timer < halfDuration)
+        {
+            timer += Time.deltaTime;
+            textTransform.localScale = Vector3.Lerp(originalTextScale, peakScale, timer / halfDuration);
+            yield return null;
+        }
+
+        timer = 0f;
+        while (timer < halfDuration)
+        {
+            timer += Time.deltaTime;
+            textTransform.localScale = Vector3.Lerp(peakScale, originalTextScale, timer / halfDuration);
+            yield return null;
+        }
+
+        textTransform.localScale = originalTextScale;
+    }
+
     private IEnumerator RespawnRoutine()
     {
         isRespawning = true;
 
         if (warningPanel != null) warningPanel.SetActive(false);
 
-        // 1. Preparar la pantalla negra
+        // Forzamos el blanco y negro al 100% durante toda la transición a negro
+        SetGrayscaleAmount(1f);
+
+        // 1. Fade Out a negro
         if (fadeToBlackCanvasGroup != null)
         {
+            Transform parentTransform = fadeToBlackCanvasGroup.transform.parent;
+            while (parentTransform != null)
+            {
+                if (!parentTransform.gameObject.activeSelf) parentTransform.gameObject.SetActive(true);
+                parentTransform = parentTransform.parent;
+            }
+
             fadeToBlackCanvasGroup.gameObject.SetActive(true);
 
-            // Elevar la capa del Canvas del Fade por encima de cualquier otro elemento de la UI
             Canvas parentCanvas = fadeToBlackCanvasGroup.GetComponentInParent<Canvas>();
             if (parentCanvas != null)
             {
@@ -217,12 +349,14 @@ public class TutorialBoundaryManager : MonoBehaviour
             fadeToBlackCanvasGroup.blocksRaycasts = true;
 
             Image blackImg = fadeToBlackCanvasGroup.GetComponent<Image>();
+            if (blackImg == null) blackImg = fadeToBlackCanvasGroup.GetComponentInChildren<Image>();
+
             if (blackImg != null)
             {
+                blackImg.enabled = true;
                 blackImg.color = new Color(0f, 0f, 0f, 1f);
             }
 
-            // Realizar Fade Out
             float timer = 0f;
             while (timer < fadeDuration)
             {
@@ -233,7 +367,7 @@ public class TutorialBoundaryManager : MonoBehaviour
             fadeToBlackCanvasGroup.alpha = 1f;
         }
 
-        // 2. Teletransportar al jugador estando en negro
+        // 2. Reaparecer al jugador estando 100% a oscuras
         if (playerTransform != null)
         {
             CharacterController cc = playerTransform.GetComponent<CharacterController>();
@@ -245,17 +379,19 @@ public class TutorialBoundaryManager : MonoBehaviour
             if (cc != null) cc.enabled = true;
         }
 
+        // AHORA QUE LA PANTALLA ESTÁ TOTALMENTE EN NEGRO, RESTAURAMOS EL COLOR Y AUDIO
         SetGrayscaleAmount(0f);
+        targetAudioCutoff = normalAudioCutoff;
         isCountingDown = false;
 
-        yield return new WaitForSeconds(0.2f); // Pausa breve en negro
+        yield return new WaitForSeconds(0.2f);
 
         if (TutorialManager.Instance != null)
         {
             TutorialManager.Instance.SetOutsideBoundary(false);
         }
 
-        // 3. Realizar Fade In (volver a la vista normal)
+        // 3. Fade In desde negro (con el color y sonido de la escena ya restablecidos)
         if (fadeToBlackCanvasGroup != null)
         {
             float timer = 0f;
@@ -277,6 +413,7 @@ public class TutorialBoundaryManager : MonoBehaviour
     {
         if (warningPanel != null) warningPanel.SetActive(false);
         SetGrayscaleAmount(0f);
+        if (audioLowPassFilter != null) audioLowPassFilter.cutoffFrequency = normalAudioCutoff;
         enabled = false;
     }
 
