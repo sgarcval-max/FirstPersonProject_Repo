@@ -194,6 +194,25 @@ public class TutorialManager : MonoBehaviour
         SetupWelcomeUI();
     }
 
+    #region MENÚ CONTEXTUAL PARA INSPECTOR (RESET / COMPLETAR)
+    [ContextMenu("Resetear Tutorial (Borrar PlayerPrefs)")]
+    public void ResetTutorialContextMenu()
+    {
+        PlayerPrefs.DeleteKey(TUTORIAL_KEY);
+        PlayerPrefs.Save();
+        Debug.Log("<color=yellow>[TutorialManager] Tutorial reseteado en PlayerPrefs.</color>");
+    }
+
+    [ContextMenu("Completar Tutorial (Forzar finalizado)")]
+    public void CompleteTutorialContextMenu()
+    {
+        PlayerPrefs.SetInt(TUTORIAL_KEY, 1);
+        PlayerPrefs.Save();
+        DisableAllPanels();
+        Debug.Log("<color=green>[TutorialManager] Tutorial marcado como completado en PlayerPrefs.</color>");
+    }
+    #endregion
+
     private void InitializeInputActions()
     {
         if (InputManager.Controls == null)
@@ -379,9 +398,6 @@ public class TutorialManager : MonoBehaviour
         CompleteTutorial();
     }
 
-    /// <summary>
-    /// Pausa o reanuda el progreso del tutorial y muestra u oculta su panel al salir/entrar de la zona permitida.
-    /// </summary>
     public void SetOutsideBoundary(bool isOutside)
     {
         IsOutsideBoundary = isOutside;
@@ -422,7 +438,7 @@ public class TutorialManager : MonoBehaviour
         formatted = formatted.Replace("{AIM}", aimText);
 
         formatted = formatted.Replace("{DROP}", GetDisplayString(dropAction, "G"));
-        formatted = formatted.Replace("{INTERACT}", GetDisplayString(interactAction, "E"));
+        formatted = formatted.Replace("{INTERACT}", GetDisplayString(interactAction, "F"));
         formatted = formatted.Replace("{INVENTORY}", GetDisplayString(inventoryAction, "I / TAB"));
 
         return formatted;
@@ -462,7 +478,6 @@ public class TutorialManager : MonoBehaviour
 
         if (inputCooldown > 0f) inputCooldown -= Time.deltaTime;
 
-        // Si estás fuera del límite (IsOutsideBoundary), NO se comprueba ningún paso del tutorial
         if (!isTutorialActive || isTransitioning || IsOutsideBoundary || currentStepIndex >= steps.Count) return;
 
         CheckCurrentStepCompletion();
@@ -523,26 +538,32 @@ public class TutorialManager : MonoBehaviour
                 break;
 
             case ActionType.InteractAndInventory:
-                CheckProximityAutomatic();
+                bool isInteractPressed = (interactAction != null && interactAction.WasPressedThisFrame())
+                                         || Input.GetKeyDown(KeyCode.F)
+                                         || Input.GetKeyDown(KeyCode.E);
+
+                // FASE 1 -> FASE 2: Si estamos cerca y se pulsa la tecla, avanzar inmediatamente y SALIR
+                if (currentSubStepPhase == 1 && isInteractPressed)
+                {
+                    OnObjectPickedUp();
+                    inputCooldown = 0.25f;
+                    return;
+                }
+
+                // SOLO comprobar proximidad si aún no hemos cogido nada (Fase < 2)
+                if (currentSubStepPhase < 2)
+                {
+                    CheckProximityAutomatic();
+                }
 
                 if (inputCooldown > 0f) return;
 
-                bool isInteractPressed = (interactAction != null && interactAction.WasPressedThisFrame()) || Input.GetKeyDown(KeyCode.E);
-
-                // FASE 1: Cerca del objeto -> Pulsar E para cogerlo
-                if (currentSubStepPhase == 1)
-                {
-                    if (isInteractPressed)
-                    {
-                        currentSubStepPhase = 2;
-                        UpdateSubStepStateUI();
-                        inputCooldown = 0.25f;
-                    }
-                }
                 // FASE 2: Objeto cogido -> Pulsar I/TAB para abrir el inventario
-                else if (currentSubStepPhase == 2)
+                if (currentSubStepPhase == 2)
                 {
-                    bool isInventoryPressed = (inventoryAction != null && inventoryAction.WasPressedThisFrame()) || Input.GetKeyDown(KeyCode.I) || Input.GetKeyDown(KeyCode.Tab);
+                    bool isInventoryPressed = (inventoryAction != null && inventoryAction.WasPressedThisFrame())
+                                              || Input.GetKeyDown(KeyCode.I)
+                                              || Input.GetKeyDown(KeyCode.Tab);
                     if (isInventoryPressed)
                     {
                         currentSubStepPhase = 3;
@@ -554,7 +575,10 @@ public class TutorialManager : MonoBehaviour
                 // FASE 3: Inventario Abierto -> Pulsar I/TAB/ESC para cerrarlo
                 else if (currentSubStepPhase == 3)
                 {
-                    bool isClosePressed = (inventoryAction != null && inventoryAction.WasPressedThisFrame()) || Input.GetKeyDown(KeyCode.I) || Input.GetKeyDown(KeyCode.Tab) || Input.GetKeyDown(KeyCode.Escape);
+                    bool isClosePressed = (inventoryAction != null && inventoryAction.WasPressedThisFrame())
+                                          || Input.GetKeyDown(KeyCode.I)
+                                          || Input.GetKeyDown(KeyCode.Tab)
+                                          || Input.GetKeyDown(KeyCode.Escape);
                     if (isClosePressed)
                     {
                         StartCoroutine(FinishInventoryStepRoutine());
@@ -636,18 +660,18 @@ public class TutorialManager : MonoBehaviour
         TutorialStep current = steps[currentStepIndex];
         if (current.requiredAction != ActionType.InteractAndInventory) return;
 
-        if (currentSubStepPhase < 2)
+        // Si ya hemos cogido el objeto (Fase 2 o superior), ignorar totalmente pérdidas de proximidad
+        if (currentSubStepPhase >= 2) return;
+
+        if (isNear && currentSubStepPhase == 0)
         {
-            if (isNear && currentSubStepPhase == 0)
-            {
-                currentSubStepPhase = 1;
-                UpdateSubStepStateUI();
-            }
-            else if (!isNear && currentSubStepPhase == 1)
-            {
-                currentSubStepPhase = 0;
-                UpdateSubStepStateUI();
-            }
+            currentSubStepPhase = 1;
+            UpdateSubStepStateUI();
+        }
+        else if (!isNear && currentSubStepPhase == 1)
+        {
+            currentSubStepPhase = 0;
+            UpdateSubStepStateUI();
         }
     }
 
@@ -658,11 +682,8 @@ public class TutorialManager : MonoBehaviour
         TutorialStep current = steps[currentStepIndex];
         if (current.requiredAction != ActionType.InteractAndInventory) return;
 
-        if (currentSubStepPhase < 2)
-        {
-            currentSubStepPhase = 2;
-            UpdateSubStepStateUI();
-        }
+        currentSubStepPhase = 2;
+        UpdateSubStepStateUI();
     }
 
     private void UpdateSubStepStateUI()
@@ -755,7 +776,6 @@ public class TutorialManager : MonoBehaviour
         hasJumped = false;
         hasCrouched = false;
 
-        // Activar el GameObject del panel solo si NO estamos fuera del límite
         if (tutorialPanel != null)
         {
             tutorialPanel.SetActive(!IsOutsideBoundary);
@@ -915,9 +935,6 @@ public class TutorialManager : MonoBehaviour
 
         DisableAllPanels();
 
-        if (welcomePanelCanvasGroup != null) welcomePanelCanvasGroup.alpha = 1f;
-        if (tutorialPanelCanvasGroup != null) tutorialPanelCanvasGroup.alpha = 1f;
-
         OnTutorialFinished?.Invoke();
     }
 
@@ -947,13 +964,5 @@ public class TutorialManager : MonoBehaviour
     {
         if (playerMovementScript != null) playerMovementScript.enabled = state;
         if (weaponScript != null) weaponScript.enabled = state;
-    }
-
-    [ContextMenu("Reset Tutorial Progress")]
-    public void ResetTutorialProgress()
-    {
-        PlayerPrefs.DeleteKey(TUTORIAL_KEY);
-        PlayerPrefs.Save();
-        Debug.Log("Tutorial reiniciado.");
     }
 }

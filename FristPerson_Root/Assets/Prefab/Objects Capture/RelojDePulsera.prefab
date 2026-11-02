@@ -64,6 +64,10 @@ PrefabInstance:
       propertyPath: m_ConstrainProportionsScale
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: -8391222552659086748, guid: ba24029c6ae272b4f996f12e14c9531d, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: -4683669308469848369, guid: ba24029c6ae272b4f996f12e14c9531d, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -72,14 +76,26 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 06bbaed8d07a8974cbe291d5c3166b43, type: 2}
+    - target: {fileID: -1334586271336323863, guid: ba24029c6ae272b4f996f12e14c9531d, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ba24029c6ae272b4f996f12e14c9531d, type: 3}
       propertyPath: m_Name
       value: RelojDePulsera
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ba24029c6ae272b4f996f12e14c9531d, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 8128739236498392301, guid: ba24029c6ae272b4f996f12e14c9531d, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 06bbaed8d07a8974cbe291d5c3166b43, type: 2}
+    - target: {fileID: 9180744828845444125, guid: ba24029c6ae272b4f996f12e14c9531d, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -312,7 +328,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85f7fa9329d50ad48901a302797dd2ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TutorialTrigger
-  playerTag: Pick Ups
+  playerTag: Player
 --- !u!1 &5668092107131942686 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9180744828845444125, guid: ba24029c6ae272b4f996f12e14c9531d, type: 3}

@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 6455557703688125508}
   - component: {fileID: 4552289101260619843}
   - component: {fileID: 5629586056568863589}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Libro_Mundo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -167,4 +167,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85f7fa9329d50ad48901a302797dd2ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TutorialTrigger
-  playerTag: Pick Ups
+  playerTag: Player

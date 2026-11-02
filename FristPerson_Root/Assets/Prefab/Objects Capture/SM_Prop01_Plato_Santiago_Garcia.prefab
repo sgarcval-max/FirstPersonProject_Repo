@@ -286,7 +286,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85f7fa9329d50ad48901a302797dd2ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TutorialTrigger
-  playerTag: Pick Ups
+  playerTag: Player
 --- !u!1 &1734838948002601634 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 332955489170592941, guid: 80a0afef0df9f9645b5745dec3492d3a, type: 3}
