@@ -318,4 +318,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85f7fa9329d50ad48901a302797dd2ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TutorialTrigger
-  playerTag: Player
+  playerTag: Pick Ups
