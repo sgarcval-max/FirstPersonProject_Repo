@@ -2,8 +2,8 @@ using UnityEngine;
 using UnityEngine.AI;
 
 /// <summary>
-/// Mantiene la animación de aturdimiento activada en bucle todo el tiempo que dura el efecto del disparo,
-/// y regresa a la animación de caminar únicamente cuando finaliza el tiempo de aturdimiento.
+/// Controla las transiciones entre Walk, Idle y Hit.
+/// Detecta de forma precisa la parada en puntos de patrulla para activar Idle sin retardo.
 /// </summary>
 public class EnemyAnimationController : MonoBehaviour
 {
@@ -21,27 +21,37 @@ public class EnemyAnimationController : MonoBehaviour
 
     private void Update()
     {
-        // 1. Si está aturdido, descontar tiempo y mantener activado el estado
+        // 1. Temporizador de aturdimiento
         if (isStunned)
         {
             stunTimer -= Time.deltaTime;
             if (stunTimer <= 0f)
             {
-                // El efecto ha terminado: desactivar aturdimiento y volver a andar
                 isStunned = false;
                 if (animator != null)
                 {
                     animator.SetBool("IsStunned", false);
                 }
             }
-            return;
         }
 
-        // 2. Si no está aturdido, actualizar velocidad normal de navegación
-        if (animator != null && agent != null)
+        // 2. Control de velocidad preciso para Idle y Walk
+        if (animator != null)
         {
-            float velocidadActual = agent.velocity.magnitude;
-            animator.SetFloat("Speed", velocidadActual);
+            float velocidadAnimacion = 0f;
+
+            if (!isStunned && agent != null)
+            {
+                // Solo consideramos que camina si el agente NO está detenido, tiene ruta y supera la velocidad mínima
+                bool estaCaminando = !agent.isStopped && agent.hasPath && agent.velocity.sqrMagnitude > 0.05f;
+
+                if (estaCaminando)
+                {
+                    velocidadAnimacion = agent.velocity.magnitude;
+                }
+            }
+
+            animator.SetFloat("Speed", velocidadAnimacion);
         }
     }
 
@@ -57,10 +67,7 @@ public class EnemyAnimationController : MonoBehaviour
         if (animator != null)
         {
             animator.SetBool("IsStunned", true);
-        }
-        else
-        {
-            Debug.LogError("¡OJO! El componente Animator es NULL en EnemyAnimationController.");
+            animator.SetFloat("Speed", 0f);
         }
     }
 }

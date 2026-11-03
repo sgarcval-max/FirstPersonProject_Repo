@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 5f73d48811f8fab4ab09fdd790bac29f
+guid: 1f5640e32b79ec34484a1afa27c1bb2c
 ModelImporter:
   serializedVersion: 24300
   internalIDToNameTable: []
@@ -89,6 +89,35 @@ ModelImporter:
       maskType: 3
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: NPC_Idle
+      takeName: NPC_Idle
+      internalID: -6486444952750978615
+      firstFrame: 0
+      lastFrame: 40
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
     isReadable: 0
   meshes:
     lODScreenPercentages: []
@@ -143,13 +172,13 @@ ModelImporter:
     serializedVersion: 3
     human: []
     skeleton:
-    - name: NPC_Animations(Clone)
+    - name: NPC_Animations (1)(Clone)
       parentName: 
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: Armature
-      parentName: NPC_Animations(Clone)
+      parentName: NPC_Animations (1)(Clone)
       position: {x: -0, y: 0, z: 0}
       rotation: {x: -0.50000006, y: -0.49999997, z: -0.50000006, w: 0.49999997}
       scale: {x: 100, y: 100, z: 100}
@@ -309,7 +338,7 @@ ModelImporter:
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: NPC
-      parentName: NPC_Animations(Clone)
+      parentName: NPC_Animations (1)(Clone)
       position: {x: -0, y: 0, z: 0}
       rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
       scale: {x: 100, y: 100, z: 100}
