@@ -5,12 +5,8 @@ using UnityEngine.InputSystem;
 
 /// <summary>
 /// Hace que las armas a distancia (la pistola) disparen al pulsar la tecla de atacar. El disparo
-/// es un rayo que sale del centro de la cámara: si da en un guardia, lo aturde. Cada arma solo
-/// dispara una vez y tarda un rato en recargar (WeaponData.rechargeTime); el tiempo de recarga
-/// sigue corriendo aunque sueltes el arma.
-///
-/// Usa la acción "Attack" del mapa "Combate" si existe, y si no, la acción "Throw" que ya tenías
-/// (clic izquierdo, o la tecla que le hayas asignado).
+/// es un rayo que sale del centro de la cámara: si da en un guardia, lo aturde y activa su animación
+/// durante el tiempo exacto que dura el efecto del arma (weapon.stunDuration).
 /// </summary>
 [RequireComponent(typeof(FirstPersonController))]
 [RequireComponent(typeof(PlayerWeaponInventory))]
@@ -19,19 +15,17 @@ public class PlayerWeaponFire : MonoBehaviour
     [Header("Disparo")]
     [Tooltip("La cámara del jugador. Si se deja vacío, usa la cámara principal.")]
     [SerializeField] private Transform cameraTransform;
-    [Tooltip("Opcional: de dónde sale el trazador visual del disparo (por ejemplo el HandPoint). Si se deja vacío, sale de la derecha de la cámara.")]
+    [Tooltip("Opcional: de dónde sale el trazador visual del disparo.")]
     [SerializeField] private Transform muzzlePoint;
 
     [Header("Trazador visual (provisional)")]
     [SerializeField] private Color tracerColor = new Color(1f, 0.9f, 0.4f, 1f);
     [SerializeField] private float tracerDuration = 0.06f;
-    [Tooltip("Opcional: el material del trazador. Si se deja vacío, copia el material del arma que llevas, que seguro funciona en la build.")]
+    [Tooltip("Opcional: el material del trazador.")]
     [SerializeField] private Material tracerMaterial;
 
     [Header("Eventos")]
-    [Tooltip("Se dispara cada vez que disparas (para sonidos o efectos futuros).")]
     [SerializeField] public UnityEvent OnFired;
-    [Tooltip("Se dispara si intentas disparar mientras el arma aún está recargando (por ejemplo, para el sonido de 'clic').")]
     [SerializeField] public UnityEvent OnTriedWhileRecharging;
 
     private FirstPersonController playerController;
@@ -40,7 +34,6 @@ public class PlayerWeaponFire : MonoBehaviour
     private bool searchedForAction;
     private bool wasGameplayActive;
 
-    // Momento (Time.time) en el que cada arma vuelve a estar lista.
     private readonly Dictionary<WeaponData, float> readyAt = new Dictionary<WeaponData, float>();
 
     private void Awake()
@@ -56,18 +49,14 @@ public class PlayerWeaponFire : MonoBehaviour
 
     private void Update()
     {
-        // En pausa, atrapado o escondido, los controles están desactivados: no se dispara.
         if (!playerController.enabled)
         {
             wasGameplayActive = false;
             return;
         }
 
-        // Con un panel abierto (inventario), el clic es para los botones, no para disparar.
         if (playerController.UiFocused) return;
 
-        // El primer fotograma tras recuperar el control lo ignoramos: así el clic que pulsa el
-        // botón Reanudar del menú no se convierte en un disparo.
         if (!wasGameplayActive)
         {
             wasGameplayActive = true;
@@ -85,7 +74,7 @@ public class PlayerWeaponFire : MonoBehaviour
 
             if (attackAction == null)
             {
-                Debug.LogWarning("PlayerWeaponFire: no existe ninguna acción 'Attack' ni 'Throw' en el mapa 'Combate' de PlayerControls.");
+                Debug.LogWarning("PlayerWeaponFire: no existe ninguna acción 'Attack' ni 'Throw' en el mapa 'Combate'.");
                 return;
             }
         }
@@ -96,7 +85,6 @@ public class PlayerWeaponFire : MonoBehaviour
         }
     }
 
-    /// <summary>Segundos que le faltan al arma para poder volver a usarse (0 = lista).</summary>
     public float GetRemainingCooldown(WeaponData weapon)
     {
         float ready;
@@ -135,11 +123,19 @@ public class PlayerWeaponFire : MonoBehaviour
         {
             endPoint = hit.point;
 
+            // 1. Lógica existente de aturdimiento (HumanStun)
             HumanStun target = hit.collider.GetComponentInParent<HumanStun>();
             if (target != null)
             {
                 target.Stun(weapon.stunDuration);
                 Debug.Log("[" + weapon.GetDisplayName() + "] Le has dado a " + target.name + ".");
+            }
+
+            // 2. Transmisión de la duración exacta del aturdimiento al controlador de animaciones
+            EnemyAnimationController anim = hit.collider.GetComponentInParent<EnemyAnimationController>();
+            if (anim != null)
+            {
+                anim.RecibirDisparo(weapon.stunDuration);
             }
         }
 
@@ -148,13 +144,11 @@ public class PlayerWeaponFire : MonoBehaviour
             : origin + cameraTransform.right * 0.25f - cameraTransform.up * 0.2f + direction * 0.5f;
         SpawnTracer(tracerStart, endPoint, weapon);
 
-        // Un disparo suena: los guardias cercanos que no estén aturdidos irán a investigar.
         if (weapon.shotNoiseRadius > 0f)
         {
             NoiseSystem.Emit(transform.position, weapon.shotNoiseRadius);
         }
 
-        // --- SONIDO DE DISPARO CENTRALIZADO ---
         if (UIAudioManager.Instance != null)
         {
             UIAudioManager.Instance.PlayWeaponShoot();
