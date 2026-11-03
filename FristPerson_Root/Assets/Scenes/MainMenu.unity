@@ -1519,7 +1519,17 @@ MonoBehaviour:
   inventoryOpenClip: {fileID: 8300000, guid: 2d7c05556d788be469bc6d0a07059a85, type: 3}
   inventoryCloseClip: {fileID: 8300000, guid: 6573e9c90192f6b4a982d83d28a9f417, type: 3}
   keyRebindStartClip: {fileID: 0}
-  countdownWarningClip: {fileID: 8300000, guid: 3d01813c74b9c9249a186735ac89031f, type: 3}
+  countdownClips:
+  - {fileID: 8300000, guid: 5edf046e455f4664daf1667086ba8718, type: 3}
+  - {fileID: 8300000, guid: e7fc11aab0db9894093561d6351f3cf8, type: 3}
+  - {fileID: 8300000, guid: e7fc11aab0db9894093561d6351f3cf8, type: 3}
+  - {fileID: 8300000, guid: e7fc11aab0db9894093561d6351f3cf8, type: 3}
+  - {fileID: 8300000, guid: e7fc11aab0db9894093561d6351f3cf8, type: 3}
+  - {fileID: 8300000, guid: e7fc11aab0db9894093561d6351f3cf8, type: 3}
+  - {fileID: 8300000, guid: e7fc11aab0db9894093561d6351f3cf8, type: 3}
+  - {fileID: 8300000, guid: e7fc11aab0db9894093561d6351f3cf8, type: 3}
+  - {fileID: 8300000, guid: e7fc11aab0db9894093561d6351f3cf8, type: 3}
+  - {fileID: 8300000, guid: e7fc11aab0db9894093561d6351f3cf8, type: 3}
   matchEndClip: {fileID: 8300000, guid: d38ffa13a37646545a6e1fdcb7617da1, type: 3}
   footstepClips:
   - {fileID: 8300000, guid: f6c1ff7631eeb50498a3699201bcc501, type: 3}

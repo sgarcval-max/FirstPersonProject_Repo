@@ -32,14 +32,16 @@ public class MatchManager : MonoBehaviour
 
     private FirstPersonController playerController;
     private int lastDisplayedSeconds = -1;
-    private bool hasPlayedWarningSound = false;
+    private int lastAudioWarningSecond = -1;
+    private bool hasStartedMusicFade = false;
 
     private void Awake()
     {
         Instance = this;
         IsMatchOver = false;
         TimeRemaining = matchDuration;
-        hasPlayedWarningSound = false;
+        hasStartedMusicFade = false;
+        lastAudioWarningSecond = -1;
     }
 
     private void OnEnable()
@@ -73,21 +75,29 @@ public class MatchManager : MonoBehaviour
         TimeRemaining = Mathf.Max(0f, TimeRemaining - Time.deltaTime);
         RefreshText(false);
 
-        // COMPROBACIÓN DEL EFECTO DE SONIDO Y FADE OUT DE MÚSICA (10 SEGUNDOS)
-        if (!hasPlayedWarningSound && TimeRemaining <= warningSoundThreshold && TimeRemaining > 0f)
+        // REPRODUCCIÓN DEL SFX ESPECÍFICO DE CADA SEGUNDO (10 a 1)
+        if (TimeRemaining <= warningSoundThreshold && TimeRemaining > 0f)
         {
-            hasPlayedWarningSound = true;
+            int currentSecond = Mathf.CeilToInt(TimeRemaining);
 
-            // 1. Reproducir sonido de alerta en la UI
-            if (UIAudioManager.Instance != null)
+            if (currentSecond != lastAudioWarningSecond)
             {
-                UIAudioManager.Instance.PlayCountdownWarning(true);
+                lastAudioWarningSecond = currentSecond;
+
+                if (UIAudioManager.Instance != null)
+                {
+                    UIAudioManager.Instance.PlayCountdownWarning(currentSecond);
+                }
             }
 
-            // 2. Iniciar Fade Out de la música durante el tiempo restante
-            if (MusicManager.Instance != null)
+            if (!hasStartedMusicFade)
             {
-                MusicManager.Instance.FadeOut(TimeRemaining);
+                hasStartedMusicFade = true;
+
+                if (MusicManager.Instance != null)
+                {
+                    MusicManager.Instance.FadeOut(TimeRemaining);
+                }
             }
         }
 
@@ -101,13 +111,11 @@ public class MatchManager : MonoBehaviour
     {
         IsMatchOver = true;
 
-        // Detener el sonido de la cuenta atrás al acabar la partida
         if (UIAudioManager.Instance != null)
         {
             UIAudioManager.Instance.StopCountdownWarning();
         }
 
-        // Asegurar que la música quede completamente detenida
         if (MusicManager.Instance != null)
         {
             MusicManager.Instance.StopMusic();
@@ -152,7 +160,6 @@ public class MatchManager : MonoBehaviour
         if (!force && seconds == lastDisplayedSeconds) return;
         lastDisplayedSeconds = seconds;
 
-        // Muestra únicamente el tiempo en formato MM:SS
         timerText.text = (seconds / 60) + ":" + (seconds % 60).ToString("00");
         timerText.color = TimeRemaining <= lowTimeThreshold ? lowTimeColor : normalColor;
     }

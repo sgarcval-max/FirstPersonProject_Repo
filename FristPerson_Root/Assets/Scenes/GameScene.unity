@@ -8390,7 +8390,7 @@ MonoBehaviour:
   inventoryOpenClip: {fileID: 0}
   inventoryCloseClip: {fileID: 0}
   keyRebindStartClip: {fileID: 0}
-  countdownWarningClip: {fileID: 0}
+  countdownClips: []
   matchEndClip: {fileID: 0}
   footstepClips: []
   jumpClip: {fileID: 0}

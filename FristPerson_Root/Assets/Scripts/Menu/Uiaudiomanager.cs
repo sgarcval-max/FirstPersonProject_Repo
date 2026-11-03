@@ -30,8 +30,9 @@ public class UIAudioManager : MonoBehaviour
     [SerializeField] private AudioClip keyRebindStartClip;
 
     [Header("Cuenta Atrás y Fin de Partida")]
-    [Tooltip("Efecto de sonido cuando quedan 10 segundos en la partida.")]
-    [SerializeField] private AudioClip countdownWarningClip;
+    [Tooltip("Lista de sonidos por segundo (Elemento 0 = Queda 1 seg, Elemento 1 = Quedan 2 segs... Elemento 9 = Quedan 10 segs).")]
+    [SerializeField] private List<AudioClip> countdownClips = new List<AudioClip>();
+
     [Tooltip("Efecto de sonido al terminar la partida (panel de resultados).")]
     [SerializeField] private AudioClip matchEndClip;
 
@@ -112,24 +113,31 @@ public class UIAudioManager : MonoBehaviour
     }
 
     // --- MÉTODOS DE CUENTA ATRÁS Y FIN DE PARTIDA ---
-    public void PlayCountdownWarning(bool loop = true)
+    /// <summary>
+    /// Reproduce el efecto asignado para el segundo exacto recibido.
+    /// </summary>
+    public void PlayCountdownWarning(int second)
     {
-        if (uiAudioSource == null || countdownWarningClip == null) return;
+        if (countdownClips == null || countdownClips.Count == 0) return;
 
-        if (uiAudioSource.isPlaying && uiAudioSource.clip == countdownWarningClip) return;
+        // Convertir el segundo actual (1 a 10) al índice de la lista (0 a 9)
+        int index = second - 1;
 
-        uiAudioSource.clip = countdownWarningClip;
-        uiAudioSource.loop = loop;
-        uiAudioSource.Play();
+        if (index >= 0 && index < countdownClips.Count)
+        {
+            AudioClip clipForSecond = countdownClips[index];
+            if (clipForSecond != null)
+            {
+                PlayClip(clipForSecond);
+            }
+        }
     }
 
     public void StopCountdownWarning()
     {
-        if (uiAudioSource != null && uiAudioSource.clip == countdownWarningClip)
+        if (uiAudioSource != null)
         {
             uiAudioSource.Stop();
-            uiAudioSource.clip = null;
-            uiAudioSource.loop = false;
         }
     }
 
@@ -148,17 +156,11 @@ public class UIAudioManager : MonoBehaviour
         PlayClip(clip);
     }
 
-    /// <summary>
-    /// Reproduce el efecto de sonido de despegue/salto.
-    /// </summary>
     public void PlayJump()
     {
         PlayClip(jumpClip);
     }
 
-    /// <summary>
-    /// Reproduce el efecto de sonido al tocar suelo tras caer o saltar.
-    /// </summary>
     public void PlayLand()
     {
         PlayClip(landClip);
