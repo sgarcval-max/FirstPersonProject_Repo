@@ -2,34 +2,34 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Resalta un objeto cuando el jugador lo está mirando y puede interactuar con él. No hace falta
-/// añadirlo a mano: PlayerInteractionController lo añade solo a cualquier objeto interactuable la
-/// primera vez que lo mira. Si quieres otro color, añádelo tú al prefab y cámbialo en el Inspector.
-///
-/// El resaltado usa DOS efectos a la vez:
-///  - Un tinte del color del material hacia el color de resaltado. Esto funciona siempre, también en
-///    las builds, porque el color es una propiedad que todos los shaders tienen disponible.
-///  - Un brillo (emisión). Se ve en el editor, pero en las builds Unity puede descartar esa variante
-///    del shader si ningún material la usa de antemano, así que no podemos depender de él.
+/// Resalta un objeto cuando el jugador lo está mirando y puede interactuar con él.
+/// Aplica un tinte de color y un brillo HDR (Emisión) compatible tanto en Editor
+/// como en Builds finales (URP y Built-in Render Pipeline).
 /// </summary>
 public class InteractableHighlight : MonoBehaviour
 {
+    [Header("Configuración de Resaltado")]
     [SerializeField] private Color highlightColor = new Color(1f, 0.85f, 0.2f, 1f);
 
     [Tooltip("Cuánto se tiñe el objeto del color de resaltado (0 = nada, 1 = por completo).")]
     [Range(0f, 1f)]
     [SerializeField] private float tintAmount = 0.55f;
 
-    [Tooltip("Intensidad del brillo (emisión) añadido al tinte.")]
-    [SerializeField] private float emissionIntensity = 1.2f;
+    [Tooltip("Intensidad del brillo (emisión). Potenciado para renderizado en espacio Lineal/HDR en Builds.")]
+    [SerializeField] private float emissionIntensity = 2.5f;
 
     private class MaterialState
     {
         public Material material;
-        public string colorProperty;      // "_BaseColor" (URP), "_Color" (clásico) o null si no tiene color
-        public Color originalColor;
-        public bool hasEmission;
-        public Color originalEmission;
+        public bool hasBaseColor;
+        public string baseColorProp;
+        public Color originalBaseColor;
+
+        public bool hasLegacyColor;
+        public Color originalLegacyColor;
+
+        public bool hasEmissionProp;
+        public Color originalEmissionColor;
         public bool hadEmissionKeyword;
     }
 
@@ -46,32 +46,55 @@ public class InteractableHighlight : MonoBehaviour
 
             if (highlighted)
             {
-                if (state.colorProperty != null)
+                // 1. Aplicar tinte al color base (Soporta URP _BaseColor y Standard _Color)
+                if (state.hasBaseColor)
                 {
-                    state.material.SetColor(state.colorProperty,
-                        Color.Lerp(state.originalColor, highlightColor, tintAmount));
+                    Color tintedColor = Color.Lerp(state.originalBaseColor, highlightColor, tintAmount);
+                    state.material.SetColor(state.baseColorProp, tintedColor);
                 }
 
-                if (state.hasEmission)
+                if (state.hasLegacyColor && state.baseColorProp != "_Color")
+                {
+                    Color tintedLegacy = Color.Lerp(state.originalLegacyColor, highlightColor, tintAmount);
+                    state.material.SetColor("_Color", tintedLegacy);
+                }
+
+                // 2. Activar y forzar la Emisión HDR para la Build
+                if (state.hasEmissionProp)
                 {
                     state.material.EnableKeyword("_EMISSION");
-                    state.material.SetColor("_EmissionColor", highlightColor * emissionIntensity);
+
+                    // Forzar a Unity a actualizar la iluminación emisiva en tiempo de ejecución
+                    state.material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
+
+                    Color finalEmission = highlightColor * emissionIntensity;
+                    state.material.SetColor("_EmissionColor", finalEmission);
                 }
             }
             else
             {
-                if (state.colorProperty != null)
+                // Restaurar color base original
+                if (state.hasBaseColor)
                 {
-                    state.material.SetColor(state.colorProperty, state.originalColor);
+                    state.material.SetColor(state.baseColorProp, state.originalBaseColor);
                 }
 
-                if (state.hasEmission)
+                if (state.hasLegacyColor && state.baseColorProp != "_Color")
                 {
-                    state.material.SetColor("_EmissionColor", state.originalEmission);
+                    state.material.SetColor("_Color", state.originalLegacyColor);
+                }
+
+                // Restaurar emisión original
+                if (state.hasEmissionProp)
+                {
+                    state.material.SetColor("_EmissionColor", state.originalEmissionColor);
+
                     if (!state.hadEmissionKeyword)
                     {
                         state.material.DisableKeyword("_EMISSION");
                     }
+
+                    state.material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.EmissiveIsBlack;
                 }
             }
         }
@@ -84,30 +107,44 @@ public class InteractableHighlight : MonoBehaviour
 
         foreach (Renderer rend in GetComponentsInChildren<Renderer>())
         {
-            // rend.materials crea una copia propia de los materiales de este objeto,
-            // así resaltarlo no afecta a otros objetos que compartan el mismo material.
+            if (rend == null) continue;
+
+            // rend.materials crea una copia de instancia del material para este objeto único
             foreach (Material mat in rend.materials)
             {
-                MaterialState state = new MaterialState();
-                state.material = mat;
+                if (mat == null) continue;
 
-                if (mat.HasProperty("_BaseColor")) state.colorProperty = "_BaseColor";
-                else if (mat.HasProperty("_Color")) state.colorProperty = "_Color";
+                MaterialState state = new MaterialState { material = mat };
 
-                if (state.colorProperty != null)
+                // Detección de propiedades de color base (URP vs Standard)
+                if (mat.HasProperty("_BaseColor"))
                 {
-                    state.originalColor = mat.GetColor(state.colorProperty);
+                    state.hasBaseColor = true;
+                    state.baseColorProp = "_BaseColor";
+                    state.originalBaseColor = mat.GetColor("_BaseColor");
+                }
+                else if (mat.HasProperty("_Color"))
+                {
+                    state.hasBaseColor = true;
+                    state.baseColorProp = "_Color";
+                    state.originalBaseColor = mat.GetColor("_Color");
                 }
 
-                state.hasEmission = mat.HasProperty("_EmissionColor");
-                if (state.hasEmission)
+                if (mat.HasProperty("_Color"))
                 {
-                    state.originalEmission = mat.GetColor("_EmissionColor");
+                    state.hasLegacyColor = true;
+                    state.originalLegacyColor = mat.GetColor("_Color");
+                }
+
+                // Detección de propiedad de emisión
+                if (mat.HasProperty("_EmissionColor"))
+                {
+                    state.hasEmissionProp = true;
+                    state.originalEmissionColor = mat.GetColor("_EmissionColor");
                     state.hadEmissionKeyword = mat.IsKeywordEnabled("_EMISSION");
                 }
 
-                // Si el material no tiene ni color ni emisión, no hay nada que resaltar en él.
-                if (state.colorProperty == null && !state.hasEmission) continue;
+                if (!state.hasBaseColor && !state.hasLegacyColor && !state.hasEmissionProp) continue;
 
                 states.Add(state);
             }
