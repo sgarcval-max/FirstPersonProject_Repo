@@ -1,14 +1,10 @@
+using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Escondite en el que se entra con la tecla de interactuar (por ejemplo un armario). Al entrar,
-/// el jugador se coloca en el punto de escondite, mirando hacia fuera, y no puede moverse. Pulsando
-/// Interactuar otra vez sale y vuelve al sitio donde estaba.
-///
-/// Cuánto te protege se configura con dos valores:
-///   Sight Multiplier: 0 = nadie te ve; 0.3 = te ven solo desde muy cerca; 1 = no te protege.
-///   Noise Multiplier: 0 = nadie te oye; 1 = tu ruido suena con normalidad.
+/// Escondite interactivo con desplazamiento y rotación suave de entrada/salida.
 /// </summary>
 public class HidingSpot : MonoBehaviour, IInteractable
 {
@@ -16,13 +12,17 @@ public class HidingSpot : MonoBehaviour, IInteractable
     [Tooltip("Dónde se coloca el jugador al entrar (a la altura del suelo, dentro del escondite). Su eje azul (Z) debe apuntar hacia donde mirará, normalmente hacia fuera por la puerta.")]
     [SerializeField] private Transform hidePoint;
 
+    [Header("Transición de Movimiento")]
+    [Tooltip("Duración en segundos del movimiento al entrar y salir del escondite.")]
+    [SerializeField] private float transitionDuration = 0.45f;
+
     [Header("Cuánto te protege")]
     [Range(0f, 1f)]
     [SerializeField] private float sightMultiplier = 0f;
     [Range(0f, 1f)]
     [SerializeField] private float noiseMultiplier = 0f;
 
-    /// <summary>True mientras el jugador está dentro.</summary>
+    /// <summary>True mientras el jugador está dentro o entrando al escondite.</summary>
     public bool IsOccupied { get; private set; }
 
     private GameObject player;
@@ -34,6 +34,8 @@ public class HidingSpot : MonoBehaviour, IInteractable
     private Vector3 returnPosition;
     private Quaternion returnRotation;
     private int enterFrame;
+    private bool isTransitioning;
+    private Coroutine currentTransition;
 
     public string GetPrompt()
     {
@@ -48,7 +50,7 @@ public class HidingSpot : MonoBehaviour, IInteractable
 
     public void Interact(GameObject playerObject)
     {
-        if (IsOccupied) return;
+        if (IsOccupied || isTransitioning) return;
         Enter(playerObject);
     }
 
@@ -74,57 +76,60 @@ public class HidingSpot : MonoBehaviour, IInteractable
         returnPosition = player.transform.position;
         returnRotation = player.transform.rotation;
 
-        // Bloqueamos los controles y colocamos al jugador dentro, mirando hacia fuera.
-        controller.enabled = false;
-        Teleport(hidePoint.position, Quaternion.Euler(0f, hidePoint.eulerAngles.y, 0f));
-
-        if (Camera.main != null)
-        {
-            Camera.main.transform.localRotation = Quaternion.identity;
-        }
-
-        concealment.SetSource(this, sightMultiplier, noiseMultiplier);
-
         IsOccupied = true;
         enterFrame = Time.frameCount;
+
+        // Bloqueamos los controles del jugador inmediatamente
+        controller.enabled = false;
+        concealment.SetSource(this, sightMultiplier, noiseMultiplier);
 
         if (UIAudioManager.Instance != null)
         {
             UIAudioManager.Instance.PlayPanelOpen();
         }
+
+        // Iniciar desplazamiento suave hacia el interior
+        Quaternion targetRotation = Quaternion.Euler(0f, hidePoint.eulerAngles.y, 0f);
+
+        if (currentTransition != null) StopCoroutine(currentTransition);
+        currentTransition = StartCoroutine(MovePlayerRoutine(hidePoint.position, targetRotation, true));
     }
 
     private void Update()
     {
         if (!IsOccupied) return;
 
-        // Con la partida terminada, el jugador se queda donde está: se muestra la pantalla de resultados.
+        // Con la partida terminada, el jugador se queda donde está
         if (MatchManager.IsMatchOver) return;
 
-        // Si te atrapan estando dentro, soltamos el escondite sin mover al jugador:
-        // PlayerCapture se encarga de todo lo que viene después.
+        // Si te atrapan estando dentro o entrando
         if (PlayerCapture.IsCaught)
         {
+            if (currentTransition != null) StopCoroutine(currentTransition);
+            isTransitioning = false;
             concealment.RemoveSource(this);
             IsOccupied = false;
             return;
         }
 
-        // En pausa no hacemos nada.
+        // En pausa no procesamos interacción
         if (PauseManager.Instance != null && PauseManager.Instance.IsPaused) return;
 
-        // Al reanudar tras una pausa, PauseManager vuelve a activar los controles: los bloqueamos otra vez.
-        if (controller.enabled)
+        // Mantener deshabilitados los controles mientras se está escondido
+        if (controller != null && controller.enabled)
         {
             controller.enabled = false;
         }
+
+        // Si se está realizando el movimiento de entrada o salida, ignoramos pulsaciones
+        if (isTransitioning) return;
 
         if (interactAction == null)
         {
             interactAction = InputManager.Controls.asset.FindAction("Combate/Interact");
         }
 
-        // No contamos el mismo pulso que nos hizo entrar (enterFrame) para que no salgas al instante.
+        // Evita salir en el mismo frame en el que entraste
         if (interactAction != null && Time.frameCount > enterFrame && interactAction.WasPressedThisFrame())
         {
             Exit();
@@ -133,24 +138,69 @@ public class HidingSpot : MonoBehaviour, IInteractable
 
     private void Exit()
     {
-        Teleport(returnPosition, returnRotation);
-
-        concealment.RemoveSource(this);
-        controller.enabled = true;
-        IsOccupied = false;
+        if (isTransitioning) return;
 
         if (UIAudioManager.Instance != null)
         {
             UIAudioManager.Instance.PlayPanelClose();
         }
+
+        if (currentTransition != null) StopCoroutine(currentTransition);
+        currentTransition = StartCoroutine(MovePlayerRoutine(returnPosition, returnRotation, false, () =>
+        {
+            concealment.RemoveSource(this);
+            controller.enabled = true;
+            IsOccupied = false;
+        }));
     }
 
-    // El CharacterController hay que apagarlo un instante para poder teletransportar al jugador.
-    private void Teleport(Vector3 position, Quaternion rotation)
+    /// <summary>
+    /// Desplaza y rota suavemente al jugador (y resetea la cámara si entra al escondite).
+    /// </summary>
+    private IEnumerator MovePlayerRoutine(Vector3 targetPos, Quaternion targetRot, bool isEntering, Action onComplete = null)
     {
+        isTransitioning = true;
         characterController.enabled = false;
-        player.transform.SetPositionAndRotation(position, rotation);
+
+        Vector3 startPos = player.transform.position;
+        Quaternion startRot = player.transform.rotation;
+
+        Transform mainCam = Camera.main != null ? Camera.main.transform : null;
+        Quaternion startCamRot = mainCam != null ? mainCam.localRotation : Quaternion.identity;
+
+        float elapsedTime = 0f;
+
+        while (elapsedTime < transitionDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsedTime / transitionDuration);
+
+            // Curva de aceleración/desaceleración suave
+            float smoothT = Mathf.SmoothStep(0f, 1f, t);
+
+            player.transform.position = Vector3.Lerp(startPos, targetPos, smoothT);
+            player.transform.rotation = Quaternion.Slerp(startRot, targetRot, smoothT);
+
+            // Al entrar, centramos suavemente la vista de la cámara hacia el frente del escondite
+            if (isEntering && mainCam != null)
+            {
+                mainCam.localRotation = Quaternion.Slerp(startCamRot, Quaternion.identity, smoothT);
+            }
+
+            yield return null;
+        }
+
+        player.transform.SetPositionAndRotation(targetPos, targetRot);
+
+        if (isEntering && mainCam != null)
+        {
+            mainCam.localRotation = Quaternion.identity;
+        }
+
         characterController.enabled = true;
+        isTransitioning = false;
+
+        onComplete?.Invoke();
     }
 
     private void OnDestroy()

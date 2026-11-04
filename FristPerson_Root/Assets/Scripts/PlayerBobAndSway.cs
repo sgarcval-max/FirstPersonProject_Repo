@@ -3,7 +3,7 @@ using UnityEngine;
 /// <summary>
 /// Control de bamboleo (Bobbing), balanceo (Sway) e impactos de salto/caída.
 /// Adapta automáticamente el movimiento si el jugador camina, corre, va agachado, apunta o salta.
-/// Corregido el temblor al agacharse respetando la altura dinámica de la cámara.
+/// Cancela suavemente las animaciones si los controles del jugador se desactivan (ej. al esconderse).
 /// </summary>
 public class PlayerBobAndSway : MonoBehaviour
 {
@@ -53,6 +53,7 @@ public class PlayerBobAndSway : MonoBehaviour
     [SerializeField] private float aimingWeaponBobMultiplier = 0.15f;
     [SerializeField] private float aimingSwayMultiplier = 0.15f;
 
+    private FirstPersonController firstPersonController;
     private PlayerAim playerAim;
     private PlayerCrouch playerCrouch;
 
@@ -64,7 +65,6 @@ public class PlayerBobAndSway : MonoBehaviour
 
     private Vector3 currentCamImpactOffset = Vector3.zero;
     private Vector3 currentWeaponImpactOffset = Vector3.zero;
-
     private Vector3 currentCamBobOffset = Vector3.zero;
 
     public void SetAiming(bool aiming)
@@ -74,6 +74,9 @@ public class PlayerBobAndSway : MonoBehaviour
 
     private void Start()
     {
+        firstPersonController = GetComponent<FirstPersonController>();
+        if (firstPersonController == null) firstPersonController = GetComponentInParent<FirstPersonController>();
+
         playerAim = GetComponent<PlayerAim>();
         if (playerAim == null) playerAim = GetComponentInParent<PlayerAim>();
 
@@ -89,14 +92,17 @@ public class PlayerBobAndSway : MonoBehaviour
 
     private void Update()
     {
-        bool isGrounded = characterController != null && characterController.isGrounded;
-        float speed = GetPlayerSpeed();
+        // Si los controles del jugador están desactivados (ej. escondido o en menú), reseteamos bamboleo
+        bool canMove = firstPersonController == null || firstPersonController.enabled;
+
+        bool isGrounded = canMove && characterController != null && characterController.enabled && characterController.isGrounded;
+        float speed = canMove ? GetPlayerSpeed() : 0f;
         bool isMoving = speed > 0.1f && isGrounded;
-        bool isCrouching = playerCrouch != null && playerCrouch.IsCrouching;
+        bool isCrouching = canMove && playerCrouch != null && playerCrouch.IsCrouching;
         bool isSprinting = speed > 5.5f && !isCrouching;
 
-        // 1. Detectar salto y aterrizaje (se omite agachado para evitar micro-impactos continuos)
-        if (!isCrouching)
+        // 1. Detectar salto y aterrizaje
+        if (!isCrouching && canMove)
         {
             HandleJumpAndLand(isGrounded);
         }
@@ -121,7 +127,7 @@ public class PlayerBobAndSway : MonoBehaviour
         Vector3 weaponSwayOffset = Vector3.zero;
 
         // 3. Balanceo con el ratón (Sway)
-        if (enableWeaponSway && weaponHolder != null)
+        if (enableWeaponSway && weaponHolder != null && canMove)
         {
             weaponSwayOffset = CalculateWeaponSwayOffset();
         }
@@ -165,7 +171,7 @@ public class PlayerBobAndSway : MonoBehaviour
 
     private void HandleJumpAndLand(bool isGrounded)
     {
-        if (!enableJumpLandImpact) return;
+        if (!enableJumpLandImpact || characterController == null || !characterController.enabled) return;
 
         // Despegue (Salto)
         if (wasGrounded && !isGrounded && characterController.velocity.y > 0f)
@@ -183,7 +189,7 @@ public class PlayerBobAndSway : MonoBehaviour
 
     private float GetPlayerSpeed()
     {
-        if (characterController == null) return 0f;
+        if (characterController == null || !characterController.enabled) return 0f;
         Vector3 horizontalVelocity = new Vector3(characterController.velocity.x, 0f, characterController.velocity.z);
         return horizontalVelocity.magnitude;
     }
