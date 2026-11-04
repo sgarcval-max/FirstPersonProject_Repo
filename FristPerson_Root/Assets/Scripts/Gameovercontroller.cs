@@ -68,7 +68,7 @@ public class GameOverController : MonoBehaviour
     {
         bool english = GameLanguage.IsEnglish;
 
-        if (titleText != null) titleText.text = "GAME OVER";
+        if (titleText != null) titleText.text = "TE HAN PILLADO";
         if (restartButtonText != null) restartButtonText.text = english ? "Restart" : "Reiniciar";
         if (menuButtonText != null) menuButtonText.text = english ? "Main menu" : "Menú principal";
     }

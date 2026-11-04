@@ -8279,6 +8279,9 @@ MonoBehaviour:
   - key: MiniInfo2TExt_teclas
     spanish: COMBATE
     english: COMBAT
+  - key: Text_GameOver
+    spanish: TE HAN PILLADO
+    english: YOU'VE BEEN CAUGHT
 --- !u!4 &365166409
 Transform:
   m_ObjectHideFlags: 0
@@ -11487,6 +11490,7 @@ GameObject:
   - component: {fileID: 465657078}
   - component: {fileID: 465657080}
   - component: {fileID: 465657079}
+  - component: {fileID: 465657081}
   m_Layer: 5
   m_Name: GameOverTitulo
   m_TagString: Untagged
@@ -11533,7 +11537,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: GAMEOVER
+  m_text: TE HAN PILLADO
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -11599,7 +11603,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: -103.480606, y: 0, z: -113.64065, w: 0}
+  m_margin: {x: -234.194, y: 0, z: -240.7344, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -11613,6 +11617,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 465657077}
   m_CullTransparentMesh: 1
+--- !u!114 &465657081
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 465657077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16bd0ed8315787441ad46827488cf5ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  key: Text_GameOver
 --- !u!64 &492045228
 MeshCollider:
   m_ObjectHideFlags: 0
