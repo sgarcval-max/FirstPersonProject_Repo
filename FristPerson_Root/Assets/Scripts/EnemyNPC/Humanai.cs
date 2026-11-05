@@ -7,10 +7,10 @@ using UnityEngine.Events;
 /// tiene (HumanPatrol, HumanVision y HumanHearing).
 ///
 /// Estados:
-///  - Patrol: patrulla su ruta (lo hace HumanPatrol).
-///  - Investigate: ha oído un ruido; va hasta allí, mira alrededor y vuelve a patrullar.
-///  - Catch: su barra de detección ha llegado al máximo. Se para, se gira hacia el jugador y lo
-///    atrapa (PlayerCapture se encarga del Game Over).
+///   - Patrol: patrulla su ruta (lo hace HumanPatrol).
+///   - Investigate: ha oído un ruido; va hasta allí, mira alrededor y vuelve a patrullar.
+///   - Catch: su barra de detección ha llegado al máximo. Se para, se gira hacia el jugador y lo
+///     atrapa (PlayerCapture se encarga del Game Over).
 ///
 /// Durante el tutorial (TutorialManager.IsPlayerProtected = true), el enemigo es forzado a mantenerse
 /// en patrulla continua ignorando cualquier evento.
@@ -26,6 +26,8 @@ public class HumanAI : MonoBehaviour
     [SerializeField] private float lookAroundTime = 3f;
     [Tooltip("Lo rápido que gira sobre sí mismo al mirar alrededor (grados por segundo).")]
     [SerializeField] private float lookAroundTurnSpeed = 60f;
+    [Tooltip("Tiempo máximo en segundos que el guardia intentará caminar hacia el ruido antes de rendirse si la ruta está bloqueada por obstáculos.")]
+    [SerializeField] private float maxInvestigateWalkTime = 6f;
 
     [Header("Atrapar")]
     [Tooltip("Lo rápido que se da la vuelta hacia el jugador al atraparlo.")]
@@ -43,6 +45,7 @@ public class HumanAI : MonoBehaviour
     private HumanHearing hearing;
 
     private float stateTimer;
+    private float investigateWalkTimer;
     private bool arrived;
     private Vector3 startPosition;
     private Quaternion startRotation;
@@ -156,21 +159,12 @@ public class HumanAI : MonoBehaviour
         if (vision != null) vision.ResetSuspicion();
         if (hearing != null) hearing.HasHeardNoise = false;
 
-        if (agent.isOnNavMesh)
-        {
-            agent.isStopped = false;
-        }
-
         patrol.enabled = false;
         EnterPatrol();
     }
 
     public void ResumePatrol()
     {
-        if (agent.isOnNavMesh)
-        {
-            agent.isStopped = false;
-        }
         EnterPatrol();
     }
 
@@ -182,7 +176,18 @@ public class HumanAI : MonoBehaviour
     private void EnterPatrol()
     {
         SetState(State.Patrol);
-        patrol.enabled = true;
+
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.ResetPath(); // Borra cualquier punto o ruta remanente del ruido anterior
+            agent.isStopped = false;
+        }
+
+        if (patrol != null)
+        {
+            patrol.enabled = false;
+            patrol.enabled = true;
+        }
     }
 
     private void EnterInvestigate(Vector3 noisePosition)
@@ -190,13 +195,22 @@ public class HumanAI : MonoBehaviour
         if (TutorialManager.IsPlayerProtected) return;
 
         SetState(State.Investigate);
-        patrol.enabled = false;
 
-        agent.speed = investigateSpeed;
-        agent.isStopped = false;
-        agent.SetDestination(SnapToNavMesh(noisePosition));
+        if (patrol != null)
+        {
+            patrol.enabled = false;
+        }
+
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.ResetPath();
+            agent.speed = investigateSpeed;
+            agent.isStopped = false;
+            agent.SetDestination(SnapToNavMesh(noisePosition));
+        }
 
         arrived = false;
+        investigateWalkTimer = 0f;
     }
 
     private void BeginCatch()
@@ -204,8 +218,16 @@ public class HumanAI : MonoBehaviour
         if (TutorialManager.IsPlayerProtected || PlayerCapture.Instance == null || PlayerCapture.IsCaught) return;
 
         SetState(State.Catch);
-        patrol.enabled = false;
-        agent.isStopped = true;
+
+        if (patrol != null)
+        {
+            patrol.enabled = false;
+        }
+
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.isStopped = true;
+        }
 
         PlayerCapture.Instance.BeginCapture(transform);
 
@@ -217,6 +239,13 @@ public class HumanAI : MonoBehaviour
         if (!TutorialManager.IsPlayerProtected && vision.HasDetectedPlayer)
         {
             BeginCatch();
+            return;
+        }
+
+        // Garantiza que la navegación no se quede congelada en patrulla
+        if (agent != null && agent.isOnNavMesh && agent.isStopped)
+        {
+            agent.isStopped = false;
         }
     }
 
@@ -230,11 +259,23 @@ public class HumanAI : MonoBehaviour
 
         if (!arrived)
         {
+            investigateWalkTimer += Time.deltaTime;
+
             if (HasArrived())
             {
                 arrived = true;
                 stateTimer = lookAroundTime;
-                agent.isStopped = true;
+
+                if (agent != null && agent.isOnNavMesh)
+                {
+                    agent.isStopped = true;
+                    agent.ResetPath(); // Limpia la ruta hacia la mesa inmediatamente
+                }
+
+                if (hearing != null)
+                {
+                    hearing.HasHeardNoise = false;
+                }
             }
             return;
         }
@@ -269,7 +310,42 @@ public class HumanAI : MonoBehaviour
 
     private bool HasArrived()
     {
-        return !agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + 0.5f;
+        if (agent == null || !agent.isOnNavMesh) return true;
+        if (agent.pathPending) return false;
+
+        // 1. Si la ruta es totalmente inválida
+        if (agent.pathStatus == NavMeshPathStatus.PathInvalid)
+        {
+            return true;
+        }
+
+        // 2. Llegada normal por distancia de parada
+        if (agent.remainingDistance <= agent.stoppingDistance + 0.5f)
+        {
+            return true;
+        }
+
+        // 3. Ruta incompleta/parcial bloqueada por un NavMeshObstacle (ej. mesa)
+        if (agent.pathStatus == NavMeshPathStatus.PathPartial && agent.remainingDistance <= agent.stoppingDistance + 1.5f)
+        {
+            return true;
+        }
+
+        // 4. Detección de colisión física contra el mueble (la velocidad cae a 0)
+        if (investigateWalkTimer > 0.6f &&
+            agent.remainingDistance <= agent.stoppingDistance + 1.8f &&
+            agent.velocity.sqrMagnitude < 0.05f)
+        {
+            return true;
+        }
+
+        // 5. Tiempo límite de seguridad (Timeout)
+        if (investigateWalkTimer >= maxInvestigateWalkTime)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     private void FaceTowards(Vector3 flatDirection)
@@ -283,7 +359,7 @@ public class HumanAI : MonoBehaviour
     private Vector3 SnapToNavMesh(Vector3 position)
     {
         NavMeshHit hit;
-        if (NavMesh.SamplePosition(position, out hit, 3f, NavMesh.AllAreas))
+        if (NavMesh.SamplePosition(position, out hit, 4.0f, NavMesh.AllAreas))
         {
             return hit.position;
         }

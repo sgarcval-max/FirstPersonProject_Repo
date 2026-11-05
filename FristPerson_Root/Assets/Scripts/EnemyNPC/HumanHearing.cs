@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.AI;
 
 /// <summary>
 /// UnityEvent que lleva la posición del ruido oído.
@@ -10,6 +11,7 @@ public class NoiseHeardEvent : UnityEvent<Vector3> { }
 /// <summary>
 /// Da oído a un humano. Durante el tutorial (TutorialManager.IsPlayerProtected = true),
 /// ignora cualquier ruido o pisada generada en el juego.
+/// Ajustado para validar y proyectar ruidos en zonas caminables del NavMesh (evita atascamientos en mesas/props).
 /// </summary>
 public class HumanHearing : MonoBehaviour
 {
@@ -25,6 +27,10 @@ public class HumanHearing : MonoBehaviour
     [SerializeField] private float maxSuspicionFromNoise = 0.7f;
     [Tooltip("Si se deja vacío, usa el HumanVision del mismo objeto.")]
     [SerializeField] private HumanVision vision;
+
+    [Header("Ajuste de Navegación")]
+    [Tooltip("Radio de búsqueda en metros para encontrar suelo caminable cerca del origen del ruido.")]
+    [SerializeField] private float navMeshSampleRadius = 3.0f;
 
     [Header("Eventos")]
     [Tooltip("Se dispara cada vez que oye un ruido, con la posición de donde vino.")]
@@ -61,7 +67,10 @@ public class HumanHearing : MonoBehaviour
 
         if (distance > effectiveRadius) return;
 
-        LastNoisePosition = position;
+        // Corregir y ajustar la posición hacia una zona del NavMesh caminable bordeando el obstáculo
+        Vector3 validPosition = GetValidNavMeshPosition(position);
+
+        LastNoisePosition = validPosition;
         HasHeardNoise = true;
 
         float closeness = 1f - Mathf.Clamp01(distance / effectiveRadius);
@@ -72,6 +81,28 @@ public class HumanHearing : MonoBehaviour
             vision.AddSuspicion(amount, maxSuspicionFromNoise);
         }
 
-        if (OnNoiseHeard != null) OnNoiseHeard.Invoke(position);
+        if (OnNoiseHeard != null) OnNoiseHeard.Invoke(validPosition);
+    }
+
+    /// <summary>
+    /// Proyecta la coordenada del ruido hacia el suelo y busca la posición de NavMesh más cercana.
+    /// </summary>
+    private Vector3 GetValidNavMeshPosition(Vector3 rawPosition)
+    {
+        Vector3 targetPoint = rawPosition;
+
+        // 1. Si el ruido ocurrió en alto (encima de una mesa/objeto), lanzamos un Raycast hacia el suelo
+        if (Physics.Raycast(rawPosition, Vector3.down, out RaycastHit rayHit, 5f))
+        {
+            targetPoint = rayHit.point;
+        }
+
+        // 2. Buscamos el punto caminable más cercano en el NavMesh respecto a la mesa
+        if (NavMesh.SamplePosition(targetPoint, out NavMeshHit navHit, navMeshSampleRadius, NavMesh.AllAreas))
+        {
+            return navHit.position;
+        }
+
+        return rawPosition;
     }
 }
