@@ -66,6 +66,13 @@ public class HumanStun : MonoBehaviour
     public void Stun(float duration)
     {
         timer = duration;
+
+        // Cancelar persecución en la música al aturdir al enemigo
+        if (ai != null && MusicManager.Instance != null)
+        {
+            MusicManager.Instance.SetChasing(ai, false);
+        }
+
         PlayDizzyEffect();
 
         if (IsStunned) return;
@@ -194,5 +201,10 @@ public class HumanStun : MonoBehaviour
     private void OnDisable()
     {
         StopDizzyEffect();
+
+        if (ai != null && MusicManager.Instance != null)
+        {
+            MusicManager.Instance.SetChasing(ai, false);
+        }
     }
 }

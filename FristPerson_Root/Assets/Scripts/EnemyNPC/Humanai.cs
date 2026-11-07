@@ -92,6 +92,11 @@ public class HumanAI : MonoBehaviour
         {
             hearing.OnNoiseHeard.RemoveListener(HandleNoiseHeard);
         }
+
+        if (MusicManager.Instance != null)
+        {
+            MusicManager.Instance.SetChasing(this, false);
+        }
     }
 
     private void Update()
@@ -99,7 +104,8 @@ public class HumanAI : MonoBehaviour
         if (vision == null || patrol == null) return;
         if (!agent.isOnNavMesh) return;
 
-        // Si el tutorial está activo, forzar al guardia a estar en modo patrulla sin alterar su ruta
+        UpdateMusicChasingState();
+
         if (TutorialManager.IsPlayerProtected)
         {
             if (CurrentState != State.Patrol)
@@ -109,7 +115,6 @@ public class HumanAI : MonoBehaviour
             return;
         }
 
-        // Si otro guardia ya ha atrapado al jugador, este se queda como estaba.
         if (PlayerCapture.IsCaught && CurrentState != State.Catch) return;
 
         switch (CurrentState)
@@ -120,8 +125,27 @@ public class HumanAI : MonoBehaviour
         }
     }
 
+    private void UpdateMusicChasingState()
+    {
+        if (MusicManager.Instance == null) return;
+
+        // La música de tensión se activa si:
+        // 1. El guardia está en modo Investigar (Investigate) o Atrapando (Catch).
+        // 2. O si la barra de sospecha tiene CUALQUIER valor superior a cero (> 0.01f).
+        bool isTense = (CurrentState == State.Investigate) ||
+                       (CurrentState == State.Catch) ||
+                       (vision != null && vision.Suspicion > 0.01f);
+
+        MusicManager.Instance.SetChasing(this, isTense);
+    }
+
     public void ResetToStart()
     {
+        if (MusicManager.Instance != null)
+        {
+            MusicManager.Instance.SetChasing(this, false);
+        }
+
         HumanStun stun = GetComponent<HumanStun>();
         if (stun != null) stun.RecoverImmediately();
 
@@ -147,6 +171,11 @@ public class HumanAI : MonoBehaviour
 
     public void ResetForRespawn(Vector3 playerSpawnPoint, float safeDistance = 5f)
     {
+        if (MusicManager.Instance != null)
+        {
+            MusicManager.Instance.SetChasing(this, false);
+        }
+
         if (Vector3.Distance(transform.position, playerSpawnPoint) < safeDistance)
         {
             ResetToStart();
@@ -179,7 +208,7 @@ public class HumanAI : MonoBehaviour
 
         if (agent != null && agent.isOnNavMesh)
         {
-            agent.ResetPath(); // Borra cualquier punto o ruta remanente del ruido anterior
+            agent.ResetPath();
             agent.isStopped = false;
         }
 
@@ -242,7 +271,6 @@ public class HumanAI : MonoBehaviour
             return;
         }
 
-        // Garantiza que la navegación no se quede congelada en patrulla
         if (agent != null && agent.isOnNavMesh && agent.isStopped)
         {
             agent.isStopped = false;
@@ -269,7 +297,7 @@ public class HumanAI : MonoBehaviour
                 if (agent != null && agent.isOnNavMesh)
                 {
                     agent.isStopped = true;
-                    agent.ResetPath(); // Limpia la ruta hacia la mesa inmediatamente
+                    agent.ResetPath();
                 }
 
                 if (hearing != null)
@@ -313,25 +341,21 @@ public class HumanAI : MonoBehaviour
         if (agent == null || !agent.isOnNavMesh) return true;
         if (agent.pathPending) return false;
 
-        // 1. Si la ruta es totalmente inválida
         if (agent.pathStatus == NavMeshPathStatus.PathInvalid)
         {
             return true;
         }
 
-        // 2. Llegada normal por distancia de parada
         if (agent.remainingDistance <= agent.stoppingDistance + 0.5f)
         {
             return true;
         }
 
-        // 3. Ruta incompleta/parcial bloqueada por un NavMeshObstacle (ej. mesa)
         if (agent.pathStatus == NavMeshPathStatus.PathPartial && agent.remainingDistance <= agent.stoppingDistance + 1.5f)
         {
             return true;
         }
 
-        // 4. Detección de colisión física contra el mueble (la velocidad cae a 0)
         if (investigateWalkTimer > 0.6f &&
             agent.remainingDistance <= agent.stoppingDistance + 1.8f &&
             agent.velocity.sqrMagnitude < 0.05f)
@@ -339,7 +363,6 @@ public class HumanAI : MonoBehaviour
             return true;
         }
 
-        // 5. Tiempo límite de seguridad (Timeout)
         if (investigateWalkTimer >= maxInvestigateWalkTime)
         {
             return true;

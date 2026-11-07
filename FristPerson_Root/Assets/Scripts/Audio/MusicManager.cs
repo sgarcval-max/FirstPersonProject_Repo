@@ -5,8 +5,8 @@ using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// Administrador central de música. Controla listas de reproducción para menú y gameplay,
-/// gestionando el paso entre canciones y escenas de forma fluida y sin bloqueos.
+/// Administrador central de música. Controla dos canales independientes (BGM y Tensión)
+/// para gestionar fundidos en menú, gameplay y persecuciones de enemigos de forma limpia.
 /// </summary>
 public class MusicManager : MonoBehaviour
 {
@@ -21,6 +21,21 @@ public class MusicManager : MonoBehaviour
     [Tooltip("Canciones para la partida / juego.")]
     [SerializeField] private List<AudioClip> gameplayPlaylist = new List<AudioClip>();
 
+    [Header("Música de Tensión / Persecución")]
+    [Tooltip("Pista de música de tensión que entra por encima cuando te persigue un enemigo.")]
+    [SerializeField] private AudioClip tensionClip;
+
+    [Range(0.05f, 1f)]
+    [Tooltip("Porcentaje de volumen al que baja la música ambiental al ser perseguido (ej: 0.3 = 30%).")]
+    [SerializeField] private float bgmDuckedVolumeMultiplier = 0.3f;
+
+    [Range(0f, 1f)]
+    [Tooltip("Volumen máximo de la música de tensión.")]
+    [SerializeField] private float tensionMaxVolume = 0.8f;
+
+    [Tooltip("Velocidad de transición entre la música normal y la de tensión.")]
+    [SerializeField] private float tensionFadeSpeed = 2.5f;
+
     [Header("Configuración de Mezclador")]
     [Tooltip("Arrastra aquí el grupo de música de tu AudioMixer.")]
     [SerializeField] private AudioMixerGroup musicOutputGroup;
@@ -31,12 +46,19 @@ public class MusicManager : MonoBehaviour
 
     public PlaylistType CurrentPlaylistType { get; private set; } = PlaylistType.None;
 
-    private AudioSource audioSource;
+    // Canales de audio generados automáticamente
+    private AudioSource bgmAudioSource;
+    private AudioSource tensionAudioSource;
+
     private List<AudioClip> currentList;
     private int currentTrackIndex = 0;
 
     private Coroutine playlistCoroutine;
     private Coroutine fadeCoroutine;
+
+    private float currentBgmFadeVolume = 1f;
+    private float currentDuckFactor = 1f;
+    private readonly HashSet<MonoBehaviour> activeChasers = new HashSet<MonoBehaviour>();
 
     private void Awake()
     {
@@ -44,7 +66,7 @@ public class MusicManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            InitAudioSource();
+            SetupAudioSources();
         }
         else
         {
@@ -52,22 +74,26 @@ public class MusicManager : MonoBehaviour
         }
     }
 
-    private void InitAudioSource()
+    private void SetupAudioSources()
     {
-        audioSource = GetComponent<AudioSource>();
-        if (audioSource == null)
-        {
-            audioSource = gameObject.AddComponent<AudioSource>();
-        }
+        // 1. Canal dedicado exclusivamente a la música de fondo (BGM)
+        GameObject bgmObj = new GameObject("BGM_AudioChannel");
+        bgmObj.transform.SetParent(transform);
+        bgmAudioSource = bgmObj.AddComponent<AudioSource>();
+        bgmAudioSource.loop = false;
+        bgmAudioSource.playOnAwake = false;
+        bgmAudioSource.spatialBlend = 0f;
+        if (musicOutputGroup != null) bgmAudioSource.outputAudioMixerGroup = musicOutputGroup;
 
-        audioSource.loop = false;
-        audioSource.playOnAwake = false;
-        audioSource.volume = 1f;
-
-        if (musicOutputGroup != null)
-        {
-            audioSource.outputAudioMixerGroup = musicOutputGroup;
-        }
+        // 2. Canal dedicado exclusivamente a la música de tensión
+        GameObject tensionObj = new GameObject("Tension_AudioChannel");
+        tensionObj.transform.SetParent(transform);
+        tensionAudioSource = tensionObj.AddComponent<AudioSource>();
+        tensionAudioSource.loop = true;
+        tensionAudioSource.playOnAwake = false;
+        tensionAudioSource.volume = 0f;
+        tensionAudioSource.spatialBlend = 0f;
+        if (musicOutputGroup != null) tensionAudioSource.outputAudioMixerGroup = musicOutputGroup;
     }
 
     private void OnEnable()
@@ -80,9 +106,53 @@ public class MusicManager : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
+    private void Update()
+    {
+        // Eliminar referencias de guardias destruidos o desactivados
+        activeChasers.RemoveWhere(enemy => enemy == null || !enemy.enabled || !enemy.gameObject.activeInHierarchy);
+
+        bool isBeingChased = activeChasers.Count > 0 && CurrentPlaylistType == PlaylistType.Gameplay;
+
+        // 1. Atenuación (Ducking) de la música de fondo
+        float targetDuck = isBeingChased ? bgmDuckedVolumeMultiplier : 1f;
+        currentDuckFactor = Mathf.MoveTowards(currentDuckFactor, targetDuck, tensionFadeSpeed * Time.unscaledDeltaTime);
+
+        if (bgmAudioSource != null)
+        {
+            bgmAudioSource.volume = currentBgmFadeVolume * currentDuckFactor;
+        }
+
+        // 2. Control dinámico del volumen de tensión
+        float targetTensionVol = isBeingChased ? tensionMaxVolume : 0f;
+        if (tensionAudioSource != null)
+        {
+            if (isBeingChased && tensionClip != null)
+            {
+                if (tensionAudioSource.clip != tensionClip)
+                {
+                    tensionAudioSource.clip = tensionClip;
+                }
+                if (!tensionAudioSource.isPlaying)
+                {
+                    tensionAudioSource.Play();
+                }
+            }
+
+            tensionAudioSource.volume = Mathf.MoveTowards(tensionAudioSource.volume, targetTensionVol, tensionFadeSpeed * Time.unscaledDeltaTime);
+
+            // Pausar la pista de tensión cuando el volumen llega a 0 para no consumir memoria
+            if (tensionAudioSource.volume <= 0.001f && tensionAudioSource.isPlaying && !isBeingChased)
+            {
+                tensionAudioSource.Pause();
+            }
+        }
+    }
+
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        activeChasers.Clear();
         string sceneName = scene.name.ToLower();
+
         if (sceneName.Contains("menu"))
         {
             PlayPlaylist(menuPlaylist, PlaylistType.Menu);
@@ -93,9 +163,27 @@ public class MusicManager : MonoBehaviour
         }
     }
 
+    public void SetChasing(MonoBehaviour enemy, bool isChasing)
+    {
+        if (enemy == null) return;
+
+        if (isChasing)
+        {
+            activeChasers.Add(enemy);
+        }
+        else
+        {
+            activeChasers.Remove(enemy);
+        }
+    }
+
+    public void ClearAllChasers()
+    {
+        activeChasers.Clear();
+    }
+
     public void PlayPlaylist(List<AudioClip> playlist, PlaylistType type)
     {
-        // Si ya está sonando esta misma lista, no la cortamos
         if (CurrentPlaylistType == type && currentList == playlist && playlistCoroutine != null)
         {
             return;
@@ -135,10 +223,8 @@ public class MusicManager : MonoBehaviour
 
             if (clipToPlay != null)
             {
-                // Reproduce la canción con fundido de entrada (Fade In)
                 yield return PlayClipWithFadeIn(clipToPlay);
 
-                // Espera hasta que la canción esté a punto de acabar
                 float trackDuration = clipToPlay.length;
                 float elapsed = 0f;
                 float waitTime = Mathf.Max(0.1f, trackDuration - fadeDuration);
@@ -149,11 +235,9 @@ public class MusicManager : MonoBehaviour
                     yield return null;
                 }
 
-                // Fundido de salida (Fade Out) al terminar
                 yield return FadeOutRoutine(fadeDuration);
             }
 
-            // Pasa a la siguiente canción de la lista (en bucle)
             currentTrackIndex = (currentTrackIndex + 1) % currentList.Count;
         }
     }
@@ -162,24 +246,22 @@ public class MusicManager : MonoBehaviour
     {
         if (fadeCoroutine != null) StopCoroutine(fadeCoroutine);
 
-        audioSource.clip = clip;
-        audioSource.volume = 0f;
-        audioSource.Play();
+        bgmAudioSource.clip = clip;
+        currentBgmFadeVolume = 0f;
+        bgmAudioSource.volume = 0f;
+        bgmAudioSource.Play();
 
         float elapsed = 0f;
         while (elapsed < fadeDuration)
         {
             elapsed += Time.unscaledDeltaTime;
-            audioSource.volume = Mathf.Lerp(0f, 1f, elapsed / fadeDuration);
+            currentBgmFadeVolume = Mathf.Lerp(0f, 1f, elapsed / fadeDuration);
             yield return null;
         }
 
-        audioSource.volume = 1f;
+        currentBgmFadeVolume = 1f;
     }
 
-    /// <summary>
-    /// Desvanece progresivamente la música actual hasta silenciarla en la duración especificada.
-    /// </summary>
     public void FadeOut(float duration)
     {
         if (playlistCoroutine != null)
@@ -198,25 +280,22 @@ public class MusicManager : MonoBehaviour
 
     private IEnumerator SmoothFadeOutRoutine(float duration)
     {
-        if (audioSource == null) yield break;
+        if (bgmAudioSource == null) yield break;
 
-        float startVol = audioSource.volume;
+        float startVol = currentBgmFadeVolume;
         float elapsed = 0f;
 
         while (elapsed < duration)
         {
             elapsed += Time.unscaledDeltaTime;
-            if (audioSource != null)
-            {
-                audioSource.volume = Mathf.Lerp(startVol, 0f, elapsed / duration);
-            }
+            currentBgmFadeVolume = Mathf.Lerp(startVol, 0f, elapsed / duration);
             yield return null;
         }
 
-        if (audioSource != null)
+        currentBgmFadeVolume = 0f;
+        if (bgmAudioSource != null)
         {
-            audioSource.volume = 0f;
-            audioSource.Stop();
+            bgmAudioSource.Stop();
         }
 
         CurrentPlaylistType = PlaylistType.None;
@@ -225,23 +304,20 @@ public class MusicManager : MonoBehaviour
 
     private IEnumerator FadeOutRoutine(float duration)
     {
-        float startVol = audioSource != null ? audioSource.volume : 1f;
+        float startVol = currentBgmFadeVolume;
         float elapsed = 0f;
 
         while (elapsed < duration)
         {
             elapsed += Time.unscaledDeltaTime;
-            if (audioSource != null)
-            {
-                audioSource.volume = Mathf.Lerp(startVol, 0f, elapsed / duration);
-            }
+            currentBgmFadeVolume = Mathf.Lerp(startVol, 0f, elapsed / duration);
             yield return null;
         }
 
-        if (audioSource != null)
+        currentBgmFadeVolume = 0f;
+        if (bgmAudioSource != null)
         {
-            audioSource.volume = 0f;
-            audioSource.Stop();
+            bgmAudioSource.Stop();
         }
     }
 
@@ -258,12 +334,20 @@ public class MusicManager : MonoBehaviour
             fadeCoroutine = null;
         }
 
-        if (audioSource != null)
+        if (bgmAudioSource != null)
         {
-            audioSource.Stop();
-            audioSource.volume = 0f;
+            bgmAudioSource.Stop();
+            currentBgmFadeVolume = 0f;
+            bgmAudioSource.volume = 0f;
         }
 
+        if (tensionAudioSource != null)
+        {
+            tensionAudioSource.Stop();
+            tensionAudioSource.volume = 0f;
+        }
+
+        activeChasers.Clear();
         currentList = null;
         CurrentPlaylistType = PlaylistType.None;
     }

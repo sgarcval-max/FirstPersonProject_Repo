@@ -63,6 +63,10 @@ public class HumanVision : MonoBehaviour
 
     public float Suspicion { get; private set; }
     public bool CanSeePlayerNow { get; private set; }
+
+    /// <summary>Indica en tiempo real si el guardia tiene visión directa sobre el jugador.</summary>
+    public bool IsSeeingPlayer => CanSeePlayerNow;
+
     public Vector3 LastSeenPosition { get; private set; }
     public bool HasDetectedPlayer => detected;
 
