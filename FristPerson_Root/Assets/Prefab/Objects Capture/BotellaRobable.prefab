@@ -287,8 +287,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ba02fe53dc0a63438b1e26c649d7151, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PropImpactAudio
-  propImpactClips: []
-  environmentImpactClips: []
+  propImpactClips:
+  - {fileID: 8300000, guid: fd06e6729da0c594c813c1d8f129813d, type: 3}
+  - {fileID: 8300000, guid: b1e5a700eb72edb4aa7f035c2bc8cba6, type: 3}
+  - {fileID: 8300000, guid: e57bbbb3ea77a954d9dac228200f86fc, type: 3}
+  - {fileID: 8300000, guid: 3406d1b0c6b59af4f93719ea20959507, type: 3}
+  - {fileID: 8300000, guid: 28d65d6ca541d9c4992fc9e2f65233ea, type: 3}
+  - {fileID: 8300000, guid: d2ac2de05666ffa42a8e66dc160a8f88, type: 3}
+  - {fileID: 8300000, guid: 0c6bdcff1d6145f4789405f3ea120ef5, type: 3}
+  - {fileID: 8300000, guid: 5d7ec5bb7a0a4cc478ba36b5c4906ee5, type: 3}
+  environmentImpactClips:
+  - {fileID: 8300000, guid: c183466e46dfe0443b5a75c2378f278c, type: 3}
+  - {fileID: 8300000, guid: 44445c0cce5dbf44eb14883b7de99068, type: 3}
   minPitch: 0.9
   maxPitch: 1.1
   minImpactForce: 2.5
