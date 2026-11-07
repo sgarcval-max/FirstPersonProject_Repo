@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 /// Permite apuntar con un arma a distancia.
 /// Expone 'CurrentBaseHandPosition' para que los efectos de bamboleo (Bobbing/Sway) 
 /// se apliquen suavemente sobre la mira centrada sin tirones.
+/// Incluye efectos de sonido (SFX) al entrar y salir del modo apuntar.
 /// </summary>
 [RequireComponent(typeof(FirstPersonController))]
 [RequireComponent(typeof(PlayerWeaponInventory))]
@@ -31,6 +32,14 @@ public class PlayerAim : MonoBehaviour
     [Tooltip("Multiplicador de la velocidad al andar apuntando.")]
     [Range(0.1f, 1f)]
     [SerializeField] private float aimSpeedMultiplier = 0.5f;
+
+    [Header("Efectos de Audio (SFX)")]
+    [Tooltip("AudioSource para reproducir los sonidos de apuntado. Si no se asigna, busca uno en el objeto.")]
+    [SerializeField] private AudioSource audioSource;
+    [Tooltip("Efecto de sonido al empezar a apuntar.")]
+    [SerializeField] private AudioClip aimInSFX;
+    [Tooltip("Efecto de sonido al dejar de apuntar.")]
+    [SerializeField] private AudioClip aimOutSFX;
 
     /// <summary>True mientras mantienes apuntar con un arma a distancia en la mano.</summary>
     public bool IsAiming { get; private set; }
@@ -66,13 +75,33 @@ public class PlayerAim : MonoBehaviour
             CurrentBaseHandPosition = hipHandLocalPosition;
         }
 
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+        }
+
         // Muestra la mira del HUD por defecto (disparo desde la cadera)
         if (crosshair != null) crosshair.SetActive(true);
     }
 
     private void Update()
     {
-        IsAiming = ShouldAim();
+        bool newAimState = ShouldAim();
+
+        // Detección de flanco: detecta el momento exacto en que empieza o termina de apuntar
+        if (newAimState != IsAiming)
+        {
+            IsAiming = newAimState;
+
+            if (IsAiming)
+            {
+                PlaySFX(aimInSFX);
+            }
+            else
+            {
+                PlaySFX(aimOutSFX);
+            }
+        }
 
         if (bobAndSway != null)
         {
@@ -134,6 +163,14 @@ public class PlayerAim : MonoBehaviour
         if (crosshair != null && crosshair.activeSelf != shouldShowCrosshair)
         {
             crosshair.SetActive(shouldShowCrosshair);
+        }
+    }
+
+    private void PlaySFX(AudioClip clip)
+    {
+        if (audioSource != null && clip != null)
+        {
+            audioSource.PlayOneShot(clip);
         }
     }
 }
