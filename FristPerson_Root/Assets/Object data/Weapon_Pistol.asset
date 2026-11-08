@@ -20,5 +20,5 @@ MonoBehaviour:
   isRanged: 1
   range: 30
   stunDuration: 8
-  rechargeTime: 90
+  rechargeTime: 25
   shotNoiseRadius: 30
