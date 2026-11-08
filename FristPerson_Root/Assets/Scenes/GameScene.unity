@@ -33198,7 +33198,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb7777f966f3e54f9261fe1736a6e49, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MatchManager
-  matchDuration: 300
+  matchDuration: 210
   timerText: {fileID: 1864265867}
   lowTimeThreshold: 30
   normalColor: {r: 1, g: 1, b: 1, a: 1}
@@ -45844,6 +45844,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCapture
   captureDuration: 1.2
+  immunityDuration: 6
   dropRadius: 1.5
 --- !u!114 &1671297799
 MonoBehaviour:
