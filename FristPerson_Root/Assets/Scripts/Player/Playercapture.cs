@@ -4,6 +4,7 @@ using UnityEngine;
 
 /// <summary>
 /// Gestiona la captura del jugador por los guardias y la reaparición tras Game Over.
+/// Oculta completamente al jugador de la vista y oído de los enemigos durante unos segundos tras reaparecer.
 /// </summary>
 [RequireComponent(typeof(FirstPersonController))]
 [RequireComponent(typeof(CharacterController))]
@@ -11,9 +12,14 @@ public class PlayerCapture : MonoBehaviour
 {
     public static PlayerCapture Instance { get; private set; }
     public static bool IsCaught { get; private set; }
+    public static bool IsImmune { get; private set; }
 
     [Header("Captura")]
     [SerializeField] private float captureDuration = 1.2f;
+
+    [Header("Inmunidad y Sigilo tras Respawn")]
+    [Tooltip("Segundos que el jugador permanece indetectable (invisible y silencioso) tras reaparecer.")]
+    [SerializeField] private float immunityDuration = 6f;
 
     [Header("Al ser atrapado")]
     [SerializeField] private float dropRadius = 1.5f;
@@ -35,6 +41,7 @@ public class PlayerCapture : MonoBehaviour
     {
         Instance = this;
         IsCaught = false;
+        IsImmune = false;
 
         controller = GetComponent<FirstPersonController>();
         characterController = GetComponent<CharacterController>();
@@ -53,7 +60,8 @@ public class PlayerCapture : MonoBehaviour
 
     public void BeginCapture(Transform guard)
     {
-        if (IsCaught || MatchManager.IsMatchOver) return;
+        // Si está en periodo de inmunidad, ya fue atrapado o acabó la partida, se anula la captura
+        if (IsCaught || IsImmune || MatchManager.IsMatchOver) return;
 
         IsCaught = true;
         caughtPosition = transform.position;
@@ -153,13 +161,37 @@ public class PlayerCapture : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        // 7) Los guardias se calman. Si están pegados al spawn, se reubican lejos.
+        // 4. Los guardias se calman y regresan a patrullar
         foreach (HumanAI guard in FindObjectsOfType<HumanAI>())
         {
             guard.ResetForRespawn(startPosition, 5f);
         }
 
+        // 5. Iniciar invisibilidad y silencio absoluto temporal
+        StartCoroutine(ImmunityRoutine());
+
         OnRespawned?.Invoke();
+    }
+
+    private IEnumerator ImmunityRoutine()
+    {
+        IsImmune = true;
+
+        // Anula vista (0) y ruido (0) para la IA durante la inmunidad
+        if (PlayerConcealment.Instance != null)
+        {
+            PlayerConcealment.Instance.SetSource(this, 0f, 0f);
+        }
+
+        yield return new WaitForSeconds(immunityDuration);
+
+        // Restablece la detección normal al agotarse el tiempo
+        if (PlayerConcealment.Instance != null)
+        {
+            PlayerConcealment.Instance.RemoveSource(this);
+        }
+
+        IsImmune = false;
     }
 
     private static float NormalizeAngle(float angle)
