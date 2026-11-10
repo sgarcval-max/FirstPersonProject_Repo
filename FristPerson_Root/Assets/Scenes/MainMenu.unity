@@ -1513,10 +1513,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIAudioManager
   uiAudioSource: {fileID: 0}
-  buttonClickClip: {fileID: 8300000, guid: 19f0809a013647b4b9518d1c3dc0c1e4, type: 3}
-  buttonHoverClip: {fileID: 8300000, guid: cba5b3dce03b6e145a89541804b80e12, type: 3}
-  panelOpenClip: {fileID: 8300000, guid: 01f1e81521323c14caaa7576c53ddb5e, type: 3}
-  panelCloseClip: {fileID: 8300000, guid: dedd2cd9e4b3e1047bb4d6527b77b057, type: 3}
+  buttonClickClip: {fileID: 8300000, guid: 5dc722b6eb888294e875699e382545ab, type: 3}
+  buttonHoverClip: {fileID: 8300000, guid: dd88f9119f586a94f838357db417b7bb, type: 3}
+  panelOpenClip: {fileID: 8300000, guid: 6fd70486a595dda4ba7dd2b35bbb184a, type: 3}
+  panelCloseClip: {fileID: 8300000, guid: 50781b3fdde96874999f26368366cf82, type: 3}
   inventoryOpenClip: {fileID: 8300000, guid: 2d7c05556d788be469bc6d0a07059a85, type: 3}
   inventoryCloseClip: {fileID: 8300000, guid: 6573e9c90192f6b4a982d83d28a9f417, type: 3}
   keyRebindStartClip: {fileID: 0}
@@ -5837,7 +5837,7 @@ AudioSource:
   m_GameObject: {fileID: 2080779659}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: -1654372282959375256, guid: 8a3e6c73505593c419a005317f6c6055, type: 2}
+  OutputAudioMixerGroup: {fileID: -4543875893180963210, guid: 8a3e6c73505593c419a005317f6c6055, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1

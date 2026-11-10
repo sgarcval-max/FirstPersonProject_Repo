@@ -121,10 +121,27 @@ public class HumanStun : MonoBehaviour
     {
         if (!IsStunned) return;
 
-        timer -= Time.deltaTime;
-        if (timer <= 0f)
+        // Control dinámico de audio durante la pausa del juego
+        if (stunAudioSource != null && stunAudioSource.clip == stunSFX)
         {
-            Recover();
+            if (Time.timeScale == 0f && stunAudioSource.isPlaying)
+            {
+                stunAudioSource.Pause();
+            }
+            else if (Time.timeScale > 0f && !stunAudioSource.isPlaying && timer > 0f)
+            {
+                stunAudioSource.UnPause();
+            }
+        }
+
+        // Si el juego está en pausa (Time.timeScale == 0), no descontamos tiempo de aturdimiento
+        if (Time.timeScale > 0f)
+        {
+            timer -= Time.deltaTime;
+            if (timer <= 0f)
+            {
+                Recover();
+            }
         }
     }
 
