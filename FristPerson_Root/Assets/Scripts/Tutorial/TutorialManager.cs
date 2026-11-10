@@ -12,13 +12,15 @@ using UnityEngine.Events;
 /// transiciones en fundido (Fade In/Out), fases dinámicas para interacción/inventario con ocultación visual del panel,
 /// detección automática de cercanía a objetos, 3 barras de progreso secuenciales strictly,
 /// pantalla final de confirmación con protección contra enemigos y control del cursor,
-/// y congelamiento del tutorial al salir de la zona límite.
+/// congelamiento del tutorial al salir de la zona límite,
+/// y reseteo automático del tutorial al detectar una nueva versión de Build (Application.version).
 /// </summary>
 public class TutorialManager : MonoBehaviour
 {
     public static TutorialManager Instance { get; private set; }
 
     private const string TUTORIAL_KEY = "TutorialCompleted";
+    private const string BUILD_VERSION_KEY = "SavedBuildVersion";
 
     public static bool IsPlayerProtected
     {
@@ -174,6 +176,9 @@ public class TutorialManager : MonoBehaviour
 
     private void Start()
     {
+        // Comprueba si la versión de la build ha cambiado respecto a la guardada anteriormente
+        CheckBuildVersionForTutorial();
+
         if (startPlayingButton != null)
         {
             startPlayingButton.onClick.RemoveAllListeners();
@@ -194,11 +199,31 @@ public class TutorialManager : MonoBehaviour
         SetupWelcomeUI();
     }
 
+    /// <summary>
+    /// Comprueba la versión del ejecutable/proyecto (Application.version).
+    /// Si detecta una versión distinta a la última guardada en PlayerPrefs,
+    /// reinicia el estado del tutorial para que se vuelva a mostrar en la nueva build.
+    /// </summary>
+    private void CheckBuildVersionForTutorial()
+    {
+        string savedVersion = PlayerPrefs.GetString(BUILD_VERSION_KEY, "");
+        string currentVersion = Application.version;
+
+        if (savedVersion != currentVersion)
+        {
+            PlayerPrefs.SetInt(TUTORIAL_KEY, 0);
+            PlayerPrefs.SetString(BUILD_VERSION_KEY, currentVersion);
+            PlayerPrefs.Save();
+            Debug.Log($"<color=cyan>[TutorialManager] Nueva versión de build detectada ({currentVersion}). Tutorial reseteado para esta build.</color>");
+        }
+    }
+
     #region MENÚ CONTEXTUAL PARA INSPECTOR (RESET / COMPLETAR)
     [ContextMenu("Resetear Tutorial (Borrar PlayerPrefs)")]
     public void ResetTutorialContextMenu()
     {
         PlayerPrefs.DeleteKey(TUTORIAL_KEY);
+        PlayerPrefs.DeleteKey(BUILD_VERSION_KEY);
         PlayerPrefs.Save();
         Debug.Log("<color=yellow>[TutorialManager] Tutorial reseteado en PlayerPrefs.</color>");
     }
@@ -207,6 +232,7 @@ public class TutorialManager : MonoBehaviour
     public void CompleteTutorialContextMenu()
     {
         PlayerPrefs.SetInt(TUTORIAL_KEY, 1);
+        PlayerPrefs.SetString(BUILD_VERSION_KEY, Application.version);
         PlayerPrefs.Save();
         DisableAllPanels();
         Debug.Log("<color=green>[TutorialManager] Tutorial marcado como completado en PlayerPrefs.</color>");
@@ -542,7 +568,6 @@ public class TutorialManager : MonoBehaviour
                                          || Input.GetKeyDown(KeyCode.F)
                                          || Input.GetKeyDown(KeyCode.E);
 
-                // FASE 1 -> FASE 2: Si estamos cerca y se pulsa la tecla, avanzar inmediatamente y SALIR
                 if (currentSubStepPhase == 1 && isInteractPressed)
                 {
                     OnObjectPickedUp();
@@ -550,7 +575,6 @@ public class TutorialManager : MonoBehaviour
                     return;
                 }
 
-                // SOLO comprobar proximidad si aún no hemos cogido nada (Fase < 2)
                 if (currentSubStepPhase < 2)
                 {
                     CheckProximityAutomatic();
@@ -558,7 +582,6 @@ public class TutorialManager : MonoBehaviour
 
                 if (inputCooldown > 0f) return;
 
-                // FASE 2: Objeto cogido -> Pulsar I/TAB para abrir el inventario
                 if (currentSubStepPhase == 2)
                 {
                     bool isInventoryPressed = (inventoryAction != null && inventoryAction.WasPressedThisFrame())
@@ -572,7 +595,6 @@ public class TutorialManager : MonoBehaviour
                         StartCoroutine(HidePanelForInventoryRoutine());
                     }
                 }
-                // FASE 3: Inventario Abierto -> Pulsar I/TAB/ESC para cerrarlo
                 else if (currentSubStepPhase == 3)
                 {
                     bool isClosePressed = (inventoryAction != null && inventoryAction.WasPressedThisFrame())
@@ -660,7 +682,6 @@ public class TutorialManager : MonoBehaviour
         TutorialStep current = steps[currentStepIndex];
         if (current.requiredAction != ActionType.InteractAndInventory) return;
 
-        // Si ya hemos cogido el objeto (Fase 2 o superior), ignorar totalmente pérdidas de proximidad
         if (currentSubStepPhase >= 2) return;
 
         if (isNear && currentSubStepPhase == 0)
@@ -920,6 +941,7 @@ public class TutorialManager : MonoBehaviour
         isTransitioning = false;
 
         PlayerPrefs.SetInt(TUTORIAL_KEY, 1);
+        PlayerPrefs.SetString(BUILD_VERSION_KEY, Application.version);
         PlayerPrefs.Save();
 
         EnablePlayerControls(true);
@@ -943,26 +965,17 @@ public class TutorialManager : MonoBehaviour
         if (welcomePanel != null) welcomePanel.SetActive(false);
         if (tutorialPanel != null) tutorialPanel.SetActive(false);
         if (subStepProgressContainer != null) subStepProgressContainer.SetActive(false);
-        if (startPlayingButton != null) startPlayingButton.gameObject.SetActive(false);
     }
 
-    private void SetCursorState(bool isUnlockedForUI)
+    private void EnablePlayerControls(bool enable)
     {
-        if (isUnlockedForUI)
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
-        else
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }
+        if (playerMovementScript != null) playerMovementScript.enabled = enable;
+        if (weaponScript != null) weaponScript.enabled = enable;
     }
 
-    private void EnablePlayerControls(bool state)
+    private void SetCursorState(bool showCursor)
     {
-        if (playerMovementScript != null) playerMovementScript.enabled = state;
-        if (weaponScript != null) weaponScript.enabled = state;
+        Cursor.lockState = showCursor ? CursorLockMode.None : CursorLockMode.Locked;
+        Cursor.visible = showCursor;
     }
 }
