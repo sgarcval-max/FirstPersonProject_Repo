@@ -6,8 +6,8 @@ using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Administrador central de música.
-/// Acelera ligeramente la música ambiental durante las persecuciones y vuelve a la normalidad al escapar o al ser atrapado.
-/// Soporta bucle continuo si solo hay 1 canción asignada.
+/// Acelera la música durante persecuciones, soporta bucles continuos para 1 sola canción
+/// y pausa/reanuda la música automáticamente al abrir el menú de pausa (Time.timeScale == 0).
 /// </summary>
 public class MusicManager : MonoBehaviour
 {
@@ -51,6 +51,8 @@ public class MusicManager : MonoBehaviour
     private float currentBgmFadeVolume = 1f;
     private readonly HashSet<MonoBehaviour> activeChasers = new HashSet<MonoBehaviour>();
 
+    private bool isAudioPausedByGame = false;
+
     private void Awake()
     {
         if (Instance == null)
@@ -89,7 +91,30 @@ public class MusicManager : MonoBehaviour
 
     private void Update()
     {
-        // Limpiar guardias destruidos o desactivados
+        // 1. Control automático de Pausa cuando Time.timeScale es 0 (Menú de pausa activo)
+        bool isPaused = Time.timeScale == 0f;
+
+        if (isPaused && !isAudioPausedByGame)
+        {
+            isAudioPausedByGame = true;
+            if (bgmAudioSource != null && bgmAudioSource.isPlaying)
+            {
+                bgmAudioSource.Pause();
+            }
+        }
+        else if (!isPaused && isAudioPausedByGame)
+        {
+            isAudioPausedByGame = false;
+            if (bgmAudioSource != null)
+            {
+                bgmAudioSource.UnPause();
+            }
+        }
+
+        // Si el juego está en pausa, congelamos las actualizaciones de volumen y pitch
+        if (isAudioPausedByGame) return;
+
+        // 2. Limpiar guardias destruidos o desactivados
         activeChasers.RemoveWhere(enemy => enemy == null || !enemy.enabled || !enemy.gameObject.activeInHierarchy);
 
         // Si el jugador fue atrapado (Game Over), desactivar tensión de inmediato
@@ -194,7 +219,6 @@ public class MusicManager : MonoBehaviour
                     bgmAudioSource.loop = true;
                     yield return PlayClipWithFadeIn(singleClip);
 
-                    // Mantiene la corrutina esperando activamente mientras siga habiendo solo esa canción
                     while (currentList != null && currentList.Count == 1 && currentList[0] == singleClip)
                     {
                         yield return null;
@@ -221,7 +245,10 @@ public class MusicManager : MonoBehaviour
 
                     while (elapsed < waitTime)
                     {
-                        elapsed += Time.unscaledDeltaTime;
+                        if (Time.timeScale > 0f)
+                        {
+                            elapsed += Time.unscaledDeltaTime;
+                        }
                         yield return null;
                     }
 
@@ -251,8 +278,11 @@ public class MusicManager : MonoBehaviour
         float elapsed = 0f;
         while (elapsed < fadeDuration)
         {
-            elapsed += Time.unscaledDeltaTime;
-            currentBgmFadeVolume = Mathf.Lerp(0f, 1f, elapsed / fadeDuration);
+            if (Time.timeScale > 0f)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                currentBgmFadeVolume = Mathf.Lerp(0f, 1f, elapsed / fadeDuration);
+            }
             yield return null;
         }
 
@@ -284,8 +314,11 @@ public class MusicManager : MonoBehaviour
 
         while (elapsed < duration)
         {
-            elapsed += Time.unscaledDeltaTime;
-            currentBgmFadeVolume = Mathf.Lerp(startVol, 0f, elapsed / duration);
+            if (Time.timeScale > 0f)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                currentBgmFadeVolume = Mathf.Lerp(startVol, 0f, elapsed / duration);
+            }
             yield return null;
         }
 
@@ -308,8 +341,11 @@ public class MusicManager : MonoBehaviour
 
         while (elapsed < duration)
         {
-            elapsed += Time.unscaledDeltaTime;
-            currentBgmFadeVolume = Mathf.Lerp(startVol, 0f, elapsed / duration);
+            if (Time.timeScale > 0f)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                currentBgmFadeVolume = Mathf.Lerp(startVol, 0f, elapsed / duration);
+            }
             yield return null;
         }
 
