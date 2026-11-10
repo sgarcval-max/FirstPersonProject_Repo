@@ -7582,6 +7582,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1e5f0dba4d5ef9498c4630d222f5839, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HumanAI
+  npcRenderer: {fileID: 977295831}
+  normalMaterial: {fileID: 2100000, guid: 916be2daef0d50641bec2f253e0750e7, type: 2}
+  tasedMaterial: {fileID: 2100000, guid: 5370817f8658f914fb6917d5ca5c30a3, type: 2}
   investigateSpeed: 2.5
   lookAroundTime: 3
   lookAroundTurnSpeed: 60
@@ -18388,6 +18391,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -1656324731878571108, guid: 1f5640e32b79ec34484a1afa27c1bb2c, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 916be2daef0d50641bec2f253e0750e7, type: 2}
     - target: {fileID: -1527249571592585413, guid: 1f5640e32b79ec34484a1afa27c1bb2c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: -2.4407713
@@ -26369,6 +26376,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 694105329570650369, guid: 1f5640e32b79ec34484a1afa27c1bb2c, type: 3}
   m_PrefabInstance: {fileID: 536408891}
   m_PrefabAsset: {fileID: 0}
+--- !u!137 &977295831 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -1656324731878571108, guid: 1f5640e32b79ec34484a1afa27c1bb2c, type: 3}
+  m_PrefabInstance: {fileID: 536408891}
+  m_PrefabAsset: {fileID: 0}
 --- !u!64 &988533687
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -27872,7 +27884,7 @@ PrefabInstance:
     - target: {fileID: -1656324731878571108, guid: 1f5640e32b79ec34484a1afa27c1bb2c, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 311bebb1a68132a4e88e6c33e2e245f6, type: 2}
+      objectReference: {fileID: 2100000, guid: bed7152638211934eba3bcab4d0dc0cc, type: 2}
     - target: {fileID: -1527249571592585413, guid: 1f5640e32b79ec34484a1afa27c1bb2c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: -2.4407713
@@ -28949,6 +28961,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2078263497}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!137 &1053999021 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -1656324731878571108, guid: 1f5640e32b79ec34484a1afa27c1bb2c, type: 3}
+  m_PrefabInstance: {fileID: 1040906476}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1055448717
 GameObject:
   m_ObjectHideFlags: 0
@@ -42614,6 +42631,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1e5f0dba4d5ef9498c4630d222f5839, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HumanAI
+  npcRenderer: {fileID: 1053999021}
+  normalMaterial: {fileID: 2100000, guid: bed7152638211934eba3bcab4d0dc0cc, type: 2}
+  tasedMaterial: {fileID: 2100000, guid: a8303867f01a59341beb6de2fe41e36c, type: 2}
   investigateSpeed: 2.5
   lookAroundTime: 3
   lookAroundTurnSpeed: 60

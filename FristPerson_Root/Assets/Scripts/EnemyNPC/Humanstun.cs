@@ -79,8 +79,13 @@ public class HumanStun : MonoBehaviour
 
         IsStunned = true;
 
-        // Se apaga todo lo que le hace actuar, ver y oír.
-        if (ai != null) ai.enabled = false;
+        // Cambiar al material de taseado
+        if (ai != null)
+        {
+            ai.SetTasedVisualState(true);
+            ai.enabled = false;
+        }
+
         if (patrol != null) patrol.enabled = false;
         if (hearing != null) hearing.enabled = false;
         if (vision != null)
@@ -130,7 +135,7 @@ public class HumanStun : MonoBehaviour
         // Apagar partículas y cortar el audio SFX
         StopDizzyEffect();
 
-        // Restaurar el color original del material
+        // Restaurar el color original del material y volver al material normal
         if (bodyRenderer != null)
         {
             bodyRenderer.material.color = originalColor;
@@ -146,6 +151,7 @@ public class HumanStun : MonoBehaviour
 
         if (ai != null)
         {
+            ai.SetTasedVisualState(false);
             ai.enabled = true;
             ai.ResumePatrol();
         }
@@ -155,7 +161,6 @@ public class HumanStun : MonoBehaviour
 
     private void PlayDizzyEffect()
     {
-        // 1. Partículas / VFX
         if (dizzyParticles != null && !dizzyParticles.isPlaying)
         {
             dizzyParticles.Play();
@@ -166,7 +171,6 @@ public class HumanStun : MonoBehaviour
             dizzyVFXObject.SetActive(true);
         }
 
-        // 2. Audio SFX
         if (stunAudioSource != null && stunSFX != null)
         {
             if (!stunAudioSource.isPlaying)
@@ -180,7 +184,6 @@ public class HumanStun : MonoBehaviour
 
     private void StopDizzyEffect()
     {
-        // 1. Partículas / VFX
         if (dizzyParticles != null)
         {
             dizzyParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
@@ -191,7 +194,6 @@ public class HumanStun : MonoBehaviour
             dizzyVFXObject.SetActive(false);
         }
 
-        // 2. Audio SFX
         if (stunAudioSource != null && stunAudioSource.isPlaying)
         {
             stunAudioSource.Stop();

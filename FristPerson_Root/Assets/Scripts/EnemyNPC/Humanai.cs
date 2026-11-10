@@ -5,20 +5,21 @@ using UnityEngine.Events;
 /// <summary>
 /// Cerebro del guardia: decide qué hacer según lo que ve y oye, usando los componentes que ya
 /// tiene (HumanPatrol, HumanVision y HumanHearing).
-///
-/// Estados:
-///   - Patrol: patrulla su ruta (lo hace HumanPatrol).
-///   - Investigate: ha oído un ruido; va hasta allí, mira alrededor y vuelve a patrullar.
-///   - Catch: su barra de detección ha llegado al máximo. Se para, se gira hacia el jugador y lo
-///     atrapa (PlayerCapture se encarga del Game Over).
-///
-/// Durante el tutorial (TutorialManager.IsPlayerProtected = true), el enemigo es forzado a mantenerse
-/// en patrulla continua ignorando cualquier evento.
 /// </summary>
 [RequireComponent(typeof(NavMeshAgent))]
 public class HumanAI : MonoBehaviour
 {
     public enum State { Patrol, Investigate, Catch }
+
+    [Header("Materiales de Estado (Normal vs Taseado)")]
+    [Tooltip("El Renderer (MeshRenderer o SkinnedMeshRenderer) del personaje.")]
+    [SerializeField] private Renderer npcRenderer;
+
+    [Tooltip("Material del NPC en estado normal. Si se deja vacío, guardará el material inicial.")]
+    [SerializeField] private Material normalMaterial;
+
+    [Tooltip("Material del NPC mientras está taseado / mareado.")]
+    [SerializeField] private Material tasedMaterial;
 
     [Header("Investigar un ruido")]
     [SerializeField] private float investigateSpeed = 2.5f;
@@ -75,6 +76,16 @@ public class HumanAI : MonoBehaviour
             gameObject.AddComponent<HumanStun>();
         }
 
+        if (npcRenderer == null)
+        {
+            npcRenderer = GetComponentInChildren<Renderer>();
+        }
+
+        if (npcRenderer != null && normalMaterial == null)
+        {
+            normalMaterial = npcRenderer.sharedMaterial;
+        }
+
         CurrentState = State.Patrol;
     }
 
@@ -96,6 +107,33 @@ public class HumanAI : MonoBehaviour
         if (MusicManager.Instance != null)
         {
             MusicManager.Instance.SetChasing(this, false);
+        }
+    }
+
+    /// <summary>
+    /// Cambia el material visual del NPC entre el estado normal y taseado.
+    /// </summary>
+    public void SetTasedVisualState(bool isTased)
+    {
+        if (npcRenderer == null) npcRenderer = GetComponentInChildren<Renderer>();
+        if (npcRenderer == null) return;
+
+        Material targetMat = isTased ? tasedMaterial : normalMaterial;
+        if (targetMat != null)
+        {
+            npcRenderer.material = targetMat;
+        }
+    }
+
+    /// <summary>
+    /// Método puente para aturdir al NPC desde el Taser.
+    /// </summary>
+    public void ApplyTaserStun(float duration = 5f)
+    {
+        HumanStun stun = GetComponent<HumanStun>();
+        if (stun != null)
+        {
+            stun.Stun(duration);
         }
     }
 
@@ -129,9 +167,6 @@ public class HumanAI : MonoBehaviour
     {
         if (MusicManager.Instance == null) return;
 
-        // La música de tensión se activa si:
-        // 1. El guardia está en modo Investigar (Investigate) o Atrapando (Catch).
-        // 2. O si la barra de sospecha tiene CUALQUIER valor superior a cero (> 0.01f).
         bool isTense = (CurrentState == State.Investigate) ||
                        (CurrentState == State.Catch) ||
                        (vision != null && vision.Suspicion > 0.01f);
@@ -145,6 +180,8 @@ public class HumanAI : MonoBehaviour
         {
             MusicManager.Instance.SetChasing(this, false);
         }
+
+        SetTasedVisualState(false);
 
         HumanStun stun = GetComponent<HumanStun>();
         if (stun != null) stun.RecoverImmediately();
