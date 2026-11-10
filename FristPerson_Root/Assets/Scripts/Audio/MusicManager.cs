@@ -6,7 +6,9 @@ using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Administrador central de música.
-/// Acelera la música durante persecuciones, soporta bucles continuos para 1 sola canción
+/// Acelera la música durante persecuciones, soporta bucles continuos para 1 sola canción,
+/// realiza transiciones fluidas entre múltiples canciones leyendo el tiempo real del reproductor,
+/// soporta Alt+Tab (pérdida de foco de ventana) sin saltar canciones por error,
 /// y pausa/reanuda la música automáticamente al abrir el menú de pausa (Time.timeScale == 0).
 /// </summary>
 public class MusicManager : MonoBehaviour
@@ -239,19 +241,32 @@ public class MusicManager : MonoBehaviour
                 {
                     yield return PlayClipWithFadeIn(clipToPlay);
 
-                    float trackDuration = clipToPlay.length;
-                    float elapsed = 0f;
-                    float waitTime = Mathf.Max(0.1f, trackDuration - fadeDuration);
+                    // Esperamos 1 frame para asegurar que el AudioSource ha comenzado a reproducir
+                    yield return null;
 
-                    while (elapsed < waitTime)
+                    // Esperar mientras la canción suena hasta que queden 'fadeDuration' segundos de pista
+                    while (bgmAudioSource != null && bgmAudioSource.clip == clipToPlay)
                     {
-                        if (Time.timeScale > 0f)
+                        // Si se perdió el foco de la ventana (Alt+Tab), el menú de pausa está activo o el AudioListener silenciado,
+                        // congelamos la corrutina aquí sin pasar de canción.
+                        if (!Application.isFocused || isAudioPausedByGame || AudioListener.pause)
                         {
-                            elapsed += Time.unscaledDeltaTime;
+                            yield return null;
+                            continue;
                         }
+
+                        float timeRemaining = clipToPlay.length - bgmAudioSource.time;
+
+                        // Si la canción realmente está a punto de acabar o ya finalizó de forma natural
+                        if (timeRemaining <= fadeDuration || !bgmAudioSource.isPlaying)
+                        {
+                            break;
+                        }
+
                         yield return null;
                     }
 
+                    // Fundido de salida suave al final de la canción antes de pasar a la siguiente
                     yield return FadeOutRoutine(fadeDuration);
                 }
                 else

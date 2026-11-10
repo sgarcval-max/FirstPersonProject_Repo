@@ -2399,7 +2399,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -18.000061, y: -13}
+  m_AnchoredPosition: {x: -18, y: -13}
   m_SizeDelta: {x: -1735.76, y: -979.83167}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &772085706
@@ -5809,6 +5809,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 139066fbf17bd5a48a8de2800a370299, type: 3}
   gameplayPlaylist:
   - {fileID: 8300000, guid: 8e71e066fcb5ab7488bbec648b38d884, type: 3}
+  - {fileID: 8300000, guid: bd7d4e1d064ca1045847da00cd5463fe, type: 3}
   chasePitchMultiplier: 2
   pitchChangeSpeed: 1.5
   musicOutputGroup: {fileID: -1654372282959375256, guid: 8a3e6c73505593c419a005317f6c6055, type: 2}
