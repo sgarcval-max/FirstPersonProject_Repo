@@ -2220,8 +2220,8 @@ MonoBehaviour:
     spanish: AJUSTES
     english: SETTINGS
   - key: ExitGame_mainmenu
-    spanish: SALIR DEL JUEGO
-    english: EXIT GAME
+    spanish: SALIR
+    english: EXIT
   - key: Info_teclas
     spanish: "ASIGNACI\xD3N DE TECLAS"
     english: KEY ASSIGNMENT
@@ -2694,7 +2694,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: SALIR DEL JUEGO
+  m_text: SALIR
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1d79ca2662114e44cafcb8b262064b43, type: 2}
   m_sharedMaterial: {fileID: -3272112196141284657, guid: 1d79ca2662114e44cafcb8b262064b43, type: 2}
@@ -2971,8 +2971,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 1376, y: 286}
-  m_SizeDelta: {x: 300.6, y: 58}
+  m_AnchoredPosition: {x: 1337, y: 286}
+  m_SizeDelta: {x: 169.1, y: 58}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &995616873
 MonoBehaviour:
@@ -5808,8 +5808,9 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 548bb2e3ce723e442800770292b359d9, type: 3}
   - {fileID: 8300000, guid: 139066fbf17bd5a48a8de2800a370299, type: 3}
   gameplayPlaylist:
-  - {fileID: 8300000, guid: 8e71e066fcb5ab7488bbec648b38d884, type: 3}
-  - {fileID: 8300000, guid: bd7d4e1d064ca1045847da00cd5463fe, type: 3}
+  - {fileID: 8300000, guid: 0d03f8a002cb22240a51c03b1efd1e55, type: 3}
+  - {fileID: 8300000, guid: 6196984a318f250439978c9752fec9c0, type: 3}
+  - {fileID: 8300000, guid: a46e2ee64374dd84c81695852af950b7, type: 3}
   chasePitchMultiplier: 2
   pitchChangeSpeed: 1.5
   musicOutputGroup: {fileID: -1654372282959375256, guid: 8a3e6c73505593c419a005317f6c6055, type: 2}
