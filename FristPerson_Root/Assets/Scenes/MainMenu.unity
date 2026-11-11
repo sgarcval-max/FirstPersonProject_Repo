@@ -5812,7 +5812,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 6196984a318f250439978c9752fec9c0, type: 3}
   - {fileID: 8300000, guid: a46e2ee64374dd84c81695852af950b7, type: 3}
   chasePitchMultiplier: 2
-  pitchChangeSpeed: 1.5
+  pitchChangeSpeed: 0
   musicOutputGroup: {fileID: -1654372282959375256, guid: 8a3e6c73505593c419a005317f6c6055, type: 2}
   fadeDuration: 1
 --- !u!4 &2080779661
