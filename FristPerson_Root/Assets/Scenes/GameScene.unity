@@ -16256,16 +16256,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 417538486}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
+  m_LocalScale: {x: 1.4999996, y: 1.4999996, z: 1.4999996}
   m_ConstrainProportionsScale: 1
   m_Children: []
-  m_Father: {fileID: 1228214322}
+  m_Father: {fileID: 1056097139}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 9.653272}
   m_SizeDelta: {x: 190, y: 77.63}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &417538488
@@ -29286,6 +29286,43 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1055448717}
   m_Mesh: {fileID: -8072482148113490406, guid: 8cc69e1407c1ca940bb266b72d574a47, type: 3}
+--- !u!1 &1056097138
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1056097139}
+  m_Layer: 5
+  m_Name: TimerContainer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1056097139
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1056097138}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 417538487}
+  - {fileID: 1864265866}
+  m_Father: {fileID: 1228214322}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 480}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1057817041 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -1854291913220317398, guid: 60951e7f4951aa54ea3d3d27b197892b, type: 3}
@@ -33872,6 +33909,7 @@ GameObject:
   - component: {fileID: 1228214330}
   - component: {fileID: 1228214331}
   - component: {fileID: 1228214332}
+  - component: {fileID: 1228214333}
   m_Layer: 5
   m_Name: GameplayCanvas
   m_TagString: Untagged
@@ -33959,8 +33997,7 @@ RectTransform:
   - {fileID: 392267172}
   - {fileID: 1882368172}
   - {fileID: 85897320}
-  - {fileID: 417538487}
-  - {fileID: 1864265866}
+  - {fileID: 1056097139}
   - {fileID: 2114969021}
   - {fileID: 2072682602}
   - {fileID: 388903915}
@@ -34083,6 +34120,11 @@ MonoBehaviour:
   lowTimeThreshold: 30
   normalColor: {r: 0.9450981, g: 0.9176471, b: 0.454902, a: 1}
   lowTimeColor: {r: 1, g: 0.25, b: 0.2, a: 1}
+  timerContainer: {fileID: 1056097139}
+  offScreenOffset: {x: 0, y: 150}
+  timerEntryDuration: 0.5
+  timerEntrySFX: {fileID: 8300000, guid: af4c64b581be30a43b1166d416e41c68, type: 3}
+  audioSource: {fileID: 1228214333}
   warningSoundThreshold: 10
 --- !u!114 &1228214330
 MonoBehaviour:
@@ -34149,6 +34191,103 @@ MonoBehaviour:
   popDuration: 0.15
   fadeDuration: 0.4
   warningFlashColor: {r: 1, g: 0, b: 0, a: 1}
+--- !u!82 &1228214333
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1228214318}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 5874429579588559407, guid: 8a3e6c73505593c419a005317f6c6055, type: 2}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1001 &1236188957
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -51725,16 +51864,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1864265865}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2.86, y: 2.86, z: 2.86}
+  m_LocalScale: {x: 2.8599997, y: 2.8599997, z: 2.8599997}
   m_ConstrainProportionsScale: 1
   m_Children: []
-  m_Father: {fileID: 1228214322}
+  m_Father: {fileID: 1056097139}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: 10.999939}
+  m_AnchoredPosition: {x: 0, y: 20.652843}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1864265867
