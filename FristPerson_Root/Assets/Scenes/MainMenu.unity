@@ -5808,9 +5808,9 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 548bb2e3ce723e442800770292b359d9, type: 3}
   - {fileID: 8300000, guid: 139066fbf17bd5a48a8de2800a370299, type: 3}
   gameplayPlaylist:
-  - {fileID: 8300000, guid: 0d03f8a002cb22240a51c03b1efd1e55, type: 3}
-  - {fileID: 8300000, guid: 6196984a318f250439978c9752fec9c0, type: 3}
   - {fileID: 8300000, guid: a46e2ee64374dd84c81695852af950b7, type: 3}
+  - {fileID: 8300000, guid: 6196984a318f250439978c9752fec9c0, type: 3}
+  - {fileID: 8300000, guid: 0d03f8a002cb22240a51c03b1efd1e55, type: 3}
   chasePitchMultiplier: 2
   pitchChangeSpeed: 0
   musicOutputGroup: {fileID: -1654372282959375256, guid: 8a3e6c73505593c419a005317f6c6055, type: 2}

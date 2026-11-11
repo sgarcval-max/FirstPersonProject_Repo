@@ -6,7 +6,8 @@ using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Administrador central de música.
-/// Acelera la música durante persecuciones, soporta bucles continuos para 1 sola canción,
+/// Precarga pistas en memoria para evitar microcortes/tirones al cambiar de canción,
+/// acelera la música durante persecuciones, soporta bucles continuos para 1 sola canción,
 /// realiza transiciones fluidas entre múltiples canciones leyendo el tiempo real del reproductor,
 /// soporta Alt+Tab (pérdida de foco de ventana) sin saltar canciones por error,
 /// y pausa/reanuda la música automáticamente al abrir el menú de pausa (Time.timeScale == 0).
@@ -186,6 +187,9 @@ public class MusicManager : MonoBehaviour
         currentList = playlist;
         currentTrackIndex = 0;
 
+        // Precargar previamente en memoria las canciones de la nueva lista
+        PreloadPlaylistClips(currentList);
+
         if (playlistCoroutine != null)
         {
             StopCoroutine(playlistCoroutine);
@@ -208,6 +212,21 @@ public class MusicManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Fuerza la carga de datos de audio en RAM en segundo plano para evitar tirones.
+    /// </summary>
+    private void PreloadPlaylistClips(List<AudioClip> playlist)
+    {
+        if (playlist == null) return;
+        foreach (var clip in playlist)
+        {
+            if (clip != null && clip.loadState == AudioDataLoadState.Unloaded)
+            {
+                clip.LoadAudioData();
+            }
+        }
+    }
+
     private IEnumerator PlaylistLoopRoutine()
     {
         while (currentList != null && currentList.Count > 0 && HasValidClips(currentList))
@@ -218,6 +237,11 @@ public class MusicManager : MonoBehaviour
                 AudioClip singleClip = currentList[0];
                 if (singleClip != null)
                 {
+                    if (singleClip.loadState == AudioDataLoadState.Unloaded)
+                    {
+                        singleClip.LoadAudioData();
+                    }
+
                     bgmAudioSource.loop = true;
                     yield return PlayClipWithFadeIn(singleClip);
 
@@ -239,10 +263,24 @@ public class MusicManager : MonoBehaviour
 
                 if (clipToPlay != null)
                 {
+                    // Garantizar que la canción actual esté cargada
+                    if (clipToPlay.loadState == AudioDataLoadState.Unloaded)
+                    {
+                        clipToPlay.LoadAudioData();
+                    }
+
                     yield return PlayClipWithFadeIn(clipToPlay);
 
                     // Esperamos 1 frame para asegurar que el AudioSource ha comenzado a reproducir
                     yield return null;
+
+                    // Precargar en segundo plano la SIGUIENTE pista mientras esta está sonando
+                    int nextTrackIndex = (currentTrackIndex + 1) % currentList.Count;
+                    AudioClip nextClip = currentList[nextTrackIndex];
+                    if (nextClip != null && nextClip.loadState == AudioDataLoadState.Unloaded)
+                    {
+                        nextClip.LoadAudioData();
+                    }
 
                     // Esperar mientras la canción suena hasta que queden 'fadeDuration' segundos de pista
                     while (bgmAudioSource != null && bgmAudioSource.clip == clipToPlay)
